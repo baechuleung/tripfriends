@@ -88,43 +88,27 @@ class _IntroductionInputState extends State<IntroductionInput> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // 제목 행: 자기소개 및 현재 글자 수/필요 글자 수
+            // 제목 행: 자기소개
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
                   currentLabels['introduction']!,
-                  style: const TextStyle(
-                    color: Color(0xFF353535),
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                Text(
-                  '$currentLength/$requiredLength',
                   style: TextStyle(
-                    color: isEligible ? Colors.green : Color(0xFF999999),
-                    fontSize: 12,
-                    fontWeight: FontWeight.w500,
+                    color: const Color(0xFF353535),
+                    fontSize: 14,
+                    fontFamily: 'Spoqa Han Sans Neo',
+                    fontWeight: FontWeight.w700,
                   ),
                 ),
               ],
             ),
             const SizedBox(height: 4),
-            // 포인트 지급 안내 메시지
-            Text(
-              currentLabels['introduction_point_info']!,
-              style: TextStyle(
-                color: isEligible ? Colors.green : Color(0xFF999999),
-                fontSize: 12,
-                fontWeight: isEligible ? FontWeight.w600 : FontWeight.w400,
-              ),
-            ),
             const SizedBox(height: 16),
             Container(
               decoration: BoxDecoration(
                 border: Border.all(
-                  color: isEligible ? Colors.green.withOpacity(0.5) : const Color(0xFFE5E5E5),
+                  color: isEligible ? Color(0xFF3182F6).withOpacity(0.5) : const Color(0xFFE5E5E5),
                 ),
                 borderRadius: BorderRadius.circular(5),
               ),
@@ -142,10 +126,11 @@ class _IntroductionInputState extends State<IntroductionInput> {
                     fontWeight: FontWeight.w500,
                   ),
                   counterStyle: TextStyle(
-                    color: isEligible ? Colors.green : Color(0xFF999999),
+                    color: isEligible ? Color(0xFF3182F6) : Color(0xFF999999),
                     fontSize: 12,
                     fontWeight: FontWeight.w500,
                   ),
+                  counterText: '$currentLength/$requiredLength',
                 ),
                 style: const TextStyle(
                   color: Color(0xFF353535),
@@ -153,8 +138,46 @@ class _IntroductionInputState extends State<IntroductionInput> {
                   fontWeight: FontWeight.w500,
                   height: 1.5,
                 ),
+                buildCounter: (context, {required currentLength, required isFocused, maxLength}) {
+                  return Container(
+                    margin: const EdgeInsets.only(right: 16.0, bottom: 8.0),
+                    child: Text(
+                      '$currentLength/$requiredLength',
+                      style: TextStyle(
+                        color: isEligible ? Color(0xFF3182F6) : Color(0xFF999999),
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  );
+                },
               ),
             ),
+            const SizedBox(height: 16),
+            Container(
+              width: double.infinity,
+              height: 40,
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+              decoration: ShapeDecoration(
+                color: const Color(0xFFFF3E6C),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Text(
+                    currentLabels['introduction_point_info']!,
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 12,
+                      fontFamily: 'Spoqa Han Sans Neo',
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ],
+              ),
+            )
           ],
         ),
       ),

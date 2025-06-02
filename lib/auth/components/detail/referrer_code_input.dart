@@ -118,10 +118,11 @@ class _ReferrerCodeInputState extends State<ReferrerCodeInput> {
               widget.isEditMode
                   ? currentLabels['referrer_info']!
                   : currentLabels['referrer_code']!,
-              style: const TextStyle(
-                color: Color(0xFF353535),
+              style: TextStyle(
+                color: const Color(0xFF353535),
                 fontSize: 14,
-                fontWeight: FontWeight.w600,
+                fontFamily: 'Spoqa Han Sans Neo',
+                fontWeight: FontWeight.w700,
               ),
             ),
             const SizedBox(height: 16),

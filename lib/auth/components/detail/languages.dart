@@ -194,6 +194,13 @@ class _LanguagesState extends State<Languages> {
                       ),
                     ),
                   ),
+                  Center(
+                    child: Icon(
+                      Icons.check,
+                      size: 14,
+                      color: Colors.white,
+                    ),
+                  ),
                 ],
               )
                   : Container(
