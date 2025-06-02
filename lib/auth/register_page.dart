@@ -96,7 +96,8 @@ class _RegisterPageState extends State<RegisterPage> {
       await SharedPreferencesService.removeBool('is_registering');
 
       if (mounted) {
-        Navigator.pushReplacement(
+        // pushReplacement 대신 push 사용
+        Navigator.push(
           context,
           MaterialPageRoute(
             builder: (context) => RegisterDetailPage(uid: widget.uid),
@@ -151,20 +152,41 @@ class _RegisterPageState extends State<RegisterPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    Container(
+                      decoration: ShapeDecoration(
+                        color: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                      padding: const EdgeInsets.all(16),
+                      child: Profile(controller: _controller.profileController),
+                    ),
                     const SizedBox(height: 16),
-                    Profile(controller: _controller.profileController),
-                    const SizedBox(height: 16),
-                    Name(controller: _controller.nameController),
-                    const SizedBox(height: 16),
-                    Gender(controller: _controller.genderController),
-                    const SizedBox(height: 16),
-                    Age(controller: _controller.ageController),
-                    const SizedBox(height: 16),
-                    Nationality(controller: _controller.nationalityController),
-                    const SizedBox(height: 16),
-                    City(controller: _controller.cityController),
-                    const SizedBox(height: 16),
-                    PhoneInput(controller: _controller.phoneController),
+                    Container(
+                      decoration: ShapeDecoration(
+                        color: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                      padding: const EdgeInsets.all(16),
+                      child: Column(
+                        children: [
+                          Name(controller: _controller.nameController),
+                          const SizedBox(height: 16),
+                          Gender(controller: _controller.genderController),
+                          const SizedBox(height: 16),
+                          Age(controller: _controller.ageController),
+                          const SizedBox(height: 16),
+                          Nationality(controller: _controller.nationalityController),
+                          const SizedBox(height: 16),
+                          City(controller: _controller.cityController),
+                          const SizedBox(height: 16),
+                          PhoneInput(controller: _controller.phoneController),
+                        ],
+                      ),
+                    ),
                     const SizedBox(height: 16),
                     TermsAgreement(controller: _controller.termsAgreementController),
                     const SizedBox(height: 32),

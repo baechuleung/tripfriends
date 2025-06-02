@@ -34,13 +34,16 @@ class _NameState extends State<Name> {
             fontWeight: FontWeight.w600,
           ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: 4),
         Container(
-          height: 45,
+          height: 50,
           decoration: ShapeDecoration(
             color: Colors.white,
             shape: RoundedRectangleBorder(
-              side: const BorderSide(width: 1, color: Color(0xFFF2F3F7)),
+              side: const BorderSide(
+                width: 1,
+                color: Color(0xFFE4E4E4),
+              ),
               borderRadius: BorderRadius.circular(5),
             ),
           ),

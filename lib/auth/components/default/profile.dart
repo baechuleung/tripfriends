@@ -132,8 +132,16 @@ class _ProfileState extends State<Profile> {
                   widget.controller.currentLabels['profileImage']!,
                   style: const TextStyle(
                     color: Color(0xFF353535),
-                    fontSize: 16,
-                    fontWeight: FontWeight.w700,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                Text(
+                  widget.controller.currentLabels['profileDescription']!,
+                  style: const TextStyle(
+                    color: Color(0xFF4E5968),
+                    fontSize: 12,
+                    fontWeight: FontWeight.w400,
                   ),
                 ),
                 const SizedBox(height: 8),
@@ -147,7 +155,7 @@ class _ProfileState extends State<Profile> {
                         label: Text(widget.controller.currentLabels['uploadImage']!),
                         style: OutlinedButton.styleFrom(
                           foregroundColor: const Color(0xFF3182F6),
-                          side: const BorderSide(color: Color(0xFF3182F6), width: 1),
+                          side: BorderSide.none,
                           backgroundColor: const Color(0xFFE6F0FF),
                           padding: const EdgeInsets.symmetric(vertical: 8),
                           shape: RoundedRectangleBorder(
@@ -160,12 +168,12 @@ class _ProfileState extends State<Profile> {
                     Expanded(
                       child: OutlinedButton.icon(
                         onPressed: isLoading || mediaList.isEmpty ? null : _handlePickVideo,
-                        icon: const Icon(Icons.videocam_rounded, size: 18),
+                        icon: const Icon(Icons.video_call_outlined, size: 18),
                         label: Text(widget.controller.currentLabels['uploadVideo']!),
                         style: OutlinedButton.styleFrom(
-                          foregroundColor: const Color(0xFF28a745),
-                          side: const BorderSide(color: Color(0xFF28a745), width: 1),
-                          backgroundColor: const Color(0xFFE6F5EB),
+                          foregroundColor: const Color(0xFF3182F6),
+                          side: BorderSide.none,
+                          backgroundColor: const Color(0xFFE6F0FF),
                           padding: const EdgeInsets.symmetric(vertical: 8),
                           disabledBackgroundColor: Colors.grey[200],
                           shape: RoundedRectangleBorder(
@@ -176,51 +184,9 @@ class _ProfileState extends State<Profile> {
                     ),
                   ],
                 ),
-                const SizedBox(height: 8),
-
-                Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFFFF8E1),
-                    borderRadius: BorderRadius.circular(6),
-                    border: Border.all(color: const Color(0xFFFFE082), width: 1),
-                  ),
-                  child: Row(
-                    children: [
-                      const Icon(Icons.emoji_events, color: Color(0xFFFFB300), size: 20),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Text(
-                          widget.controller.currentLabels['signupBonus']!,
-                          style: const TextStyle(
-                            color: Color(0xFF5D4037),
-                            fontSize: 12,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-
-                const SizedBox(height: 12),
+                const SizedBox(height: 6),
 
                 if (mediaList.isNotEmpty) ...[
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        '${widget.controller.currentLabels['uploadedMedia']} (${mediaList.length}개)',
-                        style: const TextStyle(
-                          color: Color(0xFF353535),
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-
                   SizedBox(
                     height: 120,
                     child: isLoading
@@ -344,6 +310,31 @@ class _ProfileState extends State<Profile> {
                     ),
                   ),
                 ],
+                const SizedBox(height: 8),
+                Container(
+                  width: double.infinity,
+                  height: 40,
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                  decoration: ShapeDecoration(
+                    color: const Color(0xFFFF3E6C),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Text(
+                        widget.controller.currentLabels['signupBonus']!,
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 12,
+                          fontFamily: 'Spoqa Han Sans Neo',
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ],
             );
           },

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'dart:convert';
+import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
 import '../../controller/default/terms_agreement_controller.dart';
 import '../../../main.dart';
 
@@ -59,25 +60,121 @@ class _TermsAgreementState extends State<TermsAgreement> {
     }
   }
 
-  void _showTermsDetail(String title) {
+  void _showTermsDetail(String type) {
+    String pdfPath;
+    String title;
+
+    switch (type) {
+      case 'service':
+        pdfPath = 'assets/data/pdf/service_terms.pdf';
+        title = currentLabels['service_terms']!;
+        break;
+      case 'privacy':
+        pdfPath = 'assets/data/pdf/privacy_terms.pdf';
+        title = currentLabels['privacy_terms']!;
+        break;
+      case 'location':
+        pdfPath = 'assets/data/pdf/location_terms.pdf';
+        title = currentLabels['location_terms']!;
+        break;
+      default:
+        return;
+    }
+
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text(title),
-        content: const SingleChildScrollView(
-          child: Text(
-            '이용약관 내용은 추후 추가될 예정입니다.\n\n'
-                '본 약관은 귀하의 서비스 이용에 관한 권리, 의무 및 책임사항을 규정합니다.',
-            style: TextStyle(fontSize: 14),
+      builder: (BuildContext context) {
+        return Dialog(
+          backgroundColor: Colors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
           ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('확인'),
+          child: Container(
+            color: Colors.white,
+            constraints: BoxConstraints(
+              maxHeight: MediaQuery.of(context).size.height * 0.9,
+              maxWidth: MediaQuery.of(context).size.width * 0.95,
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: const BoxDecoration(
+                    color: Colors.white,
+                    border: Border(
+                      bottom: BorderSide(
+                        color: Color(0xFFE5E5E5),
+                        width: 1,
+                      ),
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Expanded(
+                        child: Text(
+                          title,
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                            color: Color(0xFF353535),
+                          ),
+                        ),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.close),
+                        onPressed: () => Navigator.of(context).pop(),
+                        padding: EdgeInsets.zero,
+                        constraints: const BoxConstraints(),
+                      ),
+                    ],
+                  ),
+                ),
+                Expanded(
+                  child: Container(
+                    color: Colors.white,
+                    padding: const EdgeInsets.all(16),
+                    child: SfPdfViewer.asset(
+                      pdfPath,
+                      canShowScrollHead: false,
+                      canShowScrollStatus: false,
+                      enableDoubleTapZooming: true,
+                      pageSpacing: 0,
+                      canShowPaginationDialog: false,
+                    ),
+                  ),
+                ),
+                Container(
+                  color: Colors.white,
+                  padding: const EdgeInsets.all(16),
+                  child: SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: () => Navigator.of(context).pop(),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF3182F6),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(5),
+                        ),
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                      ),
+                      child: const Text(
+                        '확인',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 
@@ -98,40 +195,57 @@ class _TermsAgreementState extends State<TermsAgreement> {
               style: const TextStyle(
                 color: Color(0xFF353535),
                 fontSize: 14,
-                fontWeight: FontWeight.w600,
+                fontFamily: 'Spoqa Han Sans Neo',
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            const SizedBox(height: 16),
+            Container(
+              decoration: ShapeDecoration(
+                color: Colors.white,
+                shape: RoundedRectangleBorder(
+                  side: const BorderSide(
+                    width: 1,
+                    color: Color(0xFFF2F3F7),
+                  ),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: _buildTermItem(
+                  isAll: true,
+                  title: currentLabels['agree_all']!,
+                  isAgreed: widget.controller.allTermsAgreedNotifier,
+                  onChanged: (value) {
+                    widget.controller.allTermsAgreed = value ?? false;
+                    // 모든 약관 체크박스 상태를 전체 체크박스와 동일하게 설정
+                    widget.controller.serviceTermsAgreed = value ?? false;
+                    widget.controller.privacyTermsAgreed = value ?? false;
+                    widget.controller.locationTermsAgreed = value ?? false;
+                  },
+                  showDivider: false,
+                ),
               ),
             ),
             const SizedBox(height: 16),
             _buildTermItem(
-              isAll: true,
-              title: currentLabels['agree_all']!,
-              isAgreed: widget.controller.allTermsAgreedNotifier,
-              onChanged: (value) {
-                widget.controller.allTermsAgreed = value ?? false;
-                // 모든 약관 체크박스 상태를 전체 체크박스와 동일하게 설정
-                widget.controller.serviceTermsAgreed = value ?? false;
-                widget.controller.privacyTermsAgreed = value ?? false;
-                widget.controller.locationTermsAgreed = value ?? false;
-              },
-              showDivider: true,
-            ),
-            _buildTermItem(
               title: currentLabels['service_terms']!,
               isAgreed: widget.controller.serviceTermsAgreedNotifier,
               onChanged: (value) => widget.controller.serviceTermsAgreed = value ?? false,
-              onTap: () => _showTermsDetail(currentLabels['service_terms']!),
+              onTap: () => _showTermsDetail('service'),
             ),
             _buildTermItem(
               title: currentLabels['privacy_terms']!,
               isAgreed: widget.controller.privacyTermsAgreedNotifier,
               onChanged: (value) => widget.controller.privacyTermsAgreed = value ?? false,
-              onTap: () => _showTermsDetail(currentLabels['privacy_terms']!),
+              onTap: () => _showTermsDetail('privacy'),
             ),
             _buildTermItem(
               title: currentLabels['location_terms']!,
               isAgreed: widget.controller.locationTermsAgreedNotifier,
               onChanged: (value) => widget.controller.locationTermsAgreed = value ?? false,
-              onTap: () => _showTermsDetail(currentLabels['location_terms']!),
+              onTap: () => _showTermsDetail('location'),
               showBottomPadding: false,
             ),
           ],
@@ -154,48 +268,81 @@ class _TermsAgreementState extends State<TermsAgreement> {
       children: [
         Padding(
           padding: EdgeInsets.only(bottom: showBottomPadding ? 4.0 : 0.0),
-          child: Row(
-            children: [
-              SizedBox(
-                width: 20,
-                height: 20,
-                child: ValueListenableBuilder<bool>(
-                  valueListenable: isAgreed,
-                  builder: (context, agreed, _) {
-                    return Checkbox(
-                      value: agreed,
-                      onChanged: onChanged,
-                      activeColor: const Color(0xFF3182F6),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(2),
-                      ),
-                      side: const BorderSide(
-                        color: Color(0xFFE5E5E5),
-                      ),
-                      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                    );
-                  },
-                ),
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  title,
-                  style: TextStyle(
-                    color: isAll ? const Color(0xFF353535) : const Color(0xFF666666),
-                    fontSize: 12,
-                    fontWeight: isAll ? FontWeight.w600 : FontWeight.w500,
+          child: InkWell(
+            onTap: () => onChanged(!isAgreed.value),
+            child: Row(
+              children: [
+                SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: ValueListenableBuilder<bool>(
+                    valueListenable: isAgreed,
+                    builder: (context, agreed, _) {
+                      return Container(
+                        width: 20,
+                        height: 20,
+                        child: Stack(
+                          children: [
+                            Positioned(
+                              left: 0,
+                              top: 0,
+                              child: Container(
+                                width: 20,
+                                height: 20,
+                                decoration: ShapeDecoration(
+                                  color: agreed ? const Color(0xFF3182F6) : Colors.transparent,
+                                  shape: OvalBorder(
+                                    side: BorderSide(
+                                      width: 1,
+                                      color: agreed ? const Color(0xFF3182F6) : const Color(0xFFE4E4E4),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                            if (agreed)
+                              const Center(
+                                child: Icon(
+                                  Icons.check,
+                                  size: 14,
+                                  color: Colors.white,
+                                ),
+                              )
+                            else
+                              const Center(
+                                child: Icon(
+                                  Icons.check,
+                                  size: 14,
+                                  color: Color(0xFFE4E4E4),
+                                ),
+                              ),
+                          ],
+                        ),
+                      );
+                    },
                   ),
                 ),
-              ),
-              if (onTap != null)
-                IconButton(
-                  icon: const Icon(Icons.chevron_right, color: Color(0xFF999999), size: 20),
-                  onPressed: onTap,
-                  padding: EdgeInsets.zero,
-                  constraints: const BoxConstraints(),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    title,
+                    style: TextStyle(
+                      color: isAll ? const Color(0xFF4E5968) : const Color(0xFF666666),
+                      fontSize: isAll ? 14 : 12,
+                      fontFamily: isAll ? 'Spoqa Han Sans Neo' : null,
+                      fontWeight: isAll ? FontWeight.w700 : FontWeight.w500,
+                    ),
+                  ),
                 ),
-            ],
+                if (onTap != null)
+                  IconButton(
+                    icon: const Icon(Icons.chevron_right, color: Color(0xFF999999), size: 20),
+                    onPressed: onTap,
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(),
+                  ),
+              ],
+            ),
           ),
         ),
         if (showDivider)

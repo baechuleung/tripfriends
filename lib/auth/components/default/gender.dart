@@ -34,7 +34,7 @@ class _GenderState extends State<Gender> {
             fontWeight: FontWeight.w600,
           ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: 4),
         Row(
           children: [
             Expanded(

@@ -15,6 +15,9 @@ class PhoneInput extends StatefulWidget {
 }
 
 class _PhoneInputState extends State<PhoneInput> {
+  OverlayEntry? _overlayEntry;
+  bool _isDropdownOpen = false;
+
   @override
   void initState() {
     super.initState();
@@ -22,107 +25,213 @@ class _PhoneInputState extends State<PhoneInput> {
   }
 
   @override
+  void dispose() {
+    _removeOverlay();
+    super.dispose();
+  }
+
+  void _removeOverlay() {
+    _overlayEntry?.remove();
+    _overlayEntry = null;
+    _isDropdownOpen = false;
+  }
+
+  void _toggleDropdown() {
+    if (_isDropdownOpen) {
+      _removeOverlay();
+    } else {
+      _showDropdown();
+    }
+    setState(() {
+      _isDropdownOpen = !_isDropdownOpen;
+    });
+  }
+
+  void _showDropdown() {
+    _overlayEntry = OverlayEntry(
+      builder: (context) => GestureDetector(
+        onTap: () {
+          _removeOverlay();
+          setState(() {});
+        },
+        behavior: HitTestBehavior.opaque,
+        child: Stack(
+          children: [
+            // 반투명 배경
+            Container(
+              color: Colors.black.withOpacity(0.3),
+            ),
+            // 화면 정중앙에 드롭다운 배치
+            Center(
+              child: Material(
+                elevation: 8,
+                borderRadius: BorderRadius.circular(8),
+                child: Container(
+                  width: MediaQuery.of(context).size.width - 32,
+                  constraints: const BoxConstraints(maxHeight: 400),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child: ListView.separated(
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      shrinkWrap: true,
+                      itemCount: PhoneController.dialCodes.length,
+                      separatorBuilder: (context, index) => const Divider(
+                        height: 1,
+                        thickness: 1,
+                        color: Color(0xFFE4E4E4),
+                        indent: 0,
+                        endIndent: 0,
+                      ),
+                      itemBuilder: (context, index) {
+                        final code = PhoneController.dialCodes[index];
+                        final isSelected = code.dialCode == widget.controller.dialCodeNotifier.value;
+
+                        return InkWell(
+                          onTap: () {
+                            widget.controller.setDialCode(code);
+                            _removeOverlay();
+                            setState(() {});
+                          },
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                            color: isSelected ? const Color(0xFFE8F2FF) : null,
+                            child: Row(
+                              children: [
+                                Text(
+                                  code.flag,
+                                  style: const TextStyle(fontSize: 20),
+                                ),
+                                const SizedBox(width: 12),
+                                Text(
+                                  code.dialCode,
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                                    color: isSelected ? const Color(0xFF3182F6) : const Color(0xFF353535),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    Overlay.of(context).insert(_overlayEntry!);
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Padding(
-          padding: const EdgeInsets.only(left: 4, bottom: 8),
-          child: Text(
-            widget.controller.currentLabels['phoneVerification'] ?? "전화번호",
-            style: const TextStyle(
-              color: Color(0xFF353535),
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
-            ),
+        Text(
+          widget.controller.currentLabels['phoneVerification'] ?? "전화번호",
+          style: const TextStyle(
+            color: Color(0xFF353535),
+            fontSize: 14,
+            fontWeight: FontWeight.w600,
           ),
         ),
+        const SizedBox(height: 4),
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Container(
-              width: 100,
-              height: 45,
-              margin: const EdgeInsets.only(right: 8),
-              decoration: BoxDecoration(
-                color: Colors.white,  // 배경색을 흰색으로 변경
-                border: Border.all(color: const Color(0xFFF2F3F7)),
-                borderRadius: BorderRadius.circular(5),
-              ),
-              child: ValueListenableBuilder<String>(
-                valueListenable: widget.controller.dialCodeNotifier,
-                builder: (context, currentDialCode, _) {
-                  final selectedDialCode = widget.controller.getSelectedDialCode();
+            // 국가 코드 드롭다운
+            GestureDetector(
+              onTap: _toggleDropdown,
+              child: Container(
+                width: 120,
+                height: 50,
+                margin: const EdgeInsets.only(right: 8),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  border: Border.all(
+                    color: const Color(0xFFE4E4E4),
+                    width: 1,
+                  ),
+                  borderRadius: BorderRadius.circular(5),
+                ),
+                child: ValueListenableBuilder<String>(
+                  valueListenable: widget.controller.dialCodeNotifier,
+                  builder: (context, currentDialCode, _) {
+                    final selectedDialCode = widget.controller.getSelectedDialCode();
 
-                  return PopupMenuButton<CountryDialCode>(
-                    initialValue: selectedDialCode,
-                    onSelected: (CountryDialCode code) {
-                      widget.controller.setDialCode(code);
-                    },
-                    color: Colors.white,  // 드롭다운 메뉴 배경색을 흰색으로 설정
-                    itemBuilder: (context) {
-                      return PhoneController.dialCodes.map((code) {
-                        return PopupMenuItem(
-                          value: code,
-                          child: Row(
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 8),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Row(
                             children: [
-                              Text(code.flag),
-                              const SizedBox(width: 8),
-                              Text(code.dialCode),
+                              Text(selectedDialCode.flag),
+                              const SizedBox(width: 4),
+                              Text(
+                                selectedDialCode.dialCode,
+                                style: const TextStyle(
+                                  fontSize: 12,
+                                  color: Color(0xFF353535),
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
                             ],
                           ),
-                        );
-                      }).toList();
-                    },
-                    child: Center(
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 8),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Row(
-                              children: [
-                                Text(selectedDialCode.flag),
-                                const SizedBox(width: 4),
-                                Text(selectedDialCode.dialCode, style: const TextStyle(fontSize: 12)),
-                              ],
-                            ),
-                            const Icon(Icons.keyboard_arrow_down, color: Color(0xFF999999)),
-                          ],
-                        ),
+                          Icon(
+                            _isDropdownOpen ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down,
+                            color: const Color(0xFF999999),
+                            size: 20,
+                          ),
+                        ],
                       ),
-                    ),
-                  );
-                },
+                    );
+                  },
+                ),
               ),
             ),
+            // 전화번호 입력 필드
             Expanded(
               child: Container(
-                height: 45,
+                height: 50,
                 decoration: ShapeDecoration(
                   color: Colors.white,
                   shape: RoundedRectangleBorder(
-                    side: const BorderSide(width: 1, color: Color(0xFFF2F3F7)),
+                    side: const BorderSide(
+                      width: 1,
+                      color: Color(0xFFE4E4E4),
+                    ),
                     borderRadius: BorderRadius.circular(5),
                   ),
                 ),
-                child: Center(
-                  child: TextField(
-                    controller: widget.controller.phoneController,
-                    keyboardType: TextInputType.phone,
-                    style: const TextStyle(fontSize: 12),
-                    textAlignVertical: TextAlignVertical.center,
-                    decoration: const InputDecoration(
-                      hintText: "01012345678",
-                      hintStyle: TextStyle(
-                        color: Color(0xFF999999),
-                        fontSize: 12,
-                        fontWeight: FontWeight.w500,
-                      ),
-                      border: InputBorder.none,
-                      contentPadding: EdgeInsets.symmetric(horizontal: 16),
-                      isDense: true,
+                child: TextField(
+                  controller: widget.controller.phoneController,
+                  keyboardType: TextInputType.phone,
+                  style: const TextStyle(
+                    fontSize: 12,
+                    color: Color(0xFF353535),
+                  ),
+                  textAlignVertical: TextAlignVertical.center,
+                  decoration: const InputDecoration(
+                    hintText: "01012345678",
+                    hintStyle: TextStyle(
+                      color: Color(0xFF999999),
+                      fontSize: 12,
+                      fontWeight: FontWeight.w500,
                     ),
+                    border: InputBorder.none,
+                    contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                    isDense: true,
                   ),
                 ),
               ),

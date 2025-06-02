@@ -24,6 +24,7 @@ class ProfileController {
   // 번역 관련
   Map<String, String> currentLabels = {
     "profileImage": "프로필 미디어 등록하기",
+    "profileDescription": "자신을 소개할 짧은 영상과 사진을 올려주세요!",
     "uploadImage": "이미지",
     "uploadVideo": "동영상",
     "signupBonus": "첫 소개 영상 업로드 시 3,000원 지급!(승인시 지급)",
@@ -109,8 +110,6 @@ class ProfileController {
       onChanged!();
     }
   }
-
-  // profile_controller.dart의 removeMedia 메서드를 다음과 같이 수정
 
   void removeMedia(int index) async {
     try {
@@ -277,6 +276,9 @@ class ProfileController {
 
       if (translations['profile_image_register'] != null) {
         currentLabels['profileImage'] = translations['profile_image_register'][currentCountryCode];
+      }
+      if (translations['profile_description'] != null) {
+        currentLabels['profileDescription'] = translations['profile_description'][currentCountryCode];
       }
       if (translations['upload_image'] != null) {
         currentLabels['uploadImage'] = translations['upload_image'][currentCountryCode];

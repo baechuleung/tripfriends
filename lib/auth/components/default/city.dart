@@ -15,10 +15,137 @@ class City extends StatefulWidget {
 }
 
 class _CityState extends State<City> {
+  final LayerLink _layerLink = LayerLink();
+  OverlayEntry? _overlayEntry;
+  bool _isDropdownOpen = false;
+
   @override
   void initState() {
     super.initState();
     widget.controller.loadTranslations(currentCountryCode);
+  }
+
+  @override
+  void dispose() {
+    _removeOverlay();
+    super.dispose();
+  }
+
+  void _removeOverlay() {
+    _overlayEntry?.remove();
+    _overlayEntry = null;
+    _isDropdownOpen = false;
+  }
+
+  void _toggleDropdown() {
+    final hasCountry = widget.controller.countryController.text.isNotEmpty;
+    final isLoadingCities = widget.controller.isLoadingCitiesNotifier.value;
+    final cityLoadError = widget.controller.cityLoadErrorNotifier.value;
+    final cities = widget.controller.citiesNotifier.value;
+
+    if (!hasCountry || isLoadingCities || cityLoadError || cities.isEmpty) {
+      return;
+    }
+
+    if (_isDropdownOpen) {
+      _removeOverlay();
+    } else {
+      _showDropdown();
+    }
+    setState(() {
+      _isDropdownOpen = !_isDropdownOpen;
+    });
+  }
+
+  void _showDropdown() {
+    final RenderBox renderBox = context.findRenderObject() as RenderBox;
+    final size = renderBox.size;
+    final offset = renderBox.localToGlobal(Offset.zero);
+
+    _overlayEntry = OverlayEntry(
+      builder: (context) => GestureDetector(
+        onTap: () {
+          _removeOverlay();
+          setState(() {});
+        },
+        behavior: HitTestBehavior.opaque,
+        child: Stack(
+          children: [
+            // 반투명 배경
+            Container(
+              color: Colors.black.withOpacity(0.3),
+            ),
+            // 화면 정중앙에 드롭다운 배치
+            Center(
+              child: Material(
+                elevation: 8,
+                borderRadius: BorderRadius.circular(8),
+                child: Container(
+                  width: MediaQuery.of(context).size.width - 32, // 양쪽 16px 여백
+                  constraints: const BoxConstraints(maxHeight: 400),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: ValueListenableBuilder<List<Map<String, dynamic>>>(
+                    valueListenable: widget.controller.citiesNotifier,
+                    builder: (context, cities, _) {
+                      return ClipRRect(
+                        borderRadius: BorderRadius.circular(8),
+                        child: ListView.separated(
+                          padding: const EdgeInsets.symmetric(vertical: 4),
+                          shrinkWrap: true,
+                          itemCount: cities.length,
+                          separatorBuilder: (context, index) => const Divider(
+                            height: 1,
+                            thickness: 1,
+                            color: Color(0xFFE4E4E4),
+                            indent: 0,
+                            endIndent: 0,
+                          ),
+                          itemBuilder: (context, index) {
+                            final city = cities[index];
+                            final code = city['code'] as String;
+                            final displayName = widget.controller.getCityDisplayName(code, currentCountryCode);
+
+                            return InkWell(
+                              onTap: () {
+                                widget.controller.city = code;
+                                _removeOverlay();
+                                setState(() {});
+                              },
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                                child: Row(
+                                  children: [
+                                    const Icon(Icons.location_city, size: 20, color: Color(0xFF353535)),
+                                    const SizedBox(width: 12),
+                                    Text(
+                                      displayName,
+                                      style: const TextStyle(
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w500,
+                                        color: Color(0xFF353535),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    Overlay.of(context).insert(_overlayEntry!);
   }
 
   @override
@@ -37,6 +164,11 @@ class _CityState extends State<City> {
                   builder: (context, selectedCity, _) {
                     final hasCountry = widget.controller.countryController.text.isNotEmpty;
 
+                    String? displayName;
+                    if (selectedCity != null) {
+                      displayName = widget.controller.getCityDisplayName(selectedCity, currentCountryCode);
+                    }
+
                     return Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -48,90 +180,56 @@ class _CityState extends State<City> {
                             fontWeight: FontWeight.w600,
                           ),
                         ),
-                        const SizedBox(height: 8),
-                        Container(
-                          height: 45,
-                          decoration: ShapeDecoration(
-                            color: Colors.white,
-                            shape: RoundedRectangleBorder(
-                              side: const BorderSide(width: 1, color: Color(0xFFF2F3F7)),
-                              borderRadius: BorderRadius.circular(5),
-                            ),
-                          ),
-                          child: DropdownButtonFormField<String>(
-                            value: selectedCity,
-                            hint: Container(
-                              padding: const EdgeInsets.only(left: 16),
-                              child: Text(
-                                !hasCountry
-                                    ? widget.controller.currentLabels['select_country_first']!
-                                    : isLoadingCities
-                                    ? widget.controller.currentLabels['loading_cities']!
-                                    : cityLoadError
-                                    ? widget.controller.currentLabels['no_cities_found']!
-                                    : widget.controller.currentLabels['city_dec']!,
-                                style: const TextStyle(
-                                  color: Color(0xFF999999),
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w500,
+                        const SizedBox(height: 4),
+                        CompositedTransformTarget(
+                          link: _layerLink,
+                          child: GestureDetector(
+                            onTap: _toggleDropdown,
+                            child: Container(
+                              height: 50,
+                              decoration: ShapeDecoration(
+                                color: Colors.white,
+                                shape: RoundedRectangleBorder(
+                                  side: const BorderSide(
+                                    width: 1,
+                                    color: Color(0xFFE4E4E4),
+                                  ),
+                                  borderRadius: BorderRadius.circular(5),
                                 ),
                               ),
-                            ),
-                            icon: const Padding(
-                              padding: EdgeInsets.only(right: 12),
-                              child: Icon(Icons.keyboard_arrow_down, color: Color(0xFF999999)),
-                            ),
-                            selectedItemBuilder: (BuildContext context) {
-                              return cities.map((city) {
-                                final code = city['code'] as String;
-                                return Container(
-                                  padding: const EdgeInsets.only(left: 16),
-                                  alignment: Alignment.centerLeft,
-                                  child: Text(
-                                    widget.controller.getCityDisplayName(code, currentCountryCode),
-                                    style: const TextStyle(
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.w500,
-                                      color: Color(0xFF353535),
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(horizontal: 8),
+                                child: Row(
+                                  children: [
+                                    Icon(
+                                      Icons.location_city,
+                                      size: 20,
+                                      color: selectedCity != null ? const Color(0xFF353535) : const Color(0xFF999999),
                                     ),
-                                  ),
-                                );
-                              }).toList();
-                            },
-                            items: !hasCountry || isLoadingCities || cityLoadError || cities.isEmpty
-                                ? null
-                                : cities.map((city) {
-                              final code = city['code'] as String;
-                              final displayName = widget.controller.getCityDisplayName(code, currentCountryCode);
-
-                              return DropdownMenuItem<String>(
-                                value: code,
-                                child: Text(
-                                  displayName,
-                                  style: const TextStyle(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w500,
-                                    color: Color(0xFF353535),
-                                  ),
+                                    const SizedBox(width: 8),
+                                    Expanded(
+                                      child: Text(
+                                        !hasCountry
+                                            ? widget.controller.currentLabels['select_country_first']!
+                                            : isLoadingCities
+                                            ? widget.controller.currentLabels['loading_cities']!
+                                            : cityLoadError
+                                            ? widget.controller.currentLabels['no_cities_found']!
+                                            : displayName ?? widget.controller.currentLabels['city_dec']!,
+                                        style: TextStyle(
+                                          color: selectedCity != null ? const Color(0xFF353535) : const Color(0xFF999999),
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
+                                    ),
+                                    Icon(
+                                      _isDropdownOpen ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down,
+                                      color: const Color(0xFF999999),
+                                    ),
+                                  ],
                                 ),
-                              );
-                            }).toList(),
-                            onChanged: !hasCountry || isLoadingCities || cityLoadError || cities.isEmpty
-                                ? null
-                                : (String? value) {
-                              if (value != null) {
-                                widget.controller.city = value;
-                              }
-                            },
-                            dropdownColor: Colors.white,
-                            menuMaxHeight: 400,
-                            style: const TextStyle(
-                              color: Color(0xFF353535),
-                              fontSize: 12,
-                            ),
-                            decoration: const InputDecoration(
-                              border: InputBorder.none,
-                              contentPadding: EdgeInsets.symmetric(horizontal: 16),
+                              ),
                             ),
                           ),
                         ),
