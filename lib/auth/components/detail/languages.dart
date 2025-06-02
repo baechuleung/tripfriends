@@ -83,20 +83,19 @@ class _LanguagesState extends State<Languages> {
           children: [
             Text(
               currentLabels['available_languages'] ?? '사용 가능 언어',
-              style: const TextStyle(
-                color: Color(0xFF353535),
+              style: TextStyle(
+                color: const Color(0xFF353535),
                 fontSize: 14,
-                fontWeight: FontWeight.w600,
+                fontFamily: 'Spoqa Han Sans Neo',
+                fontWeight: FontWeight.w700,
               ),
             ),
             const SizedBox(height: 16),
-            // build 메서드 내의 ValueListenableBuilder 부분만 수정됩니다.
             ValueListenableBuilder<List<String>>(
               valueListenable: widget.controller.selectedLanguagesNotifier,
               builder: (context, selectedLanguages, _) {
                 return Column(
                   children: [
-                    // 첫 번째 줄
                     Row(
                       children: [
                         Expanded(
@@ -117,7 +116,6 @@ class _LanguagesState extends State<Languages> {
                       ],
                     ),
                     const SizedBox(height: 8),
-                    // 두 번째 줄
                     Row(
                       children: [
                         Expanded(
@@ -138,7 +136,6 @@ class _LanguagesState extends State<Languages> {
                       ],
                     ),
                     const SizedBox(height: 8),
-                    // 세 번째 줄
                     Row(
                       children: [
                         Expanded(
@@ -175,25 +172,57 @@ class _LanguagesState extends State<Languages> {
   }) {
     return SizedBox(
       height: 35,
-      child: Row(
-        children: [
-          Checkbox(
-            value: value,
-            onChanged: onChanged,
-            activeColor: const Color(0xFF3182F6),
-            materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-          ),
-          Expanded(
-            child: Text(
-              label,
-              style: const TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w500,
-                color: Color(0xFF353535),
+      child: GestureDetector(
+        onTap: () => onChanged(!value),
+        child: Row(
+          children: [
+            Container(
+              width: 20,
+              height: 20,
+              child: value
+                  ? Stack(
+                children: [
+                  Positioned(
+                    left: 0,
+                    top: 0,
+                    child: Container(
+                      width: 20,
+                      height: 20,
+                      decoration: ShapeDecoration(
+                        color: const Color(0xFF3182F6),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
+                      ),
+                    ),
+                  ),
+                ],
+              )
+                  : Container(
+                decoration: ShapeDecoration(
+                  color: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    side: const BorderSide(
+                      width: 1,
+                      color: Color(0xFFE4E4E4),
+                    ),
+                    borderRadius: BorderRadius.circular(5),
+                  ),
+                ),
               ),
             ),
-          ),
-        ],
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                label,
+                style: TextStyle(
+                  color: const Color(0xFF4E5968),
+                  fontSize: 14,
+                  fontFamily: 'Spoqa Han Sans Neo',
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
