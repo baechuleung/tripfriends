@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'dart:convert';
-import 'dart:async'; // StreamSubscription 사용을 위해 추가
+import 'dart:async';
 import 'main.dart';
+import 'main/main_screen.dart';
 import 'auth/auth_main_page.dart';
 import 'services/shared_preferences_service.dart';
 import 'services/translation_service.dart';
@@ -15,7 +16,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'auth/register_page.dart';
 
 class MainPage extends StatefulWidget {
-  final int? initialIndex;  // 초기 탭 인덱스 파라미터 추가
+  final int? initialIndex;
 
   const MainPage({super.key, this.initialIndex});
   @override
@@ -26,17 +27,17 @@ class _MainPageState extends State<MainPage> with WidgetsBindingObserver {
   Map<String, String> countryNames = {};
   Key _authWidgetKey = UniqueKey();
   Key _bottomNavKey = UniqueKey();
-  Key _manualKey = UniqueKey(); // 매뉴얼 위젯용 키 추가
+  Key _manualKey = UniqueKey();
   int _selectedIndex = 0;
   bool _isLoggedIn = false;
   bool _isCheckingSession = false;
   bool _isProfileComplete = false;
-  bool _isRegisterPageActive = false; // 등록 페이지 활성화 상태 추적
-  bool _isInitialCheckComplete = false; // 초기 체크 완료 여부 추가
+  bool _isRegisterPageActive = false;
+  bool _isInitialCheckComplete = false;
   late TranslationService translationService;
-  StreamSubscription? _languageChangeSubscription; // 언어 변경 구독 추가
-  String _currentLanguage = ''; // 현재 언어 코드 저장 변수 추가
-  bool _wasLoggedOut = true; // 이전 로그아웃 상태 추적
+  StreamSubscription? _languageChangeSubscription;
+  String _currentLanguage = '';
+  bool _wasLoggedOut = true;
 
   @override
   void initState() {
@@ -44,16 +45,13 @@ class _MainPageState extends State<MainPage> with WidgetsBindingObserver {
     WidgetsBinding.instance.addObserver(this);
     translationService = TranslationService();
 
-    // initialIndex가 있으면 해당 탭으로 설정
     if (widget.initialIndex != null) {
       _selectedIndex = widget.initialIndex!;
     }
 
-    // 현재 언어 코드 초기화
     _currentLanguage =
         SharedPreferencesService.getLanguage() ?? currentCountryCode;
 
-    // 언어 변경 이벤트 구독
     _languageChangeSubscription =
         languageChangeController.stream.listen((String newLanguage) {
           if (_currentLanguage != newLanguage) {
@@ -61,8 +59,8 @@ class _MainPageState extends State<MainPage> with WidgetsBindingObserver {
               setState(() {
                 _currentLanguage = newLanguage;
                 debugPrint('🔤 MainPage: 언어 변경 이벤트 수신: $newLanguage');
-                loadTranslations(); // 번역 다시 로드
-                _refreshKeys(); // UI 갱신
+                loadTranslations();
+                _refreshKeys();
               });
             }
           }
@@ -71,7 +69,6 @@ class _MainPageState extends State<MainPage> with WidgetsBindingObserver {
     loadTranslations();
     _checkLoginStatus();
 
-    // authStateChanges 대신 idTokenChanges 사용하여 토큰 갱신 감지
     FirebaseAuth.instance.idTokenChanges().listen((User? user) {
       if (mounted) {
         debugPrint('🔑 토큰 상태 변경 감지');
@@ -83,7 +80,7 @@ class _MainPageState extends State<MainPage> with WidgetsBindingObserver {
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
-    _languageChangeSubscription?.cancel(); // 구독 취소
+    _languageChangeSubscription?.cancel();
     super.dispose();
   }
 
@@ -91,13 +88,10 @@ class _MainPageState extends State<MainPage> with WidgetsBindingObserver {
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
       _checkRealLoginStatus();
-
-      // 앱이 다시 활성화될 때 현재 언어 설정 확인 및 업데이트
       _checkLanguageUpdate();
     }
   }
 
-  // 언어 변경 확인 및 업데이트
   Future<void> _checkLanguageUpdate() async {
     String? savedLanguage = SharedPreferencesService.getLanguage();
     if (savedLanguage != null && savedLanguage != _currentLanguage) {
@@ -115,7 +109,6 @@ class _MainPageState extends State<MainPage> with WidgetsBindingObserver {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    // 의존성 변경 시 현재 언어 확인
     _checkLanguageUpdate();
   }
 
@@ -126,7 +119,6 @@ class _MainPageState extends State<MainPage> with WidgetsBindingObserver {
     try {
       final user = FirebaseAuth.instance.currentUser;
 
-      // 등록 페이지 활성화 상태 확인 로직 추가
       _isRegisterPageActive = SharedPreferencesService.getBool(
           'is_registering', defaultValue: false);
       debugPrint('🔍 등록 페이지 활성화 여부: $_isRegisterPageActive');
@@ -134,13 +126,11 @@ class _MainPageState extends State<MainPage> with WidgetsBindingObserver {
       bool validAuth = false;
       if (user != null) {
         try {
-          // false로 먼저 시도하여 불필요한 네트워크 요청 방지
           await user.getIdToken(false);
           validAuth = true;
         } catch (e) {
           debugPrint('🚫 토큰 확인 실패, 강제 갱신 시도: $e');
           try {
-            // 실패한 경우에만 강제 갱신
             await user.getIdToken(true);
             validAuth = true;
           } catch (e2) {
@@ -154,15 +144,13 @@ class _MainPageState extends State<MainPage> with WidgetsBindingObserver {
 
       final bool realLoggedIn = user != null && validAuth;
 
-      // 로그인 상태 변경 감지
       final bool justLoggedIn = !_isLoggedIn && realLoggedIn && _wasLoggedOut;
 
-      // mounted 체크 추가
       if (!mounted) return;
 
       setState(() {
         _isLoggedIn = realLoggedIn;
-        _wasLoggedOut = !realLoggedIn; // 현재 로그아웃 상태 업데이트
+        _wasLoggedOut = !realLoggedIn;
       });
 
       SharedPreferencesService.setLoggedIn(realLoggedIn);
@@ -172,20 +160,19 @@ class _MainPageState extends State<MainPage> with WidgetsBindingObserver {
       if (realLoggedIn) {
         await _checkProfileCompletion();
 
-        // 방금 로그인한 경우 reservation 탭(인덱스 2)으로 이동
+        // 방금 로그인한 경우 홈 탭(인덱스 0)으로 이동
         if (justLoggedIn && _isProfileComplete && mounted) {
           setState(() {
-            _selectedIndex = 2; // reservation 탭 인덱스
+            _selectedIndex = 0; // 홈 탭 인덱스
           });
-          debugPrint('📍 로그인 성공 - Reservation 탭으로 이동');
+          debugPrint('📍 로그인 성공 - 홈 탭으로 이동');
         }
       } else {
-        // mounted 체크 추가
         if (!mounted) return;
 
         setState(() {
           _isProfileComplete = false;
-          _isInitialCheckComplete = true; // 초기 체크 완료
+          _isInitialCheckComplete = true;
         });
         debugPrint('🔄 로그아웃 상태 - UI 업데이트');
       }
@@ -194,13 +181,12 @@ class _MainPageState extends State<MainPage> with WidgetsBindingObserver {
       await FirebaseAuth.instance.signOut();
       await SharedPreferencesService.clearUserSession();
 
-      // mounted 체크 추가
       if (!mounted) return;
 
       setState(() {
         _isLoggedIn = false;
         _isProfileComplete = false;
-        _isInitialCheckComplete = true; // 초기 체크 완료
+        _isInitialCheckComplete = true;
       });
     } finally {
       _isCheckingSession = false;
@@ -212,31 +198,27 @@ class _MainPageState extends State<MainPage> with WidgetsBindingObserver {
   }
 
   Future<void> _checkProfileCompletion() async {
-    // 등록 페이지가 활성화된 상태면 중복 리다이렉트 방지
     if (_isRegisterPageActive) {
       debugPrint('🛑 등록 페이지 활성화 상태 - 프로필 검증 건너뜀');
 
-      // 등록 페이지 활성화 상태 해제
       await SharedPreferencesService.setBool('is_registering', false);
       _isRegisterPageActive = false;
 
       setState(() {
         _isInitialCheckComplete = true;
       });
-      // return 제거하여 프로필 완성도 체크 계속 진행
     }
 
     try {
       final user = FirebaseAuth.instance.currentUser;
 
       if (user == null) {
-        // mounted 체크 추가
         if (!mounted) return;
 
         setState(() {
           _isProfileComplete = false;
           _isLoggedIn = false;
-          _isInitialCheckComplete = true; // 초기 체크 완료
+          _isInitialCheckComplete = true;
         });
 
         if (mounted) {
@@ -248,7 +230,6 @@ class _MainPageState extends State<MainPage> with WidgetsBindingObserver {
         return;
       }
 
-      // 토큰 검증 제거 - 이미 _checkRealLoginStatus에서 검증함
       final docSnapshot = await FirebaseFirestore.instance
           .collection('tripfriends_users')
           .doc(user.uid)
@@ -261,15 +242,13 @@ class _MainPageState extends State<MainPage> with WidgetsBindingObserver {
           docSnapshot.data() != null &&
           docSnapshot.data()!.containsKey('name');
 
-      // mounted 체크 추가
       if (!mounted) return;
 
       setState(() {
         _isProfileComplete = profileExists;
-        _isInitialCheckComplete = true; // 초기 체크 완료
+        _isInitialCheckComplete = true;
       });
 
-      // 프로필이 존재하지 않는 경우 RegisterPage로 리다이렉트
       if (!profileExists) {
         debugPrint('⚠️ 사용자 프로필이 완료되지 않음 - RegisterPage로 이동');
 
@@ -288,13 +267,12 @@ class _MainPageState extends State<MainPage> with WidgetsBindingObserver {
       await FirebaseAuth.instance.signOut();
       await SharedPreferencesService.clearUserSession();
 
-      // mounted 체크 추가
       if (!mounted) return;
 
       setState(() {
         _isProfileComplete = false;
         _isLoggedIn = false;
-        _isInitialCheckComplete = true; // 초기 체크 완료
+        _isInitialCheckComplete = true;
       });
 
       if (mounted) {
@@ -308,7 +286,6 @@ class _MainPageState extends State<MainPage> with WidgetsBindingObserver {
 
   Future<void> loadTranslations() async {
     try {
-      // 현재 언어 확인 (SharedPreferences 또는 currentCountryCode)
       String effectiveLanguage = _currentLanguage.isNotEmpty ?
       _currentLanguage :
       (SharedPreferencesService.getLanguage() ?? currentCountryCode);
@@ -323,7 +300,6 @@ class _MainPageState extends State<MainPage> with WidgetsBindingObserver {
         setState(() {
           countryNames = Map.fromEntries(
               (data['countries'] as List).map((country) {
-                // 현재 언어 코드로 국가명 가져오기
                 String countryName = effectiveLanguage.isNotEmpty &&
                     country['names'].containsKey(effectiveLanguage) ?
                 country['names'][effectiveLanguage] as String :
@@ -348,17 +324,12 @@ class _MainPageState extends State<MainPage> with WidgetsBindingObserver {
       _currentLanguage = newCountryCode;
       debugPrint('🔄 MainPage: 앱바에서 언어 변경: $newCountryCode');
 
-      // currentCountryCode 업데이트 (main.dart의 변수)
       if (currentCountryCode != newCountryCode) {
         currentCountryCode = newCountryCode;
-
-        // 다른 위젯에 변경 알림을 위해 이벤트 발생
         languageChangeController.add(newCountryCode);
       }
 
       loadTranslations();
-
-      // 언어 변경 시 매뉴얼 위젯 갱신을 위한 키 변경
       _refreshKeys();
     });
   }
@@ -369,7 +340,7 @@ class _MainPageState extends State<MainPage> with WidgetsBindingObserver {
     setState(() {
       _authWidgetKey = UniqueKey();
       _bottomNavKey = UniqueKey();
-      _manualKey = UniqueKey(); // 매뉴얼 위젯 키도 갱신
+      _manualKey = UniqueKey();
     });
   }
 
@@ -379,14 +350,13 @@ class _MainPageState extends State<MainPage> with WidgetsBindingObserver {
     setState(() {
       _authWidgetKey = UniqueKey();
       _bottomNavKey = UniqueKey();
-      _manualKey = UniqueKey(); // 매뉴얼 위젯 키도 갱신
+      _manualKey = UniqueKey();
     });
     _checkRealLoginStatus();
   }
 
   @override
   Widget build(BuildContext context) {
-    // 로그인되지 않은 상태에서는 앱바 없이 AuthMainPageWidget만 표시
     if (!_isInitialCheckComplete) {
       return Scaffold(
         body: Center(
@@ -401,7 +371,19 @@ class _MainPageState extends State<MainPage> with WidgetsBindingObserver {
       );
     }
 
-    // 로그인된 상태에서만 앱바와 함께 표시
+    // 홈 탭(인덱스 0)이 선택된 경우 MainScreen 표시
+    if (_selectedIndex == 0) {
+      return MainScreen(
+        onNavigateToTab: (index) {
+          if (!mounted) return;
+          setState(() {
+            _selectedIndex = index;
+          });
+        },
+      );
+    }
+
+    // 다른 탭들은 기존대로 BottomNavigation 표시
     return Scaffold(
       appBar: TripFriendsAppBar(
         countryNames: countryNames,
@@ -416,13 +398,11 @@ class _MainPageState extends State<MainPage> with WidgetsBindingObserver {
       endDrawer: const SettingsDrawer(),
       body: Column(
         children: [
-          // 매뉴얼 위젯
           TripFriendsManual(
             key: _manualKey,
             translationService: translationService,
           ),
 
-          // 메인 컨텐츠
           Expanded(
             child: CustomBottomNavigation(
               key: _bottomNavKey,

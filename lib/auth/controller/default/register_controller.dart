@@ -150,6 +150,7 @@ class RegisterController {
         "updatedAt": FieldValue.serverTimestamp(),
         "isApproved": false, // 승인여부 - 기본값 false
         "isActive": true, // 활동여부 - 기본값 true (계정은 활성화 상태로 시작)
+        "isTicket": 15, // 이용권 초기 횟수
       };
 
       await _firestore.collection("tripfriends_users").doc(uid).set(userData);

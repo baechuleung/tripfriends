@@ -1,14 +1,15 @@
 // lib/compents/bottom_navigation.dart
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:firebase_auth/firebase_auth.dart'; // Firebase Auth 추가
+import 'package:firebase_auth/firebase_auth.dart';
 import 'dart:convert';
 import '../main.dart';
+import '../main/main_screen.dart'; // 홈 화면 추가
 import '../mypage/mypage.dart';
 import '../globals.dart';
-import '../reservation/screens/current_reservation_list_screen.dart'; // 현재 예약 화면
-import '../reservation/screens/past_reservation_list_screen.dart'; // 지난 예약 화면
-import '../chat/screens/friend_chat_list_screen.dart'; // 채팅 목록 화면 추가
+import '../reservation/screens/current_reservation_list_screen.dart';
+import '../reservation/screens/past_reservation_list_screen.dart';
+import '../chat/screens/friend_chat_list_screen.dart';
 
 class CustomBottomNavigation extends StatefulWidget {
   final int selectedIndex;
@@ -31,6 +32,7 @@ class _CustomBottomNavigationState extends State<CustomBottomNavigation> {
   String? lastCountryCode;
   bool _mounted = true;
   Map<String, String> navLabels = {
+    "home": "홈",
     "reservation_list": "예약목록",
     "past_reservations": "지난예약",
     "chat_list": "채팅 리스트",
@@ -93,6 +95,7 @@ class _CustomBottomNavigationState extends State<CustomBottomNavigation> {
             translations.containsKey('my_info')) {
 
           navLabels = {
+            "home": translations['home']?[countryCode] ?? "홈",
             "reservation_list": translations['reservation_list'][countryCode] ?? "예약목록",
             "past_reservations": translations['past_reservations'][countryCode] ?? "지난예약",
             "chat_list": translations['chat_list']?[countryCode] ?? "채팅 리스트",
@@ -112,10 +115,10 @@ class _CustomBottomNavigationState extends State<CustomBottomNavigation> {
     final String userId = getUserId();
 
     final List<Widget> pages = [
+      MainScreen(onNavigateToTab: widget.onItemSelected), // 콜백 전달
       const CurrentReservationListScreen(),    // 예약목록
       const PastReservationListScreen(),       // 지난 예약목록
-      // 수정된 부분: 채팅 목록 화면 추가
-      _buildChatListScreen(userId),
+      _buildChatListScreen(userId),            // 채팅 목록
       const MyPage(),                          // 내정보
     ];
 
@@ -123,6 +126,10 @@ class _CustomBottomNavigationState extends State<CustomBottomNavigation> {
       body: pages[widget.selectedIndex],
       bottomNavigationBar: BottomNavigationBar(
         items: <BottomNavigationBarItem>[
+          BottomNavigationBarItem(
+            icon: const Icon(Icons.home),
+            label: navLabels['home'],
+          ),
           BottomNavigationBarItem(
             icon: const Icon(Icons.list_alt),
             label: navLabels['reservation_list'],

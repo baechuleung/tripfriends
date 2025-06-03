@@ -83,92 +83,204 @@ class _ReportDialogState extends State<ReportDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      backgroundColor: Colors.white, // 명시적으로 배경색을 흰색으로 설정
+      backgroundColor: Colors.white,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12.0), // 모서리를 더 둥글게
+        borderRadius: BorderRadius.circular(12.0),
       ),
-      title: Row(
-        children: [
-          const Icon(Icons.warning, color: Colors.orange, size: 20), // 아이콘 크기 줄임
-          const SizedBox(width: 8),
-          Expanded(
-            child: Text(
-              _titleText,
-              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500), // 타이틀 글자 크기 줄임
-            ),
-          ),
-        ],
-      ),
-      contentPadding: const EdgeInsets.fromLTRB(20, 12, 20, 16), // 컨텐츠 패딩 조정
-      content: SingleChildScrollView(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
+      insetPadding: const EdgeInsets.symmetric(horizontal: 40), // 가장자리 여백 늘려서 팝업 너비 줄임
+      title: Container(
+        width: MediaQuery.of(context).size.width * 0.85, // 85%로 줄임
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // 라디오 버튼 목록
-            for (String type in _reportTypes)
-              RadioListTile<String>(
-                title: Text(
-                  type,
-                  style: const TextStyle(fontSize: 14), // 목록 항목 글자 크기 줄임
-                ),
-                value: type,
-                groupValue: _selectedType,
-                onChanged: (value) {
-                  setState(() {
-                    _selectedType = value;
-                  });
-                },
-                activeColor: Colors.blue,
-                contentPadding: EdgeInsets.zero,
-                dense: true, // 목록 항목 간격 더 조밀하게
+            const Icon(
+              Icons.warning,
+              color: Colors.black,
+              size: 20,
+            ),
+            const SizedBox(width: 8),
+            Text(
+              _titleText,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                color: Color(0xFF353535),
+                fontSize: 16,
+                fontFamily: 'Spoqa Han Sans Neo',
+                fontWeight: FontWeight.w700,
+                height: 1.50,
               ),
-
-            // '기타' 선택 시 표시할 텍스트 필드
-            if (_selectedType == _reportTypes.last) // '기타' 항목은 마지막에 있음
-              Padding(
-                padding: const EdgeInsets.only(top: 8.0),
-                child: TextField(
-                  controller: _customReasonController,
-                  style: const TextStyle(fontSize: 14), // 입력 필드 글자 크기 줄임
-                  decoration: InputDecoration(
-                    hintText: _inputHintText,
-                    hintStyle: const TextStyle(fontSize: 13), // 힌트 텍스트 크기 줄임
-                    border: const OutlineInputBorder(),
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                  ),
-                  maxLines: 3,
-                ),
-              ),
+            ),
           ],
         ),
       ),
-      actions: [
-        TextButton(
-          onPressed: widget.onCancel,
-          style: TextButton.styleFrom(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-          ),
-          child: Text(
-            _cancelButtonText,
-            style: const TextStyle(fontSize: 14), // 버튼 글자 크기 줄임
+      contentPadding: const EdgeInsets.fromLTRB(16, 24, 16, 16), // 상단 패딩 증가
+      content: Container(
+        width: MediaQuery.of(context).size.width * 0.85, // 85%로 줄임
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // 라디오 버튼 목록
+              for (int i = 0; i < _reportTypes.length; i++)
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 12), // 간격 더 늘림 (10 -> 12)
+                  child: GestureDetector(
+                    onTap: () {
+                      setState(() {
+                        _selectedType = _reportTypes[i];
+                      });
+                    },
+                    child: Row(
+                      children: [
+                        // 커스텀 체크박스
+                        Container(
+                          width: 20,
+                          height: 20,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: Colors.white,
+                            border: Border.all(
+                              color: _selectedType == _reportTypes[i]
+                                  ? const Color(0xFF237AFF)
+                                  : const Color(0xFFE0E0E0),
+                              width: 2,
+                            ),
+                          ),
+                          child: _selectedType == _reportTypes[i]
+                              ? Center(
+                            child: Container(
+                              width: 10,
+                              height: 10,
+                              decoration: const BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: Color(0xFF237AFF),
+                              ),
+                            ),
+                          )
+                              : null,
+                        ),
+                        const SizedBox(width: 12),
+                        // 텍스트
+                        Expanded(
+                          child: Text(
+                            _reportTypes[i],
+                            style: const TextStyle(fontSize: 14),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+
+              // '기타' 선택 시 표시할 텍스트 필드
+              if (_selectedType == _reportTypes.last) // '기타' 항목은 마지막에 있음
+                Padding(
+                  padding: const EdgeInsets.only(top: 20.0, bottom: 8.0), // 상단 간격 더 늘림
+                  child: TextField(
+                    controller: _customReasonController,
+                    style: const TextStyle(fontSize: 14), // 입력 필드 글자 크기 줄임
+                    decoration: InputDecoration(
+                      hintText: _inputHintText,
+                      hintStyle: const TextStyle(fontSize: 13), // 힌트 텍스트 크기 줄임
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12), // 라운드 증가
+                        borderSide: const BorderSide(
+                          color: Color(0xFFE0E0E0), // 체크박스와 동일한 회색
+                        ),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: const BorderSide(
+                          color: Color(0xFFE0E0E0),
+                        ),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: const BorderSide(
+                          color: Color(0xFF237AFF), // 포커스 시 파란색
+                        ),
+                      ),
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    ),
+                    maxLines: 3,
+                  ),
+                ),
+            ],
           ),
         ),
-        ElevatedButton(
-          onPressed: _selectedType == null
-              ? null  // 선택이 없으면 비활성화
-              : () {
-            final customReason = _selectedType == _reportTypes.last ? _customReasonController.text : null;
-            widget.onReport(_selectedType!, customReason);
-          },
-          style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.red[100],
-            foregroundColor: Colors.red[900],
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8), // 버튼 패딩 조정
-          ),
-          child: Text(
-            _reportButtonText,
-            style: const TextStyle(fontSize: 14), // 버튼 글자 크기 줄임
+      ),
+      actions: [
+        Container(
+          padding: const EdgeInsets.fromLTRB(0, 8, 0, 20), // 좌우 패딩 제거
+          width: double.infinity, // 가로로 꽉 차게
+          child: Row(
+            children: [
+              // 취소 버튼
+              Expanded(
+                child: GestureDetector(
+                  onTap: widget.onCancel,
+                  child: Container(
+                    height: 48,
+                    decoration: BoxDecoration(
+                      border: Border.all(
+                        color: const Color(0xFFE5E7EB),
+                        width: 1,
+                      ),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Center(
+                      child: Text(
+                        _cancelButtonText,
+                        style: const TextStyle(
+                          fontSize: 14,
+                          fontFamily: 'Spoqa Han Sans Neo',
+                          fontWeight: FontWeight.w500,
+                          height: 1.71,
+                          color: Color(0xFF6B7280),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+
+              // 신고하기 버튼
+              Expanded(
+                child: GestureDetector(
+                  onTap: _selectedType == null
+                      ? null
+                      : () {
+                    final customReason = _selectedType == _reportTypes.last ? _customReasonController.text : null;
+                    widget.onReport(_selectedType!, customReason);
+                  },
+                  child: Container(
+                    height: 48,
+                    decoration: BoxDecoration(
+                      color: _selectedType == null
+                          ? const Color(0xFFFFE8E8).withOpacity(0.5)
+                          : const Color(0xFFFFE8E8),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Center(
+                      child: Text(
+                        _reportButtonText,
+                        style: TextStyle(
+                          color: _selectedType == null
+                              ? const Color(0xFFFF5050).withOpacity(0.5)
+                              : const Color(0xFFFF5050),
+                          fontSize: 14,
+                          fontFamily: 'Spoqa Han Sans Neo',
+                          fontWeight: FontWeight.w500,
+                          height: 1.71,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
       ],
