@@ -122,6 +122,24 @@ class EditDetailController {
         currencyCodeNotifier.value = userData['currencyCode'] ?? 'KRW';
         introductionController.text = userData['introduction'] ?? '';
 
+        // 추천인 정보 로드
+        if (userData['referrer'] != null) {
+          final referrerData = userData['referrer'] as Map<String, dynamic>;
+          if (referrerData['code'] != null) {
+            referrerCodeController.text = referrerData['code'];
+            validatedReferrerCode = referrerData['code'];
+            referrerUid = referrerData['uid'];
+            referrerCodeSuccessNotifier.value = _translationController.getTranslatedMessage("referrer_code_matched");
+
+            // 추천인 정보 노티파이어 업데이트
+            referrerInfoNotifier.value = {
+              'uid': referrerData['uid'] ?? '',
+              'code': referrerData['code'] ?? '',
+              'name': '추천인 코드가 확인되었습니다'
+            };
+          }
+        }
+
         // 유효성 상태 업데이트
         updateValidationState();
 
@@ -210,7 +228,7 @@ class EditDetailController {
 
     isCheckingReferrerCode.value = true;
     try {
-      final result = await _referralController.validateReferrerCode(code);
+      final result = await _referralController.validateReferrerCode(code, uid);
       if (result.isValid) {
         referrerCodeErrorNotifier.value = null;
         referrerCodeSuccessNotifier.value = _translationController.getTranslatedMessage("referrer_code_matched");

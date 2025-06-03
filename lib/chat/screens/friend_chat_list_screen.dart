@@ -91,7 +91,7 @@ class _ChatListScreenState extends State<ChatListScreen> {
           children: [
             // 헤더 부분 (타이틀과 카운트, 편집 버튼)
             Container(
-              padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+              padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
               child: Row(
                 children: [
                   Text(
@@ -119,12 +119,12 @@ class _ChatListScreenState extends State<ChatListScreen> {
                     ),
                   ),
                   const Spacer(),
-                  // 편집 아이콘 (연필)
+                  // 편집 아이콘 (세로 점 3개)
                   if (_chatItems.isNotEmpty)
                     GestureDetector(
                       onTap: () => _controller.toggleEditMode(),
                       child: Icon(
-                        _isEditMode ? Icons.close : Icons.edit,
+                        _isEditMode ? Icons.close : Icons.more_vert,
                         color: const Color(0xFF353535),
                         size: 24,
                       ),
@@ -135,7 +135,10 @@ class _ChatListScreenState extends State<ChatListScreen> {
 
             // 채팅 목록
             Expanded(
-              child: _buildChatList(),
+              child: Container(
+                color: Colors.white,
+                child: _buildChatList(),
+              ),
             ),
 
             // 삭제 및 차단 해제 버튼 (편집 모드일 때만 표시)
@@ -167,37 +170,55 @@ class _ChatListScreenState extends State<ChatListScreen> {
                     const SizedBox(width: 8),
                     // 삭제 버튼
                     Expanded(
-                      child: ElevatedButton(
-                        onPressed: () => _controller.deleteSelectedChats(),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.red,
-                          foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(vertical: 12),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
+                      child: GestureDetector(
+                        onTap: () => _controller.deleteSelectedChats(),
+                        child: Container(
+                          height: 50,
+                          decoration: ShapeDecoration(
+                            color: const Color(0xFF3182F6),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
                           ),
-                        ),
-                        child: Text(
-                          _deleteButtonText,
-                          style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+                          child: Center(
+                            child: Text(
+                              '${_selectedChatIds.length}개 채팅방 나가기',
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 14,
+                                fontFamily: 'Pretendard',
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
                         ),
                       ),
                     ),
                   ],
                 )
-                    : ElevatedButton( // 차단된 채팅이 없으면 삭제 버튼만 표시
-                  onPressed: () => _controller.deleteSelectedChats(),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.red,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
+                    : GestureDetector( // 차단된 채팅이 없으면 삭제 버튼만 표시
+                  onTap: () => _controller.deleteSelectedChats(),
+                  child: Container(
+                    height: 50,
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 13),
+                    decoration: ShapeDecoration(
+                      color: const Color(0xFF3182F6),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
                     ),
-                  ),
-                  child: Text(
-                    _deleteButtonText,
-                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Text(
+                          '${_selectedChatIds.length}개 채팅방 나가기',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 14,
+                            fontFamily: 'Pretendard',
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -289,20 +310,30 @@ class _ChatListScreenState extends State<ChatListScreen> {
             children: [
               // 체크박스 (편집 모드일 때만)
               if (_isEditMode)
-                Padding(
-                  padding: const EdgeInsets.only(right: 8),
-                  child: SizedBox(
-                    width: 24,
-                    height: 24,
-                    child: Checkbox(
-                      value: isSelected,
-                      onChanged: (value) {
-                        _controller.setChatSelection(item.chatId, value == true);
-                      },
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(4),
+                GestureDetector(
+                  onTap: () {
+                    _controller.toggleChatSelection(item.chatId);
+                  },
+                  child: Padding(
+                    padding: const EdgeInsets.only(right: 8),
+                    child: Container(
+                      width: 24,
+                      height: 24,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: isSelected ? const Color(0xFF237AFF) : Colors.white,
+                        border: Border.all(
+                          color: isSelected ? const Color(0xFF237AFF) : const Color(0xFFE0E0E0),
+                          width: 2,
+                        ),
                       ),
-                      activeColor: const Color(0xFF237AFF),
+                      child: isSelected
+                          ? const Icon(
+                        Icons.check,
+                        size: 16,
+                        color: Colors.white,
+                      )
+                          : null,
                     ),
                   ),
                 ),
@@ -412,7 +443,7 @@ class _ChatListScreenState extends State<ChatListScreen> {
                                   vertical: 2,
                                 ),
                                 decoration: BoxDecoration(
-                                  color: const Color(0xFF00897B),
+                                  color: const Color(0xFFFF3E6C),
                                   borderRadius: BorderRadius.circular(12),
                                 ),
                                 child: Text(

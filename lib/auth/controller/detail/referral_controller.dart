@@ -12,12 +12,29 @@ class ReferralController {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   // 추천인 코드 유효성 검사
-  Future<ReferralValidationResult> validateReferrerCode(String code) async {
+  Future<ReferralValidationResult> validateReferrerCode(String code, String currentUserId) async {
     if (code.isEmpty) {
       return ReferralValidationResult(isValid: false);
     }
 
     try {
+      // 자기 자신의 추천인 코드인지 먼저 확인
+      final currentUserDoc = await _firestore
+          .collection("tripfriends_users")
+          .doc(currentUserId)
+          .get();
+
+      if (currentUserDoc.exists) {
+        final currentUserData = currentUserDoc.data() as Map<String, dynamic>;
+        final myReferrerCode = currentUserData['referrer_code'];
+
+        if (myReferrerCode == code) {
+          print('자기 자신의 추천인 코드를 입력했습니다.');
+          return ReferralValidationResult(isValid: false);
+        }
+      }
+
+      // 다른 사용자의 추천인 코드 확인
       final querySnapshot = await _firestore
           .collection("tripfriends_users")
           .where("referrer_code", isEqualTo: code)

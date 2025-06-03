@@ -202,7 +202,7 @@ class _BlockDialogState extends State<BlockDialog> {
 
   // 번역된 텍스트
   String _titleText = '이 여행자를 차단하시겠어요?';
-  String _descriptionText = '차단 시 대화를 더 이상 주고 받을 수 없으며, 추후 동일 사용자와의 매칭되지 않습니다.';
+  String _descriptionText = '차단 시 대화를 더 이상 주고 받을 수 없으며,\n추후 동일 사용자와다시 매칭되지 않습니다.';
   String _blockButtonText = '차단하기';
   String _cancelButtonText = '취소';
 
@@ -219,7 +219,7 @@ class _BlockDialogState extends State<BlockDialog> {
       setState(() {
         _titleText = _translationService.get('chat_block_user_title', '이 여행자를 차단하시겠어요?');
         _descriptionText = _translationService.get('chat_block_user_description',
-            '차단 시 대화를 더 이상 주고 받을 수 없으며, 추후 동일 사용자와의 매칭되지 않습니다.');
+            '차단 시 대화를 더 이상 주고 받을 수 없으며,\n추후 동일 사용자와다시 매칭되지 않습니다.');
         _blockButtonText = _translationService.get('block_button', '차단하기');
         _cancelButtonText = _translationService.get('cancel_button', '취소');
       });
@@ -228,52 +228,119 @@ class _BlockDialogState extends State<BlockDialog> {
 
   @override
   Widget build(BuildContext context) {
-    return AlertDialog(
-      backgroundColor: Colors.white, // 명시적으로 배경색을 흰색으로 설정
+    return Dialog(
+      backgroundColor: Colors.white,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12.0), // 모서리를 더 둥글게
+        borderRadius: BorderRadius.circular(20),
       ),
-      title: Row(
-        children: [
-          const Icon(Icons.warning, color: Colors.orange, size: 20), // 아이콘 크기 줄임
-          const SizedBox(width: 8),
-          Expanded(
-            child: Text(
-              _titleText,
-              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500), // 타이틀 글자 크기 줄임
+      insetPadding: const EdgeInsets.symmetric(horizontal: 20),
+      child: Container(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // 제목 (아이콘 포함)
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(
+                  Icons.error_outline,
+                  color: Colors.black,
+                  size: 24,
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  _titleText,
+                  style: const TextStyle(
+                    color: Color(0xFF353535),
+                    fontSize: 16,
+                    fontFamily: 'Spoqa Han Sans Neo',
+                    fontWeight: FontWeight.w700,
+                    height: 1.50,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ],
             ),
-          ),
-        ],
-      ),
-      contentPadding: const EdgeInsets.fromLTRB(20, 12, 20, 16), // 컨텐츠 패딩 조정
-      content: Text(
-        _descriptionText,
-        style: const TextStyle(fontSize: 14), // 내용 글자 크기 줄임
-      ),
-      actions: [
-        TextButton(
-          onPressed: widget.onCancel,
-          style: TextButton.styleFrom(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-          ),
-          child: Text(
-            _cancelButtonText,
-            style: const TextStyle(fontSize: 14), // 버튼 글자 크기 줄임
-          ),
+            const SizedBox(height: 12),
+
+            // 설명
+            Text(
+              _descriptionText,
+              style: const TextStyle(
+                color: Color(0x7F14181F),
+                fontSize: 14,
+                fontFamily: 'Spoqa Han Sans Neo',
+                fontWeight: FontWeight.w400,
+                height: 1.43,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 24),
+
+            // 버튼들
+            Row(
+              children: [
+                // 취소 버튼
+                Expanded(
+                  child: GestureDetector(
+                    onTap: widget.onCancel,
+                    child: Container(
+                      height: 48,
+                      decoration: BoxDecoration(
+                        border: Border.all(
+                          color: const Color(0xFFE5E7EB),
+                          width: 1,
+                        ),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Center(
+                        child: Text(
+                          _cancelButtonText,
+                          style: const TextStyle(
+                            fontSize: 14,
+                            fontFamily: 'Spoqa Han Sans Neo',
+                            fontWeight: FontWeight.w500,
+                            height: 1.71,
+                            color: Color(0xFF6B7280),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+
+                // 차단하기 버튼
+                Expanded(
+                  child: GestureDetector(
+                    onTap: widget.onBlock,
+                    child: Container(
+                      height: 48,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFFFE8E8),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Center(
+                        child: Text(
+                          _blockButtonText,
+                          style: const TextStyle(
+                            color: Color(0xFFFF5050),
+                            fontSize: 14,
+                            fontFamily: 'Spoqa Han Sans Neo',
+                            fontWeight: FontWeight.w500,
+                            height: 1.71,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
         ),
-        ElevatedButton(
-          onPressed: widget.onBlock,
-          style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.red[100],
-            foregroundColor: Colors.red[900],
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8), // 버튼 패딩 조정
-          ),
-          child: Text(
-            _blockButtonText,
-            style: const TextStyle(fontSize: 14), // 버튼 글자 크기 줄임
-          ),
-        ),
-      ],
+      ),
     );
   }
 }

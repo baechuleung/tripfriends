@@ -80,30 +80,25 @@ class _ChatInputFieldState extends State<ChatInputField> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(8.0),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.3),
-            spreadRadius: 1,
-            blurRadius: 5,
-            offset: const Offset(0, -1),
-          ),
-        ],
-      ),
+      padding: const EdgeInsets.all(16.0),
+      color: Colors.white,
       child: SafeArea(
-        child: Row(
-          children: [
-            // 메시지 입력 필드
-            Expanded(
-              child: Container(
-                decoration: BoxDecoration(
-                  color: Colors.grey[100],
-                  borderRadius: BorderRadius.circular(24),
-                ),
+        child: Container(
+          height: 56,
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(28),
+            border: Border.all(
+              color: const Color(0xFFE0E0E0),
+              width: 1,
+            ),
+          ),
+          child: Row(
+            children: [
+              // 메시지 입력 필드
+              Expanded(
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  padding: const EdgeInsets.only(left: 20, right: 8),
                   child: TextField(
                     controller: widget.controller,
                     focusNode: _focusNode,
@@ -111,11 +106,15 @@ class _ChatInputFieldState extends State<ChatInputField> {
                       hintText: _hintText,
                       hintStyle: const TextStyle(
                         color: Color(0xFF999999),
-                        fontSize: 12,
-                        fontWeight: FontWeight.w500,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w400,
                       ),
-                      contentPadding: const EdgeInsets.symmetric(vertical: 8),
                       border: InputBorder.none,
+                      contentPadding: EdgeInsets.zero,
+                    ),
+                    style: const TextStyle(
+                      color: Colors.black,
+                      fontSize: 14,
                     ),
                     maxLines: null,
                     textInputAction: TextInputAction.send,
@@ -129,24 +128,38 @@ class _ChatInputFieldState extends State<ChatInputField> {
                   ),
                 ),
               ),
-            ),
 
-            const SizedBox(width: 8),
-
-            // 전송 버튼 - 클릭 시 키보드가 내려가지 않도록 설정
-            Container(
-              decoration: const BoxDecoration(
-                color: Color(0xFF00897B),
-                shape: BoxShape.circle,
+              // 전송 버튼
+              Padding(
+                padding: const EdgeInsets.only(right: 8),
+                child: Container(
+                  width: 40,
+                  height: 40,
+                  decoration: const BoxDecoration(
+                    color: Color(0xFF237AFF),
+                    shape: BoxShape.circle,
+                  ),
+                  child: IconButton(
+                    padding: EdgeInsets.zero,
+                    icon: Transform.translate(
+                      offset: const Offset(2, -2), // 오른쪽으로 2, 위로 2 이동
+                      child: Transform.rotate(
+                        angle: -0.585398, // -45도 (라디안)
+                        child: const Icon(
+                          Icons.send_rounded,
+                          color: Colors.white,
+                          size: 20,
+                        ),
+                      ),
+                    ),
+                    onPressed: _sendMessage,
+                    splashColor: Colors.transparent,
+                    highlightColor: Colors.transparent,
+                  ),
+                ),
               ),
-              child: IconButton(
-                icon: const Icon(Icons.send, color: Colors.white),
-                onPressed: _sendMessage,
-                splashColor: Colors.transparent,
-                highlightColor: Colors.transparent,
-              ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

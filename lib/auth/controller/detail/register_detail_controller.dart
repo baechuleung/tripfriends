@@ -272,7 +272,7 @@ class RegisterDetailController {
 
     isCheckingReferrerCode.value = true;
     try {
-      final result = await _referralController.validateReferrerCode(code);
+      final result = await _referralController.validateReferrerCode(code, uid);
       if (result.isValid) {
         referrerCodeErrorNotifier.value = null;
         referrerCodeSuccessNotifier.value = _translationController.getTranslatedMessage("referrer_code_matched");

@@ -13,8 +13,8 @@ class MessageBubble extends StatefulWidget {
   final bool isMe;
   final String? customerImage;
 
-  // 프렌즈 앱 메시지 색상 (초록색 계열) - 클래스 수준 상수로 변경
-  static const Color myBubbleColor = Color(0xFF00897B);
+  // 프렌즈 앱 메시지 색상 (파란색 계열) - 클래스 수준 상수로 변경
+  static const Color myBubbleColor = Color(0xFF237AFF);
 
   const MessageBubble({
     Key? key,
@@ -196,7 +196,7 @@ class _MessageBubbleState extends State<MessageBubble> {
                           maxWidth: MediaQuery.of(context).size.width * 0.6,
                         ),
                         decoration: BoxDecoration(
-                          color: widget.isMe ? MessageBubble.myBubbleColor : Colors.grey[200],
+                          color: widget.isMe ? Colors.grey[200] : MessageBubble.myBubbleColor,
                           borderRadius: messageBorderRadius, // 커스텀 BorderRadius 적용
                         ),
                         child: _isTranslating
@@ -207,7 +207,7 @@ class _MessageBubbleState extends State<MessageBubble> {
                             Text(
                               widget.message.content,
                               style: TextStyle(
-                                color: widget.isMe ? Colors.white : Colors.black87,
+                                color: widget.isMe ? Colors.black87 : Colors.white,
                               ),
                             ),
                             const SizedBox(height: 10),
@@ -230,7 +230,7 @@ class _MessageBubbleState extends State<MessageBubble> {
                             Text(
                               widget.message.content,
                               style: TextStyle(
-                                color: widget.isMe ? Colors.white : Colors.black87,
+                                color: widget.isMe ? Colors.black87 : Colors.white,
                               ),
                             ),
                             if (_translatedText != null) ...[
@@ -239,16 +239,16 @@ class _MessageBubbleState extends State<MessageBubble> {
                                 height: 1,
                                 thickness: 1,
                                 color: widget.isMe
-                                    ? Colors.white.withOpacity(0.3)
-                                    : Colors.black.withOpacity(0.1),
+                                    ? Colors.black.withOpacity(0.1)
+                                    : Colors.white.withOpacity(0.3),
                               ),
                               const SizedBox(height: 8),
                               Text(
                                 _translatedText!,
                                 style: TextStyle(
                                   color: widget.isMe
-                                      ? Colors.white.withOpacity(0.9)
-                                      : Colors.black87.withOpacity(0.8),
+                                      ? Colors.black87.withOpacity(0.8)
+                                      : Colors.white.withOpacity(0.9),
                                   fontSize: 13,
                                 ),
                               ),
@@ -276,22 +276,25 @@ class _MessageBubbleState extends State<MessageBubble> {
                   // 번역 버튼을 콘텐츠 아래로 이동 (상대방 메시지만, 번역 중이거나 이미 번역된 경우 표시 안함)
                   if (!widget.isMe && !_isTranslating && _translatedText == null) ...[
                     Padding(
-                      padding: const EdgeInsets.only(top: 4, left: 4),
+                      padding: const EdgeInsets.only(top: 6, left: 6),
                       child: GestureDetector(
                         onTap: _translateMessage,
                         child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                          decoration: BoxDecoration(
-                            color: Colors.grey[100],
-                            borderRadius: BorderRadius.circular(10),
-                            border: Border.all(color: Colors.grey.shade300),
+                          height: 26,
+                          padding: const EdgeInsets.symmetric(horizontal: 12,),
+                          decoration: ShapeDecoration(
+                            color: const Color(0xFFE8F2FF),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
                           ),
-                          child: Text(
-                            _translateButtonText,
-                            style: const TextStyle(
-                              fontSize: 9,
-                              color: Colors.blue,
-                              fontWeight: FontWeight.w500,
+                          child: Center(
+                            child: Text(
+                              _translateButtonText,
+                              style: const TextStyle(
+                                color: Color(0xFF0059B7),
+                                fontSize: 12,
+                                fontFamily: 'Pretendard',
+                                fontWeight: FontWeight.w500,
+                              ),
                             ),
                           ),
                         ),
