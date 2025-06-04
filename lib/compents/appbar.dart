@@ -126,7 +126,7 @@ class _TripFriendsAppBarState extends State<TripFriendsAppBar> {
       debugPrint('⚠️ countryNames가 비어있습니다. 기본 앱바 표시');
       return AppBar(
         centerTitle: false,
-        title: Image.asset('assets/logo.png', height: 30, fit: BoxFit.contain),
+        title: Image.asset('assets/logo.png', height: 17, fit: BoxFit.contain),
       );
     }
 
@@ -139,7 +139,7 @@ class _TripFriendsAppBarState extends State<TripFriendsAppBar> {
 
     return AppBar(
       centerTitle: false,
-      title: Image.asset('assets/logo.png', height: 30, fit: BoxFit.contain),
+      title: Image.asset('assets/logo.png', height: 17, fit: BoxFit.contain),
       actions: [
         // 언어 아이콘
         Padding(

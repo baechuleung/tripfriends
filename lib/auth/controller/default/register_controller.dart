@@ -120,14 +120,7 @@ class RegisterController {
       final referralCode = await profileController.generateUniqueReferralCode();
       final fcmToken = await SharedPreferencesService.getFCMToken();
 
-      // 4. 동영상 업로드 여부 확인 (회원가입 시 보상 지급을 위해)
-      bool hasVideo = false;
-      if (profileController.profileMediaList.length > 1) {
-        // 첫 번째는 무조건 이미지이므로, 두 번째부터 확인
-        hasVideo = profileController.profileMediaList.skip(1).any((media) => media.type == MediaType.video);
-      }
-
-      // 5. Firestore에 사용자 데이터 저장
+      // 4. Firestore에 사용자 데이터 저장
       final userData = {
         "uid": uid,
         "name": nameController.name,
@@ -145,22 +138,16 @@ class RegisterController {
         "point": 0,
         "termsAgreed": termsAgreementController.getTermsAgreedMap(),
         "referrer_code": referralCode,
-        "fcmToken": fcmToken, // FCM 토큰 추가
+        "fcmToken": fcmToken,
         "createdAt": FieldValue.serverTimestamp(),
         "updatedAt": FieldValue.serverTimestamp(),
-        "isApproved": false, // 승인여부 - 기본값 false
-        "isActive": true, // 활동여부 - 기본값 true (계정은 활성화 상태로 시작)
-        "isTicket": 15, // 이용권 초기 횟수
+        "isApproved": false,
+        "isActive": true,
+        "isTicket": 15,
       };
 
       await _firestore.collection("tripfriends_users").doc(uid).set(userData);
       print('✅ Firestore 사용자 데이터 저장 완료');
-
-      // 6. 동영상 업로드 보상 지급 (회원가입 시)
-      if (hasVideo && currencyCode.isNotEmpty) {
-        await PointUtil.addVideoUploadPoints(uid, currencyCode);
-        print('✅ 회원가입 시 동영상 업로드 보상 지급 완료');
-      }
 
     } catch (e) {
       print('❌ Firestore 등록 실패: $e');

@@ -7,10 +7,12 @@ import '../services/shared_preferences_service.dart';
 import '../services/translation_service.dart';
 import '../compents/appbar.dart';
 import '../compents/settings_drawer.dart';
-import 'widgets/announcement_section.dart';
+import 'widgets/reservation_info_card.dart';
+import 'widgets/traveler_info_card.dart';
+import 'widgets/horizontal_reservation_cards.dart';
+import 'widgets/point_section.dart';
+import 'widgets/bottom_nav_section.dart';
 import 'widgets/trip_friends_banner.dart';
-import 'widgets/reservation_cards.dart';
-import 'widgets/menu_cards.dart';
 import 'widgets/event_banner.dart';
 import 'widgets/main_footer.dart';
 
@@ -106,34 +108,38 @@ class _MainScreenState extends State<MainScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // 공지사항 섹션
-                const AnnouncementSection(),
+                // 예약 정보 카드
+                const ReservationInfoCard(),
 
                 const SizedBox(height: 12),
 
-                // 메인 섹션 - 왼쪽 트립프렌즈, 오른쪽 예약/지난예약
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // 왼쪽 - 트립프렌즈 배너
-                    const Expanded(
-                      child: TripFriendsBanner(),
-                    ),
-                    const SizedBox(width: 12),
-                    // 오른쪽 - 예약 카드들
-                    Expanded(
-                      child: ReservationCards(
-                        onNavigateToTab: widget.onNavigateToTab,
-                      ),
-                    ),
-                  ],
+                // 예약 현황 카드
+                const TravelerInfoCard(),
+
+                const SizedBox(height: 12),
+
+                // 예약/지난예약 카드 (가로 배치)
+                HorizontalReservationCards(
+                  onNavigateToTab: widget.onNavigateToTab,
                 ),
 
                 const SizedBox(height: 12),
 
-                // 내 정보/채팅 메뉴 카드
-                MenuCards(
+                // 적립금 섹션
+                const PointSection(),
+
+                const SizedBox(height: 12),
+
+                // 하단 네비게이션
+                BottomNavSection(
                   onNavigateToTab: widget.onNavigateToTab,
+                ),
+
+                const SizedBox(height: 12),
+
+                // 트립프렌즈 배너
+                TripFriendsBanner(
+                  language: _currentLanguage.isNotEmpty ? _currentLanguage : currentCountryCode,
                 ),
 
                 const SizedBox(height: 12),
@@ -144,7 +150,9 @@ class _MainScreenState extends State<MainScreen> {
                 const SizedBox(height: 40),
 
                 // Footer
-                const MainFooter(),
+                MainFooter(
+                  language: _currentLanguage.isNotEmpty ? _currentLanguage : currentCountryCode,
+                ),
               ],
             ),
           ),

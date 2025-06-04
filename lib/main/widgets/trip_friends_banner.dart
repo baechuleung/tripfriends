@@ -1,9 +1,15 @@
 import 'package:flutter/material.dart';
 import '../../compents/tripfriends_manual/screens/manual_detail_page.dart';
 import '../../services/translation_service.dart';
+import '../../translations/main_translations.dart';
 
 class TripFriendsBanner extends StatelessWidget {
-  const TripFriendsBanner({super.key});
+  final String language;
+
+  const TripFriendsBanner({
+    super.key,
+    required this.language,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -20,9 +26,9 @@ class TripFriendsBanner extends StatelessWidget {
         );
       },
       child: Container(
-        height: 260,
+        height: 100,
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(20),
           image: const DecorationImage(
             image: AssetImage('assets/main/main_banner.png'),
             fit: BoxFit.cover,
@@ -32,7 +38,7 @@ class TripFriendsBanner extends StatelessWidget {
           children: [
             Container(
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(20),
                 gradient: LinearGradient(
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
@@ -43,42 +49,26 @@ class TripFriendsBanner extends StatelessWidget {
                 ),
               ),
             ),
-            const Positioned(
+            Positioned(
               left: 16,
               top: 16,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Tìm hiếu về',
-                    style: TextStyle(
+                    MainTranslations.getTranslation('learn_about', language),
+                    style: const TextStyle(
                       color: Colors.white,
                       fontSize: 14,
                     ),
                   ),
-                  Text(
+                  const Text(
                     'Trip Friends',
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
                     ),
-                  ),
-                ],
-              ),
-            ),
-            const Positioned(
-              right: 16,
-              bottom: 16,
-              child: Icon(
-                Icons.arrow_forward,
-                color: Colors.white,
-                size: 30,
-                shadows: [
-                  Shadow(
-                    offset: Offset(1, 1),
-                    blurRadius: 3,
-                    color: Colors.black54,
                   ),
                 ],
               ),

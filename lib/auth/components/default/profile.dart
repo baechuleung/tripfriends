@@ -313,24 +313,166 @@ class _ProfileState extends State<Profile> {
                 const SizedBox(height: 8),
                 Container(
                   width: double.infinity,
-                  height: 40,
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                  decoration: ShapeDecoration(
-                    color: const Color(0xFFFF3E6C),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(5),
+                    border: Border.all(color: const Color(0xFFE5E5E5)),
                   ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.center,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        widget.controller.currentLabels['signupBonus']!,
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 12,
-                          fontFamily: 'Spoqa Han Sans Neo',
+                        '<${widget.controller.currentLabels['upload_guide_title']!}>',
+                        style: const TextStyle(
+                          color: Color(0xFF353535),
+                          fontSize: 14,
                           fontWeight: FontWeight.w700,
                         ),
+                      ),
+                      const SizedBox(height: 16),
+
+                      // 프로필 이미지 안내
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Icon(
+                            Icons.report_gmailerrorred,
+                            size: 20,
+                            color: Color(0xFFFF5050),
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  widget.controller.currentLabels['profile_image_guide_title']!,
+                                  style: const TextStyle(
+                                    color: Color(0xFF353535),
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  '• ${widget.controller.currentLabels['profile_image_guide_desc1']!}',
+                                  style: const TextStyle(
+                                    color: Color(0xFF666666),
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w400,
+                                    height: 1.4,
+                                  ),
+                                ),
+                                Text(
+                                  '• ${widget.controller.currentLabels['profile_image_guide_desc2']!}',
+                                  style: const TextStyle(
+                                    color: Color(0xFF666666),
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w400,
+                                    height: 1.4,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+
+                      // 자기소개 동영상 안내
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Icon(
+                            Icons.report_gmailerrorred,
+                            size: 20,
+                            color: Color(0xFFFF5050),
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  widget.controller.currentLabels['intro_video_guide_title']!,
+                                  style: const TextStyle(
+                                    color: Color(0xFF353535),
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  '• ${widget.controller.currentLabels['intro_video_guide_desc1']!}',
+                                  style: const TextStyle(
+                                    color: Color(0xFF666666),
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w400,
+                                    height: 1.4,
+                                  ),
+                                ),
+                                Text(
+                                  '• ${widget.controller.currentLabels['intro_video_guide_desc2']!}',
+                                  style: const TextStyle(
+                                    color: Color(0xFF666666),
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w400,
+                                    height: 1.4,
+                                  ),
+                                ),
+                                Text(
+                                  '• ${widget.controller.currentLabels['intro_video_guide_desc3']!}',
+                                  style: const TextStyle(
+                                    color: Color(0xFF666666),
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w400,
+                                    height: 1.4,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+
+                      // 적립금 지급 안내
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Icon(
+                            Icons.report_gmailerrorred,
+                            size: 20,
+                            color: Color(0xFFFF5050),
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  widget.controller.currentLabels['reward_guide_title']!,
+                                  style: const TextStyle(
+                                    color: Color(0xFF353535),
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  '• ${widget.controller.currentLabels['reward_guide_desc']!}',
+                                  style: const TextStyle(
+                                    color: Color(0xFF666666),
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w400,
+                                    height: 1.4,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ),

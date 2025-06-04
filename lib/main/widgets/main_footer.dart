@@ -1,7 +1,13 @@
 import 'package:flutter/material.dart';
+import '../../translations/main_translations.dart';
 
 class MainFooter extends StatelessWidget {
-  const MainFooter({super.key});
+  final String language;
+
+  const MainFooter({
+    super.key,
+    required this.language,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -31,7 +37,7 @@ class MainFooter extends StatelessWidget {
           ),
           const SizedBox(height: 6),
           Text(
-            'CEO: Sangho Park | CTO: Chuleung Bae | CDD: Yoonwoo Jung',
+            '${MainTranslations.getTranslation('ceo', language)}: Sangho Park | ${MainTranslations.getTranslation('cto', language)}: Chuleung Bae | ${MainTranslations.getTranslation('cdd', language)}: Yoonwoo Jung',
             style: TextStyle(
               fontSize: 8,
               fontFamily: 'Spoqa Han Sans Neo',
@@ -40,7 +46,7 @@ class MainFooter extends StatelessWidget {
           ),
           const SizedBox(height: 3),
           Text(
-            'Business Registration Number: 413-87-02826',
+            '${MainTranslations.getTranslation('business_registration_number', language)}: 413-87-02826',
             style: TextStyle(
               fontSize: 8,
               fontFamily: 'Spoqa Han Sans Neo',
@@ -49,7 +55,7 @@ class MainFooter extends StatelessWidget {
           ),
           const SizedBox(height: 3),
           Text(
-            'E-commerce Registration Number: 2024-Seoul Gwangjin-1870',
+            '${MainTranslations.getTranslation('ecommerce_registration_number', language)}: 2024-${MainTranslations.getTranslation('seoul_gwangjin', language)}-1870',
             style: TextStyle(
               fontSize: 8,
               fontFamily: 'Spoqa Han Sans Neo',
@@ -58,7 +64,7 @@ class MainFooter extends StatelessWidget {
           ),
           const SizedBox(height: 3),
           Text(
-            'Tourism Business License No.: 2024-000022 (Comprehensive Travel Business)',
+            '${MainTranslations.getTranslation('tourism_business_license', language)}: 2024-000022 (${MainTranslations.getTranslation('comprehensive_travel_business', language)})',
             style: TextStyle(
               fontSize: 8,
               fontFamily: 'Spoqa Han Sans Neo',
@@ -67,7 +73,7 @@ class MainFooter extends StatelessWidget {
           ),
           const SizedBox(height: 3),
           Text(
-            '14-12, Achasan-ro 62-gil, Gwangjin-gu, Seoul, Republic of Korea (Daeyeong Twin, Guui-dong)',
+            MainTranslations.getTranslation('achasan_address', language) + ', ' + MainTranslations.getTranslation('republic_of_korea', language),
             style: TextStyle(
               fontSize: 8,
               fontFamily: 'Spoqa Han Sans Neo',
@@ -76,7 +82,7 @@ class MainFooter extends StatelessWidget {
           ),
           const SizedBox(height: 3),
           Text(
-            'Tel: 1666-5157',
+            '${MainTranslations.getTranslation('tel', language)}: 1666-5157',
             style: TextStyle(
               fontSize: 8,
               fontFamily: 'Spoqa Han Sans Neo',

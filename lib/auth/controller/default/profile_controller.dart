@@ -27,14 +27,22 @@ class ProfileController {
     "profileDescription": "자신을 소개할 짧은 영상과 사진을 올려주세요!",
     "uploadImage": "이미지",
     "uploadVideo": "동영상",
-    "signupBonus": "첫 소개 영상 업로드 시 3,000원 지급!(승인시 지급)",
     "uploadedMedia": "업로드된 미디어",
     "mainPhoto": "대표",
     "imageErrorMsg": "이미지 선택 중 오류가 발생했습니다.",
     "videoErrorMsg": "동영상 선택 중 오류가 발생했습니다.",
     "firstItemImageError": "첫 번째 항목은 이미지여야 합니다. 먼저 이미지를 선택해주세요.",
-    "videoRewardSuccess": "소개 영상 업로드 보상이 지급되었습니다.",
-    "deleteErrorMsg": "미디어 삭제 중 오류가 발생했습니다."
+    "deleteErrorMsg": "미디어 삭제 중 오류가 발생했습니다.",
+    "upload_guide_title": "이미지 및 영상 업로드 제출 안내",
+    "profile_image_guide_title": "프로필 이미지",
+    "profile_image_guide_desc1": "본인의 얼굴이 정면으로 보이는 사진이어야 합니다.",
+    "profile_image_guide_desc2": "마스크, 선글라스, 풍경 또는 타인의 사진은 인정되지 않습니다.",
+    "intro_video_guide_title": "자기소개 동영상",
+    "intro_video_guide_desc1": "영상 업로드 시 본인이 직접 자신을 소개하는 영상이어야 합니다.",
+    "intro_video_guide_desc2": "본인이 직접 자신을 소개하는 영상이어야 합니다.",
+    "intro_video_guide_desc3": "광고성 영상, 텍스트 영상 등 관련이 없는 영상은 보상이 지급되지 않습니다.",
+    "reward_guide_title": "적립금 지급 안내",
+    "reward_guide_desc": "신뢰할 수 있는 플랫폼 운영을 위해 관리자의 검토 후, 조건을 충족하지 않은 경우 적립금은 지급 되지 않습니다."
   };
 
   ProfileController({
@@ -286,9 +294,6 @@ class ProfileController {
       if (translations['upload_video'] != null) {
         currentLabels['uploadVideo'] = translations['upload_video'][currentCountryCode];
       }
-      if (translations['signup_bonus'] != null) {
-        currentLabels['signupBonus'] = translations['signup_bonus'][currentCountryCode];
-      }
       if (translations['uploaded_media'] != null) {
         currentLabels['uploadedMedia'] = translations['uploaded_media'][currentCountryCode];
       }
@@ -304,11 +309,38 @@ class ProfileController {
       if (translations['first_item_image_error'] != null) {
         currentLabels['firstItemImageError'] = translations['first_item_image_error'][currentCountryCode];
       }
-      if (translations['video_reward_success'] != null) {
-        currentLabels['videoRewardSuccess'] = translations['video_reward_success'][currentCountryCode];
-      }
       if (translations['delete_error_msg'] != null) {
         currentLabels['deleteErrorMsg'] = translations['delete_error_msg'][currentCountryCode];
+      }
+      if (translations['upload_guide_title'] != null) {
+        currentLabels['upload_guide_title'] = translations['upload_guide_title'][currentCountryCode];
+      }
+      if (translations['profile_image_guide_title'] != null) {
+        currentLabels['profile_image_guide_title'] = translations['profile_image_guide_title'][currentCountryCode];
+      }
+      if (translations['profile_image_guide_desc1'] != null) {
+        currentLabels['profile_image_guide_desc1'] = translations['profile_image_guide_desc1'][currentCountryCode];
+      }
+      if (translations['profile_image_guide_desc2'] != null) {
+        currentLabels['profile_image_guide_desc2'] = translations['profile_image_guide_desc2'][currentCountryCode];
+      }
+      if (translations['intro_video_guide_title'] != null) {
+        currentLabels['intro_video_guide_title'] = translations['intro_video_guide_title'][currentCountryCode];
+      }
+      if (translations['intro_video_guide_desc1'] != null) {
+        currentLabels['intro_video_guide_desc1'] = translations['intro_video_guide_desc1'][currentCountryCode];
+      }
+      if (translations['intro_video_guide_desc2'] != null) {
+        currentLabels['intro_video_guide_desc2'] = translations['intro_video_guide_desc2'][currentCountryCode];
+      }
+      if (translations['intro_video_guide_desc3'] != null) {
+        currentLabels['intro_video_guide_desc3'] = translations['intro_video_guide_desc3'][currentCountryCode];
+      }
+      if (translations['reward_guide_title'] != null) {
+        currentLabels['reward_guide_title'] = translations['reward_guide_title'][currentCountryCode];
+      }
+      if (translations['reward_guide_desc'] != null) {
+        currentLabels['reward_guide_desc'] = translations['reward_guide_desc'][currentCountryCode];
       }
     } catch (e) {
       print('Error loading translations: $e');

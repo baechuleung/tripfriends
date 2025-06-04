@@ -174,7 +174,6 @@ class EditDefaultController {
   }
 
   // saveProfileToFirestore 메서드 수정
-  // saveProfileToFirestore 메서드 수정
   Future<void> saveProfileToFirestore() async {
     try {
       isRegisteringNotifier.value = true;
@@ -211,13 +210,7 @@ class EditDefaultController {
         }
       }
 
-      // 4. 동영상 업로드 여부 확인
-      bool hasVideo = false;
-      if (profileController.profileMediaList.length > 1) {
-        hasVideo = profileController.profileMediaList.skip(1).any((media) => media.type == MediaType.video);
-      }
-
-      // 5. Firestore에 데이터 저장
+      // 4. Firestore에 데이터 저장
       final userData = {
         "uid": uid,
         "name": nameController.name,
@@ -235,19 +228,6 @@ class EditDefaultController {
 
       await _firestore.collection("tripfriends_users").doc(uid).update(userData);
       print('Firestore 사용자 데이터 저장 완료');
-
-      // 6. 동영상 업로드 보상 지급 (수정 시)
-      if (hasVideo && currencyCode.isNotEmpty) {
-        // 이미 동영상 업로드 보상을 받았는지 확인
-        final hasReceivedReward = await PointUtil.hasReceivedVideoUploadReward(uid);
-
-        if (!hasReceivedReward) {
-          await PointUtil.addVideoUploadPoints(uid, currencyCode);
-          print('✅ 프로필 수정 시 동영상 업로드 보상 지급 완료');
-        } else {
-          print('ℹ️ 이미 동영상 업로드 보상을 받은 사용자입니다.');
-        }
-      }
 
     } catch (e) {
       print('Firestore 등록 실패: $e');
