@@ -47,19 +47,18 @@ class MainTranslations {
     },
 
     // TripFriendsBanner
-    "learn_about": {
-      "KR": "알아보기",
-      "JP": "詳しく見る",
-      "VN": "Tìm hiểu về",
-      "TH": "เรียนรู้เกี่ยวกับ",
-      "TW": "了解更多",
-      "CN": "了解更多",
-      "HK": "了解更多",
-      "PH": "Learn about",
-      "GU": "Learn about",
-      "SG": "Learn about"
+    "how_to_use": {
+      "KR": "이용방법 알아보기",
+      "JP": "利用方法を知る",
+      "VN": "Tìm hiểu cách sử dụng",
+      "TH": "เรียนรู้วิธีใช้งาน",
+      "TW": "了解使用方法",
+      "CN": "了解使用方法",
+      "HK": "了解使用方法",
+      "PH": "Learn how to use",
+      "GU": "Learn how to use",
+      "SG": "Learn how to use"
     },
-
     // ReservationCards
     "reservation": {
       "KR": "예약",

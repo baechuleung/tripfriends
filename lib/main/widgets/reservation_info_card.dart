@@ -23,6 +23,10 @@ class _ReservationInfoCardState extends State<ReservationInfoCard> with SingleTi
   String _currentLanguage = 'KR';
   StreamSubscription<String>? _languageSubscription;
 
+  // TravelerInfoCard에서 가져온 변수
+  int completedCount = 0;
+  bool isLoadingCompleted = true;
+
   @override
   void initState() {
     super.initState();
@@ -51,6 +55,7 @@ class _ReservationInfoCardState extends State<ReservationInfoCard> with SingleTi
     });
 
     _loadReservations();
+    _loadCompletedReservations();
   }
 
   @override
@@ -59,6 +64,37 @@ class _ReservationInfoCardState extends State<ReservationInfoCard> with SingleTi
     _animationController.dispose();
     _languageSubscription?.cancel();
     super.dispose();
+  }
+
+  Future<void> _loadCompletedReservations() async {
+    try {
+      debugPrint('🔍 전체 완료된 예약 수를 가져옵니다');
+
+      // Collection Group Query를 사용하여 모든 사용자의 완료된 reservations 조회
+      final completedReservationsQuery = await FirebaseFirestore.instance
+          .collectionGroup('reservations')
+          .where('status', isEqualTo: 'completed')
+          .count()
+          .get();
+
+      final count = completedReservationsQuery.count ?? 0;
+      debugPrint('📊 전체 완료된 예약 수: $count');
+
+      if (mounted) {
+        setState(() {
+          completedCount = count;
+          isLoadingCompleted = false;
+        });
+      }
+    } catch (e) {
+      debugPrint('❌ 완료된 예약 정보 로드 오류: $e');
+      debugPrint('💡 Collection Group Query를 사용하려면 Firebase Console에서 인덱스를 생성해야 합니다');
+      if (mounted) {
+        setState(() {
+          isLoadingCompleted = false;
+        });
+      }
+    }
   }
 
   Future<void> _loadReservations() async {
@@ -251,67 +287,15 @@ class _ReservationInfoCardState extends State<ReservationInfoCard> with SingleTi
     }
   }
 
+  String _getCountUnitText() {
+    return MainTranslations.getTranslation('count_unit', _currentLanguage);
+  }
+
   @override
   Widget build(BuildContext context) {
-    if (isLoading) {
-      return Container(
-        height: 75,
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(12),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.grey.withOpacity(0.1),
-              spreadRadius: 1,
-              blurRadius: 3,
-              offset: const Offset(0, 1),
-            ),
-          ],
-        ),
-        child: const Center(
-          child: SizedBox(
-            width: 20,
-            height: 20,
-            child: CircularProgressIndicator(strokeWidth: 2),
-          ),
-        ),
-      );
-    }
-
-    if (reservations.isEmpty) {
-      return Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(12),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.grey.withOpacity(0.1),
-              spreadRadius: 1,
-              blurRadius: 3,
-              offset: const Offset(0, 1),
-            ),
-          ],
-        ),
-        child: Row(
-          children: [
-            Icon(Icons.local_fire_department, color: Colors.grey, size: 24),
-            const SizedBox(width: 8),
-            Text(
-              MainTranslations.getTranslation('no_reservations_in_progress', _currentLanguage),
-              style: TextStyle(
-                fontSize: 14,
-                color: Colors.grey[600],
-              ),
-            ),
-          ],
-        ),
-      );
-    }
-
     return Container(
-      height: 75,
+      height: 100,
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
@@ -324,66 +308,127 @@ class _ReservationInfoCardState extends State<ReservationInfoCard> with SingleTi
           ),
         ],
       ),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Row(
-          children: [
-            Icon(Icons.local_fire_department, color: Colors.orange, size: 24),
-            const SizedBox(width: 8),
-            Expanded(
-              child: ClipRect(
-                child: SlideTransition(
-                  position: _slideAnimation,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        _getLocationText(reservations[currentIndex]),
-                        style: const TextStyle(
-                          color: Color(0xFF353535),
-                          fontSize: 13,
-                          fontFamily: 'Spoqa Han Sans Neo',
-                          fontWeight: FontWeight.w500,
-                          height: 1.50,
-                        ),
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      if (_getDateText(reservations[currentIndex]).isNotEmpty)
-                        Text(
-                          _getDateText(reservations[currentIndex]),
-                          style: const TextStyle(
-                            color: Color(0xFF999999),
-                            fontSize: 12,
-                            fontFamily: 'Spoqa Han Sans Neo',
-                            fontWeight: FontWeight.w500,
-                            height: 1.50,
-                          ),
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(width: 8),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-              decoration: BoxDecoration(
-                color: _getStatusColor(reservations[currentIndex]['status']).withOpacity(0.1),
-                borderRadius: BorderRadius.circular(4),
-              ),
-              child: Text(
-                _getStatusDisplay(reservations[currentIndex]['status']),
-                style: TextStyle(
-                  fontSize: 12,
-                  color: _getStatusColor(reservations[currentIndex]['status']),
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ),
-          ],
+      child: isLoading
+          ? const Center(
+        child: SizedBox(
+          width: 20,
+          height: 20,
+          child: CircularProgressIndicator(strokeWidth: 2),
         ),
+      )
+          : reservations.isEmpty
+          ? Row(
+        children: [
+          Text(
+            MainTranslations.getTranslation('no_reservations_in_progress', _currentLanguage),
+            style: TextStyle(
+              fontSize: 14,
+              color: Colors.grey[600],
+            ),
+          ),
+        ],
+      )
+          : Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                // 진행중인 예약 정보
+                Row(
+                  children: [
+                    Expanded(
+                      child: ClipRect(
+                        child: SlideTransition(
+                          position: _slideAnimation,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                _getLocationText(reservations[currentIndex]),
+                                style: const TextStyle(
+                                  color: Color(0xFF353535),
+                                  fontSize: 13,
+                                  fontFamily: 'Spoqa Han Sans Neo',
+                                  fontWeight: FontWeight.w500,
+                                  height: 1.50,
+                                ),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              if (_getDateText(reservations[currentIndex]).isNotEmpty)
+                                Text(
+                                  _getDateText(reservations[currentIndex]),
+                                  style: const TextStyle(
+                                    color: Color(0xFF999999),
+                                    fontSize: 12,
+                                    fontFamily: 'Spoqa Han Sans Neo',
+                                    fontWeight: FontWeight.w500,
+                                    height: 1.50,
+                                  ),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: _getStatusColor(reservations[currentIndex]['status']).withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      child: Text(
+                        _getStatusDisplay(reservations[currentIndex]['status']),
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: _getStatusColor(reservations[currentIndex]['status']),
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                // 완료된 예약 정보
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    Text(
+                      MainTranslations.getTranslation('total_completed_reservations', _currentLanguage),
+                      style: TextStyle(
+                        color: const Color(0xFF999999),
+                        fontSize: 12,
+                        fontFamily: 'Spoqa Han Sans Neo',
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    isLoadingCompleted
+                        ? SizedBox(
+                      width: 16,
+                      height: 16,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        valueColor: AlwaysStoppedAnimation<Color>(Colors.pink),
+                      ),
+                    )
+                        : Text(
+                      '$completedCount ${_getCountUnitText()}',
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.pink,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

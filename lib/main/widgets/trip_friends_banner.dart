@@ -26,51 +26,39 @@ class TripFriendsBanner extends StatelessWidget {
         );
       },
       child: Container(
-        height: 70,
+        height: 50,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(10),
-          image: const DecorationImage(
-            image: AssetImage('assets/main/main_banner.png'),
-            fit: BoxFit.cover,
-          ),
+          color: const Color(0xFFFFE2E1),
         ),
         child: Stack(
           children: [
-            Container(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(10),
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [
-                    Colors.transparent,
-                    Colors.black.withOpacity(0.7),
-                  ],
+            Positioned(
+              left: 16,
+              top: 0,
+              bottom: 0,
+              child: Center(
+                child: Text(
+                  MainTranslations.getTranslation('how_to_use', language),
+                  style: const TextStyle(
+                    color: Color(0xFFFF3E6C),
+                    fontSize: 13,
+                    fontFamily: 'Spoqa Han Sans Neo',
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
               ),
             ),
             Positioned(
-              left: 16,
-              top: 16,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    MainTranslations.getTranslation('learn_about', language),
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 14,
-                    ),
-                  ),
-                  const Text(
-                    'Trip Friends',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ],
+              right: 16,
+              top: 0,
+              bottom: 0,
+              child: Center(
+                child: Icon(
+                  Icons.chevron_right,
+                  color: Color(0xFFFF3E6C),
+                  size: 24,
+                ),
               ),
             ),
           ],

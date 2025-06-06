@@ -8,7 +8,6 @@ import '../services/translation_service.dart';
 import '../compents/appbar.dart';
 import '../compents/settings_drawer.dart';
 import 'widgets/reservation_info_card.dart';
-import 'widgets/traveler_info_card.dart';
 import 'widgets/horizontal_reservation_cards.dart';
 import 'widgets/point_section.dart';
 import 'widgets/bottom_nav_section.dart';
@@ -108,13 +107,15 @@ class _MainScreenState extends State<MainScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // 예약 정보 카드
-                const ReservationInfoCard(),
+                // 트립프렌즈 배너
+                TripFriendsBanner(
+                  language: _currentLanguage.isNotEmpty ? _currentLanguage : currentCountryCode,
+                ),
 
                 const SizedBox(height: 12),
 
-                // 예약 현황 카드
-                const TravelerInfoCard(),
+                // 예약 정보 카드
+                const ReservationInfoCard(),
 
                 const SizedBox(height: 12),
 
@@ -133,13 +134,6 @@ class _MainScreenState extends State<MainScreen> {
                 // 하단 네비게이션
                 BottomNavSection(
                   onNavigateToTab: widget.onNavigateToTab,
-                ),
-
-                const SizedBox(height: 12),
-
-                // 트립프렌즈 배너
-                TripFriendsBanner(
-                  language: _currentLanguage.isNotEmpty ? _currentLanguage : currentCountryCode,
                 ),
 
                 const SizedBox(height: 12),

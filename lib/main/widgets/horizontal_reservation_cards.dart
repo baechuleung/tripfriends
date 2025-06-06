@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import '../../translations/main_translations.dart';
+import '../../main.dart' show currentCountryCode, languageChangeController;
+import 'dart:async';
 
 class HorizontalReservationCards extends StatefulWidget {
   final Function(int)? onNavigateToTab;
@@ -18,11 +21,32 @@ class _HorizontalReservationCardsState extends State<HorizontalReservationCards>
   int activeReservationCount = 0;
   int pastReservationCount = 0;
   bool isLoading = true;
+  String _currentLanguage = 'KR';
+  StreamSubscription<String>? _languageSubscription;
 
   @override
   void initState() {
     super.initState();
+
+    // 현재 언어 설정 가져오기
+    _currentLanguage = currentCountryCode;
+
+    // 언어 변경 리스너 등록
+    _languageSubscription = languageChangeController.stream.listen((newLanguage) {
+      if (mounted) {
+        setState(() {
+          _currentLanguage = newLanguage;
+        });
+      }
+    });
+
     _loadReservationCounts();
+  }
+
+  @override
+  void dispose() {
+    _languageSubscription?.cancel();
+    super.dispose();
   }
 
   Future<void> _loadReservationCounts() async {
@@ -71,12 +95,19 @@ class _HorizontalReservationCardsState extends State<HorizontalReservationCards>
       children: [
         Expanded(
           child: _ReservationCard(
-            title: '예약',
-            count: isLoading ? '...' : '$activeReservationCount건',
-            isNew: true,
+            title: MainTranslations.getTranslation('reservation', _currentLanguage),
+            count: isLoading ? '...' : '$activeReservationCount${MainTranslations.getTranslation('count_unit', _currentLanguage)}',
             isLoading: isLoading,
-            backgroundColor: Colors.blue[50]!,
-            textColor: Colors.blue,
+            backgroundColor: const Color(0xFFE6F1FF),
+            textColor: const Color(0xFF005AB8),
+            iconColor: const Color(0xFF005AB8),
+            titleStyle: const TextStyle(
+              color: Color(0xFF0059B7),
+              fontSize: 14,
+              fontFamily: 'Spoqa Han Sans Neo',
+              fontWeight: FontWeight.w700,
+            ),
+            icon: Icons.calendar_month,
             onTap: () {
               if (widget.onNavigateToTab != null) {
                 widget.onNavigateToTab!(1);
@@ -87,12 +118,19 @@ class _HorizontalReservationCardsState extends State<HorizontalReservationCards>
         const SizedBox(width: 12),
         Expanded(
           child: _ReservationCard(
-            title: '지난예약',
-            count: isLoading ? '...' : '$pastReservationCount건',
-            isNew: false,
+            title: MainTranslations.getTranslation('past_reservation', _currentLanguage),
+            count: isLoading ? '...' : '$pastReservationCount${MainTranslations.getTranslation('count_unit', _currentLanguage)}',
             isLoading: isLoading,
-            backgroundColor: Colors.pink[50]!,
-            textColor: Colors.pink,
+            backgroundColor: Colors.white,
+            textColor: const Color(0xFF4E5968),
+            iconColor: const Color(0xFF4E5968),
+            titleStyle: const TextStyle(
+              color: Color(0xFF4E5968),
+              fontSize: 14,
+              fontFamily: 'Spoqa Han Sans Neo',
+              fontWeight: FontWeight.w700,
+            ),
+            icon: Icons.calendar_month,
             onTap: () {
               if (widget.onNavigateToTab != null) {
                 widget.onNavigateToTab!(2);
@@ -108,19 +146,23 @@ class _HorizontalReservationCardsState extends State<HorizontalReservationCards>
 class _ReservationCard extends StatelessWidget {
   final String title;
   final String count;
-  final bool isNew;
   final bool isLoading;
   final Color backgroundColor;
   final Color textColor;
+  final Color iconColor;
+  final TextStyle titleStyle;
+  final IconData icon;
   final VoidCallback onTap;
 
   const _ReservationCard({
     required this.title,
     required this.count,
-    required this.isNew,
     required this.isLoading,
     required this.backgroundColor,
     required this.textColor,
+    required this.iconColor,
+    required this.titleStyle,
+    required this.icon,
     required this.onTap,
   });
 
@@ -129,7 +171,7 @@ class _ReservationCard extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        height: 100,
+        height: 85,
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: backgroundColor,
@@ -141,51 +183,41 @@ class _ReservationCard extends StatelessWidget {
           children: [
             Row(
               children: [
+                Icon(
+                  icon,
+                  size: 20,
+                  color: iconColor,
+                ),
+                const SizedBox(width: 8),
                 Text(
                   title,
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.grey[700],
-                  ),
+                  style: titleStyle,
                 ),
-                if (isNew) ...[
-                  const SizedBox(width: 8),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                    decoration: BoxDecoration(
-                      color: Colors.blue,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: const Text(
-                      'NEW',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 10,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                ],
               ],
             ),
-            if (isLoading)
-              SizedBox(
-                width: 20,
-                height: 20,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2,
-                  valueColor: AlwaysStoppedAnimation<Color>(textColor),
-                ),
-              )
-            else
-              Text(
-                count,
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: textColor,
-                ),
-              ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                if (isLoading)
+                  SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      valueColor: AlwaysStoppedAnimation<Color>(textColor),
+                    ),
+                  )
+                else
+                  Text(
+                    count,
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: textColor,
+                    ),
+                  ),
+              ],
+            ),
           ],
         ),
       ),
