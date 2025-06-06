@@ -291,6 +291,151 @@ class MainTranslations {
       "PH": "Total Completed Reservations",
       "GU": "Total Completed Reservations",
       "SG": "Total Completed Reservations"
-    }
+    },
+    // PointSection 관련
+    "my_points": {
+      "KR": "내 적립금",
+      "JP": "マイポイント",
+      "VN": "Điểm của tôi",
+      "TH": "คะแนนสะสมของฉัน",
+      "TW": "我的積分",
+      "CN": "我的积分",
+      "HK": "我的積分",
+      "PH": "My Points",
+      "GU": "My Points",
+      "SG": "My Points"
+    },
+    "points_history": {
+      "KR": "적립금 내역",
+      "JP": "ポイント履歴",
+      "VN": "Lịch sử điểm",
+      "TH": "ประวัติคะแนน",
+      "TW": "積分記錄",
+      "CN": "积分记录",
+      "HK": "積分記錄",
+      "PH": "Points History",
+      "GU": "Points History",
+      "SG": "Points History"
+    },
+    "request_settlement": {
+      "KR": "정산요청",
+      "JP": "精算リクエスト",
+      "VN": "Yêu cầu thanh toán",
+      "TH": "ขอชำระเงิน",
+      "TW": "結算請求",
+      "CN": "结算请求",
+      "HK": "結算請求",
+      "PH": "Request Settlement",
+      "GU": "Request Settlement",
+      "SG": "Request Settlement"
+    },
+    "rank_up": {
+      "KR": "RANK UP!",
+      "JP": "ランクアップ！",
+      "VN": "NÂNG CẤP!",
+      "TH": "อัพเลเวล!",
+      "TW": "升級！",
+      "CN": "升级！",
+      "HK": "升級！",
+      "PH": "RANK UP!",
+      "GU": "RANK UP!",
+      "SG": "RANK UP!"
+    },
+    "p_usage": {
+      "KR": "사용",
+      "JP": "使用",
+      "VN": "sử dụng",
+      "TH": "ใช้",
+      "TW": "使用",
+      "CN": "使用",
+      "HK": "使用",
+      "PH": "use",
+      "GU": "use",
+      "SG": "use"
+    },
+    "login_required": {
+      "KR": "로그인이 필요합니다.",
+      "JP": "ログインが必要です。",
+      "VN": "Cần đăng nhập.",
+      "TH": "ต้องเข้าสู่ระบบ",
+      "TW": "需要登入。",
+      "CN": "需要登录。",
+      "HK": "需要登入。",
+      "PH": "Login required.",
+      "GU": "Login required.",
+      "SG": "Login required."
+    },
+    "user_not_found": {
+      "KR": "사용자 정보를 찾을 수 없습니다.",
+      "JP": "ユーザー情報が見つかりません。",
+      "VN": "Không tìm thấy thông tin người dùng.",
+      "TH": "ไม่พบข้อมูลผู้ใช้",
+      "TW": "找不到用戶資訊。",
+      "CN": "找不到用户信息。",
+      "HK": "找不到用戶資訊。",
+      "PH": "User information not found.",
+      "GU": "User information not found.",
+      "SG": "User information not found."
+    },
+    "no_user_data": {
+      "KR": "사용자 데이터가 없습니다.",
+      "JP": "ユーザーデータがありません。",
+      "VN": "Không có dữ liệu người dùng.",
+      "TH": "ไม่มีข้อมูลผู้ใช้",
+      "TW": "沒有用戶數據。",
+      "CN": "没有用户数据。",
+      "HK": "沒有用戶數據。",
+      "PH": "No user data.",
+      "GU": "No user data.",
+      "SG": "No user data."
+    },
+    "insufficient_points": {
+      "KR": "포인트가 부족합니다.",
+      "JP": "ポイントが不足しています。",
+      "VN": "Không đủ điểm.",
+      "TH": "คะแนนไม่เพียงพอ",
+      "TW": "積分不足。",
+      "CN": "积分不足。",
+      "HK": "積分不足。",
+      "PH": "Insufficient points.",
+      "GU": "Insufficient points.",
+      "SG": "Insufficient points."
+    },
+    "recommendation_activated": {
+      "KR": "추천 프렌즈가 활성화되었습니다!",
+      "JP": "推薦フレンズが有効になりました！",
+      "VN": "Đã kích hoạt bạn bè giới thiệu!",
+      "TH": "เปิดใช้งานเพื่อนแนะนำแล้ว!",
+      "TW": "推薦朋友已啟用！",
+      "CN": "推荐朋友已激活！",
+      "HK": "推薦朋友已啟用！",
+      "PH": "Recommended friends activated!",
+      "GU": "Recommended friends activated!",
+      "SG": "Recommended friends activated!"
+    },
+    "error_occurred": {
+      "KR": "오류가 발생했습니다",
+      "JP": "エラーが発生しました",
+      "VN": "Đã xảy ra lỗi",
+      "TH": "เกิดข้อผิดพลาด",
+      "TW": "發生錯誤",
+      "CN": "发生错误",
+      "HK": "發生錯誤",
+      "PH": "An error occurred",
+      "GU": "An error occurred",
+      "SG": "An error occurred"
+    },
+    "minimum_withdrawal": {
+      "KR": "출금은 ₩ 100,000 이상부터 가능합니다.",
+      "JP": "出金は¥ 100,000以上から可能です。",
+      "VN": "Rút tiền từ ₫ 2,000,000 trở lên.",
+      "TH": "ถอนเงินได้ตั้งแต่ ฿ 100,000 ขึ้นไป",
+      "TW": "提款需NT\$ 100,000以上。",
+      "CN": "提款需¥ 100,000以上。",
+      "HK": "提款需HK\$ 100,000以上。",
+      "PH": "Withdrawal from ₱ 100,000 and above.",
+      "GU": "Withdrawal from \$ 100,000 and above.",
+      "SG": "Withdrawal from S\$ 100,000 and above."
+    },
   };
 }
