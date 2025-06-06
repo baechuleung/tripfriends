@@ -26,9 +26,9 @@ class TripFriendsBanner extends StatelessWidget {
         );
       },
       child: Container(
-        height: 100,
+        height: 70,
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(10),
           image: const DecorationImage(
             image: AssetImage('assets/main/main_banner.png'),
             fit: BoxFit.cover,
@@ -38,7 +38,7 @@ class TripFriendsBanner extends StatelessWidget {
           children: [
             Container(
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(20),
+                borderRadius: BorderRadius.circular(10),
                 gradient: LinearGradient(
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
