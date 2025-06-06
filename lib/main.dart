@@ -62,15 +62,11 @@ void main() async {
   // 지원하는 국가 코드 목록
   const List<String> SUPPORTED_COUNTRY_CODES = [
     'KR',
-    'JP',
     'VN',
+    'JP',
     'TH',
-    'TW',
-    'CN',
-    'HK',
     'PH',
-    'GU',
-    'SG'
+    'MY'
   ];
 
   // 지원하는 국가 코드인지 확인

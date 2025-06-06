@@ -374,6 +374,11 @@ class _MainPageState extends State<MainPage> with WidgetsBindingObserver {
     // 홈 탭(인덱스 0)이 선택된 경우 MainScreen 표시
     if (_selectedIndex == 0) {
       return MainScreen(
+        countryNames: countryNames,
+        currentLanguage: _currentLanguage,
+        onCountryChanged: _handleCountryChanged,
+        refreshKeys: _refreshKeys,
+        translationService: translationService,
         onNavigateToTab: (index) {
           if (!mounted) return;
           setState(() {

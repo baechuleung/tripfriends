@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'dart:convert';
+import 'dart:async';
 import '../main.dart';
-import '../main_page.dart';
 import '../services/shared_preferences_service.dart';
 import '../services/translation_service.dart';
 import '../compents/appbar.dart';
@@ -17,72 +15,58 @@ import 'widgets/main_footer.dart';
 
 class MainScreen extends StatefulWidget {
   final Function(int)? onNavigateToTab;
+  final Map<String, String> countryNames;
+  final String currentLanguage;
+  final Function(String) onCountryChanged;
+  final VoidCallback refreshKeys;
+  final TranslationService translationService;
 
-  const MainScreen({super.key, this.onNavigateToTab});
+  const MainScreen({
+    super.key,
+    this.onNavigateToTab,
+    required this.countryNames,
+    required this.currentLanguage,
+    required this.onCountryChanged,
+    required this.refreshKeys,
+    required this.translationService,
+  });
 
   @override
   State<MainScreen> createState() => _MainScreenState();
 }
 
 class _MainScreenState extends State<MainScreen> {
-  Map<String, String> countryNames = {};
-  late TranslationService translationService;
   String _currentLanguage = '';
   bool _isLoggedIn = true;
+  StreamSubscription<String>? _languageSubscription;
 
   @override
   void initState() {
     super.initState();
-    translationService = TranslationService();
-    _currentLanguage = SharedPreferencesService.getLanguage() ?? currentCountryCode;
-    loadTranslations();
-  }
+    _currentLanguage = widget.currentLanguage;
 
-  Future<void> loadTranslations() async {
-    try {
-      String effectiveLanguage = _currentLanguage.isNotEmpty ?
-      _currentLanguage :
-      (SharedPreferencesService.getLanguage() ?? currentCountryCode);
-
-      final String translationsJson = await rootBundle.loadString(
-          'assets/data/country.json');
-      final data = json.decode(translationsJson);
-
+    // 언어 변경 리스너 등록
+    _languageSubscription = languageChangeController.stream.listen((newLanguage) {
       if (mounted) {
         setState(() {
-          countryNames = Map.fromEntries(
-              (data['countries'] as List).map((country) {
-                String countryName = effectiveLanguage.isNotEmpty &&
-                    country['names'].containsKey(effectiveLanguage) ?
-                country['names'][effectiveLanguage] as String :
-                country['names']['KR'] as String;
-
-                return MapEntry(country['code'] as String, countryName);
-              })
-          );
+          _currentLanguage = newLanguage;
         });
       }
-    } catch (e) {
-      debugPrint('❌ 번역 로드 오류: $e');
-    }
-  }
-
-  void _handleCountryChanged(String newCountryCode) {
-    if (!mounted) return;
-
-    setState(() {
-      _currentLanguage = newCountryCode;
-      if (currentCountryCode != newCountryCode) {
-        currentCountryCode = newCountryCode;
-        languageChangeController.add(newCountryCode);
-      }
-      loadTranslations();
     });
   }
 
+  @override
+  void dispose() {
+    _languageSubscription?.cancel();
+    super.dispose();
+  }
+
+  void _handleCountryChanged(String newCountryCode) {
+    widget.onCountryChanged(newCountryCode);
+  }
+
   void _refreshKeys() {
-    if (!mounted) return;
-    setState(() {});
+    widget.refreshKeys();
   }
 
   @override
@@ -90,14 +74,14 @@ class _MainScreenState extends State<MainScreen> {
     return Scaffold(
       backgroundColor: Colors.grey[100],
       appBar: TripFriendsAppBar(
-        countryNames: countryNames,
+        countryNames: widget.countryNames,
         currentCountryCode: _currentLanguage.isNotEmpty ?
         _currentLanguage :
         currentCountryCode,
         onCountryChanged: _handleCountryChanged,
         refreshKeys: _refreshKeys,
         isLoggedIn: _isLoggedIn,
-        translationService: translationService,
+        translationService: widget.translationService,
       ),
       endDrawer: const SettingsDrawer(),
       body: SafeArea(

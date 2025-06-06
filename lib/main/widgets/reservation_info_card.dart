@@ -27,10 +27,6 @@ class _ReservationInfoCardState extends State<ReservationInfoCard> with SingleTi
   int completedCount = 0;
   bool isLoadingCompleted = true;
 
-  // 카운터 애니메이션을 위한 변수
-  int _displayedCount = 0;
-  Timer? _countTimer;
-
   @override
   void initState() {
     super.initState();
@@ -65,7 +61,6 @@ class _ReservationInfoCardState extends State<ReservationInfoCard> with SingleTi
   @override
   void dispose() {
     _timer?.cancel();
-    _countTimer?.cancel();
     _animationController.dispose();
     _languageSubscription?.cancel();
     super.dispose();
@@ -90,9 +85,6 @@ class _ReservationInfoCardState extends State<ReservationInfoCard> with SingleTi
           completedCount = count;
           isLoadingCompleted = false;
         });
-
-        // 카운터 애니메이션 시작
-        _startCounterAnimation();
       }
     } catch (e) {
       debugPrint('❌ 완료된 예약 정보 로드 오류: $e');
@@ -207,34 +199,6 @@ class _ReservationInfoCardState extends State<ReservationInfoCard> with SingleTi
           _animationController.forward();
         });
       }
-    });
-  }
-
-  void _startCounterAnimation() {
-    // 카운터 애니메이션 초기화
-    _displayedCount = 0;
-
-    // 애니메이션 지속 시간과 단계 계산
-    const int animationDuration = 1000; // 1초
-    const int steps = 30; // 30단계
-    final int stepDuration = animationDuration ~/ steps;
-    final int increment = (completedCount / steps).ceil();
-
-    _countTimer?.cancel();
-    _countTimer = Timer.periodic(Duration(milliseconds: stepDuration), (timer) {
-      if (!mounted) {
-        timer.cancel();
-        return;
-      }
-
-      setState(() {
-        if (_displayedCount + increment >= completedCount) {
-          _displayedCount = completedCount;
-          timer.cancel();
-        } else {
-          _displayedCount += increment;
-        }
-      });
     });
   }
 
@@ -434,8 +398,17 @@ class _ReservationInfoCardState extends State<ReservationInfoCard> with SingleTi
                       ),
                     ),
                     const SizedBox(width: 8),
-                    Text(
-                      '$_displayedCount ${_getCountUnitText()}',
+                    isLoadingCompleted
+                        ? SizedBox(
+                      width: 16,
+                      height: 16,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        valueColor: AlwaysStoppedAnimation<Color>(Colors.pink),
+                      ),
+                    )
+                        : Text(
+                      '$completedCount ${_getCountUnitText()}',
                       style: TextStyle(
                         fontSize: 14,
                         color: Colors.pink,

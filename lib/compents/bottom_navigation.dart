@@ -4,12 +4,13 @@ import 'package:flutter/services.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'dart:convert';
 import '../main.dart';
-import '../main/main_screen.dart'; // 홈 화면 추가
+import '../main/main_screen.dart';
 import '../mypage/mypage.dart';
 import '../globals.dart';
 import '../reservation/screens/current_reservation_list_screen.dart';
 import '../reservation/screens/past_reservation_list_screen.dart';
 import '../chat/screens/friend_chat_list_screen.dart';
+import '../services/translation_service.dart';
 
 class CustomBottomNavigation extends StatefulWidget {
   final int selectedIndex;
@@ -39,10 +40,23 @@ class _CustomBottomNavigationState extends State<CustomBottomNavigation> {
     "my_info": "내정보"
   };
 
+  // MainScreen에서 사용할 파라미터들을 위한 더미 데이터
+  final Map<String, String> _dummyCountryNames = {
+    'KR': '한국',
+    'VN': '베트남',
+    'JP': '일본',
+    'TH': '태국',
+    'PH': '필리핀',
+    'MY': '말레이시아'
+  };
+
+  late TranslationService _translationService;
+
   @override
   void initState() {
     super.initState();
     lastCountryCode = currentCountryCode;
+    _translationService = TranslationService();
     loadTranslations();
 
     // 전역 함수에 탭 변경 함수 등록
@@ -115,7 +129,20 @@ class _CustomBottomNavigationState extends State<CustomBottomNavigation> {
     final String userId = getUserId();
 
     final List<Widget> pages = [
-      MainScreen(onNavigateToTab: widget.onItemSelected), // 콜백 전달
+      MainScreen(
+        onNavigateToTab: widget.onItemSelected,
+        countryNames: _dummyCountryNames,
+        currentLanguage: currentCountryCode,
+        onCountryChanged: (String newCode) {
+          // BottomNavigation에서는 언어 변경을 처리하지 않음
+          debugPrint('Language change requested in BottomNavigation: $newCode');
+        },
+        refreshKeys: () {
+          // BottomNavigation에서는 키 새로고침을 처리하지 않음
+          debugPrint('Refresh keys requested in BottomNavigation');
+        },
+        translationService: _translationService,
+      ),
       const CurrentReservationListScreen(),    // 예약목록
       const PastReservationListScreen(),       // 지난 예약목록
       _buildChatListScreen(userId),            // 채팅 목록
