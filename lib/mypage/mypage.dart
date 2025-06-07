@@ -10,8 +10,8 @@ import '../services/translation_service.dart'; // TranslationService 임포트 �
 import 'recommended_friends/recommended_friends_button_widget.dart'; // 나를 추천한 친구들 버튼 위젯 임포트 추가
 import 'withdrawal/widgets/balance_card_widget.dart'; // balance_card_widget 추가
 import 'withdrawal/controller/balance_controller.dart'; // balance_controller 추가
-import 'logout/logout_controller.dart'; // 로그아웃 컨트롤러 추가
-import 'logout/logout_widget.dart'; // 로그아웃 위젯 추가
+import '../compents/logout/logout_controller.dart'; // 로그아웃 컨트롤러 추가
+import '../compents/logout/logout_widget.dart'; // 로그아웃 위젯 추가
 import 'active/active_toggle_widget.dart'; // Active 토글 위젯 추가
 
 class MyPage extends StatefulWidget {

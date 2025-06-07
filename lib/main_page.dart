@@ -7,6 +7,7 @@ import 'main/main_screen.dart';
 import 'auth/auth_main_page.dart';
 import 'services/shared_preferences_service.dart';
 import 'services/translation_service.dart';
+import 'services/version_check_service.dart'; // 버전 체크 서비스 추가
 import 'compents/bottom_navigation.dart';
 import 'compents/appbar.dart';
 import 'compents/settings_drawer.dart';
@@ -68,6 +69,13 @@ class _MainPageState extends State<MainPage> with WidgetsBindingObserver {
 
     loadTranslations();
     _checkLoginStatus();
+
+    // 버전 체크 추가
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        VersionCheckService.checkVersion(context);
+      }
+    });
 
     FirebaseAuth.instance.idTokenChanges().listen((User? user) {
       if (mounted) {

@@ -7,7 +7,6 @@ import 'main_page.dart';
 import 'firebase_options.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart'; // Firebase Realtime Database 추가
-import 'package:cloud_firestore/cloud_firestore.dart'; // Firestore 추가
 import 'services/shared_preferences_service.dart';
 import 'services/fcm_service/fcm_service.dart'; // FCM 서비스 임포트
 import 'services/fcm_service/handlers/message_handler.dart'; // navigatorKey 임포트
@@ -147,6 +146,7 @@ class _MyAppState extends State<MyApp> {
   void initState() {
     super.initState();
     _setupAuthListeners();
+    // 버전 체크를 여기서 제거
 
     // 로딩 상태 변경 이벤트 구독
     loadingStateController.stream.listen((bool loading) {

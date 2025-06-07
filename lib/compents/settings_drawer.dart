@@ -6,6 +6,8 @@ import 'terms/service_terms_screen.dart';
 import 'terms/privacy_terms_screen.dart';
 import 'terms/location_terms_screen.dart';
 import '../services/translation_service.dart';
+import 'logout/logout_controller.dart';
+import 'logout/logout_popup.dart';
 
 class SettingsDrawer extends StatefulWidget {
   final TranslationService? translationService;
@@ -18,12 +20,14 @@ class SettingsDrawer extends StatefulWidget {
 
 class _SettingsDrawerState extends State<SettingsDrawer> {
   late TranslationService _translationService;
+  late LogoutController _logoutController;
   String _appVersion = "";
 
   @override
   void initState() {
     super.initState();
     _translationService = widget.translationService ?? TranslationService();
+    _logoutController = LogoutController();
     _getAppVersion();
   }
 
@@ -57,7 +61,7 @@ class _SettingsDrawerState extends State<SettingsDrawer> {
   }
 
   Widget _buildNavigationTile(String title, String translationKey,
-      VoidCallback onTap, {bool showDivider = false}) {
+      VoidCallback onTap, {bool showDivider = false, IconData? trailingIcon}) {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -69,8 +73,8 @@ class _SettingsDrawerState extends State<SettingsDrawer> {
               fontWeight: FontWeight.normal,
             ),
           ),
-          trailing: const Icon(
-            Icons.chevron_right,
+          trailing: Icon(
+            trailingIcon ?? Icons.chevron_right,
             size: 18,
             color: Colors.grey,
           ),
@@ -134,126 +138,149 @@ class _SettingsDrawerState extends State<SettingsDrawer> {
         borderRadius: BorderRadius.zero,
       ),
       child: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.only(top: 30.0),
-          child: SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _buildSectionTitle('서비스 설정', 'service_settings'),
+        child: Stack(
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(top: 80.0),
+              child: SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildSectionTitle('서비스 설정', 'service_settings'),
 
-                // 위치서비스 허용
-                ListTile(
-                  title: Text(
-                    _translationService.get(
-                        'location_service_permission', '위치서비스 허용'),
-                    style: const TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.normal,
+                    // 위치서비스 허용
+                    ListTile(
+                      title: Text(
+                        _translationService.get(
+                            'location_service_permission', '위치서비스 허용'),
+                        style: const TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.normal,
+                        ),
+                      ),
+                      trailing: Text(
+                        _translationService.get('while_using_app', '앱을 사용하는 동안'),
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: Colors.blue,
+                        ),
+                      ),
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 16.0),
+                      visualDensity: const VisualDensity(
+                          horizontal: 0, vertical: -2),
                     ),
-                  ),
-                  trailing: Text(
-                    _translationService.get('while_using_app', '앱을 사용하는 동안'),
-                    style: const TextStyle(
-                      fontSize: 12,
-                      color: Colors.blue,
+                    const Divider(
+                      height: 1,
+                      thickness: 0.5,
+                      indent: 16,
+                      endIndent: 0,
                     ),
-                  ),
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 16.0),
-                  visualDensity: const VisualDensity(
-                      horizontal: 0, vertical: -2),
+
+                    _buildSectionTitle('서비스 약관', 'terms_of_service'),
+
+                    _buildNavigationTile('서비스 이용약관', 'terms_service_agreement', () {
+                      Navigator.pop(context);
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => const ServiceTermsScreen()),
+                      );
+                    }),
+
+                    _buildNavigationTile('위치정보 이용약관', 'terms_location_info', () {
+                      Navigator.pop(context);
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => const LocationTermsScreen()),
+                      );
+                    }),
+
+                    _buildNavigationTile('개인정보 처리방침', 'privacy_policy', () {
+                      Navigator.pop(context);
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => const PrivacyTermsScreen()),
+                      );
+                    }, showDivider: true),
+
+                    _buildSectionTitle('고객서비스', 'customer_service'),
+
+                    _buildVersionTile('현재버전', 'current_version', _appVersion),
+
+                    _buildNavigationTile('공지사항', 'notifications', () {
+                      Navigator.pop(context);
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const SupportPage(),
+                        ),
+                      );
+                    }),
+
+                    _buildNavigationTile('1:1 문의', 'one_to_one_inquiry', () {
+                      Navigator.pop(context);
+                      // 1:1 문의 탭으로 이동
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) {
+                            // TabController를 사용하여 인덱스 1(두 번째 탭)로 초기화된 SupportPage 생성
+                            return const SupportPage(
+                              initialTabIndex: 1, // 1:1 문의 탭 인덱스
+                            );
+                          },
+                        ),
+                      );
+                    }),
+
+                    _buildNavigationTile('회원탈퇴', 'delete_account', () {
+                      Navigator.pop(context);
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => const AccountDeletePage()),
+                      );
+                    }, showDivider: true),
+
+                    _buildNavigationTile('로그아웃', 'logout', () {
+                      showLogoutPopup(context, _logoutController, translationService: _translationService);
+                    }, trailingIcon: Icons.logout),
+
+                    // 패치 확인용 텍스트
+                    Container(
+                      alignment: Alignment.bottomRight,
+                      padding: const EdgeInsets.only(
+                          right: 16.0, bottom: 8.0, top: 20.0),
+                      child: const Text(
+                        'patch_confirm +1',
+                        style: TextStyle(
+                          fontSize: 6,
+                          color: Colors.grey,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-                const Divider(
-                  height: 1,
-                  thickness: 0.5,
-                  indent: 16,
-                  endIndent: 0,
-                ),
-
-                _buildSectionTitle('서비스 약관', 'terms_of_service'),
-
-                _buildNavigationTile('서비스 이용약관', 'terms_service_agreement', () {
-                  Navigator.pop(context);
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => const ServiceTermsScreen()),
-                  );
-                }),
-
-                _buildNavigationTile('위치정보 이용약관', 'terms_location_info', () {
-                  Navigator.pop(context);
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => const LocationTermsScreen()),
-                  );
-                }),
-
-                _buildNavigationTile('개인정보 처리방침', 'privacy_policy', () {
-                  Navigator.pop(context);
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => const PrivacyTermsScreen()),
-                  );
-                }, showDivider: true),
-
-                _buildSectionTitle('고객서비스', 'customer_service'),
-
-                _buildVersionTile('현재버전', 'current_version', _appVersion),
-
-                _buildNavigationTile('공지사항', 'notifications', () {
-                  Navigator.pop(context);
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const SupportPage(),
-                    ),
-                  );
-                }),
-
-                _buildNavigationTile('1:1 문의', 'one_to_one_inquiry', () {
-                  Navigator.pop(context);
-                  // 1:1 문의 탭으로 이동
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) {
-                        // TabController를 사용하여 인덱스 1(두 번째 탭)로 초기화된 SupportPage 생성
-                        return const SupportPage(
-                          initialTabIndex: 1, // 1:1 문의 탭 인덱스
-                        );
-                      },
-                    ),
-                  );
-                }),
-
-                _buildNavigationTile('회원탈퇴', 'delete_account', () {
-                  Navigator.pop(context);
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => const AccountDeletePage()),
-                  );
-                }),
-
-                // 패치 확인용 텍스트
-                Container(
-                  alignment: Alignment.bottomRight,
-                  padding: const EdgeInsets.only(
-                      right: 16.0, bottom: 8.0, top: 20.0),
-                  child: const Text(
-                    'patch_confirm +1',
-                    style: TextStyle(
-                      fontSize: 6,
-                      color: Colors.grey,
-                    ),
-                  ),
-                ),
-              ],
+              ),
             ),
-          ),
+            // X 버튼
+            Positioned(
+              top: 8,
+              left: 8,
+              child: IconButton(
+                icon: const Icon(
+                  Icons.close,
+                  size: 24,
+                  color: Colors.black87,
+                ),
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+              ),
+            ),
+          ],
         ),
       ),
     );
