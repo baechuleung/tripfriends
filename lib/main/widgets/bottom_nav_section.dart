@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_database/firebase_database.dart';
 import '../../translations/main_translations.dart';
 import '../../main.dart' show currentCountryCode, languageChangeController;
 import 'dart:async';
@@ -18,11 +20,17 @@ class BottomNavSection extends StatefulWidget {
 class _BottomNavSectionState extends State<BottomNavSection> {
   String _currentLanguage = 'KR';
   StreamSubscription<String>? _languageSubscription;
+  StreamSubscription? _unreadSubscription;
+  bool _hasUnreadMessages = false;
+  final FirebaseDatabase _database = FirebaseDatabase.instance;
 
   @override
   void initState() {
     super.initState();
     _currentLanguage = currentCountryCode;
+
+    // Firebase Database URL 설정
+    _database.databaseURL = 'https://tripjoy-d309f-default-rtdb.asia-southeast1.firebasedatabase.app/';
 
     // 언어 변경 리스너 등록
     _languageSubscription = languageChangeController.stream.listen((newLanguage) {
@@ -32,11 +40,51 @@ class _BottomNavSectionState extends State<BottomNavSection> {
         });
       }
     });
+
+    // 읽지 않은 메시지 감지
+    _listenToUnreadMessages();
+  }
+
+  void _listenToUnreadMessages() {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+
+    _unreadSubscription = _database
+        .ref()
+        .child('users/${user.uid}/chats')
+        .onValue
+        .listen((event) {
+      if (!mounted) return;
+
+      bool hasUnread = false;
+
+      if (event.snapshot.exists && event.snapshot.value != null) {
+        final chatsData = Map<dynamic, dynamic>.from(event.snapshot.value as Map);
+
+        for (var chatData in chatsData.values) {
+          if (chatData is Map) {
+            final unreadCount = chatData['unreadCount'] ?? 0;
+            final isBlocked = chatData['blocked'] ?? false;
+
+            // 차단되지 않은 채팅에서 읽지 않은 메시지가 있는지 확인
+            if (!isBlocked && unreadCount > 0) {
+              hasUnread = true;
+              break;
+            }
+          }
+        }
+      }
+
+      setState(() {
+        _hasUnreadMessages = hasUnread;
+      });
+    });
   }
 
   @override
   void dispose() {
     _languageSubscription?.cancel();
+    _unreadSubscription?.cancel();
     super.dispose();
   }
 
@@ -70,6 +118,7 @@ class _BottomNavSectionState extends State<BottomNavSection> {
             child: _NavItem(
               iconPath: 'assets/main/tooltip.png',
               label: MainTranslations.getTranslation('chat_list', _currentLanguage),
+              hasNotification: _hasUnreadMessages,
               onTap: () {
                 if (widget.onNavigateToTab != null) {
                   widget.onNavigateToTab!(3);
@@ -101,11 +150,13 @@ class _NavItem extends StatelessWidget {
   final String iconPath;
   final String label;
   final VoidCallback onTap;
+  final bool hasNotification;
 
   const _NavItem({
     required this.iconPath,
     required this.label,
     required this.onTap,
+    this.hasNotification = false,
   });
 
   @override
@@ -118,10 +169,32 @@ class _NavItem extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
-            Image.asset(
-              iconPath,
-              width: 26,
-              height: 26,
+            Stack(
+              clipBehavior: Clip.none,
+              children: [
+                Image.asset(
+                  iconPath,
+                  width: 26,
+                  height: 26,
+                ),
+                if (hasNotification)
+                  Positioned(
+                    right: -4,
+                    top: -4,
+                    child: Container(
+                      width: 8,
+                      height: 8,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFFF3E6C),
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          color: Colors.white,
+                          width: 1,
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
             ),
             const SizedBox(height: 4),
             Container(

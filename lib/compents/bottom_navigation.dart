@@ -154,28 +154,31 @@ class _CustomBottomNavigationState extends State<CustomBottomNavigation> {
       bottomNavigationBar: BottomNavigationBar(
         items: <BottomNavigationBarItem>[
           BottomNavigationBarItem(
-            icon: const Icon(Icons.home),
+            icon: Icon(widget.selectedIndex == 0 ? Icons.home_rounded : Icons.home_outlined),
             label: navLabels['home'],
           ),
           BottomNavigationBarItem(
-            icon: const Icon(Icons.list_alt),
+            icon: Icon(widget.selectedIndex == 1 ? Icons.event_note_rounded : Icons.event_note_outlined),
             label: navLabels['reservation_list'],
           ),
           BottomNavigationBarItem(
-            icon: const Icon(Icons.history),
+            icon: Icon(widget.selectedIndex == 2 ? Icons.event_available_rounded : Icons.event_available_outlined),
             label: navLabels['past_reservations'],
           ),
           BottomNavigationBarItem(
-            icon: const Icon(Icons.chat_outlined),
+            icon: Tooltip(
+              message: navLabels['chat_list'] ?? '채팅 리스트',
+              child: Icon(widget.selectedIndex == 3 ? Icons.chat_rounded : Icons.chat_outlined),
+            ),
             label: navLabels['chat_list'],
           ),
           BottomNavigationBarItem(
-            icon: const Icon(Icons.person_outline),
+            icon: Icon(widget.selectedIndex == 4 ? Icons.account_circle_rounded : Icons.account_circle_outlined),
             label: navLabels['my_info'],
           ),
         ],
         currentIndex: widget.selectedIndex,
-        selectedItemColor: Colors.blue,
+        selectedItemColor: const Color(0xFF5963D0),
         unselectedItemColor: Colors.grey,
         onTap: widget.onItemSelected,
         type: BottomNavigationBarType.fixed,
