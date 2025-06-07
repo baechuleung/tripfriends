@@ -14,6 +14,7 @@ void showLogoutPopup(BuildContext context, LogoutController controller, {Transla
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
         ),
+        backgroundColor: Colors.white,
         child: Container(
           width: 328,
           padding: const EdgeInsets.all(24),
