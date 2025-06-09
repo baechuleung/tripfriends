@@ -115,29 +115,86 @@ class _PastReservationListScreenState extends State<PastReservationListScreen> {
     return reservations;
   }
 
+  Future<void> _onRefresh() async {
+    // 단순히 setState를 호출하여 화면을 다시 그리도록 함
+    setState(() {});
+    // 약간의 지연을 추가하여 사용자가 새로고침을 인지할 수 있도록 함
+    await Future.delayed(const Duration(milliseconds: 500));
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF9FAFB),
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(
+            Icons.arrow_back_ios,
+            color: Color(0xFF353535),
+            size: 20,
+          ),
+          onPressed: () {
+            // MainPage의 홈 탭(인덱스 0)으로 이동
+            Navigator.of(context).pushNamedAndRemoveUntil(
+              '/',
+                  (route) => false,
+            );
+          },
+        ),
+        titleSpacing: 0,
+        title: StreamBuilder<List<Reservation>>(
+          stream: _controller.getPastReservationsStream(),
+          builder: (context, snapshot) {
+            final reservationCount = snapshot.hasData ? snapshot.data!.length : 0;
+
+            return Row(
+              children: [
+                Text(
+                  ReservationTranslations.getTranslation('past_reservations', _currentLanguage),
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                    color: Color(0xFF353535),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF999999),
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Text(
+                    '$reservationCount',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+              ],
+            );
+          },
+        ),
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(1.0),
+          child: Container(
+            color: const Color(0xFFE5E5E5),
+            height: 1.0,
+          ),
+        ),
+      ),
       body: SafeArea(
         child: StreamBuilder<List<Reservation>>(
           stream: _controller.getPastReservationsStream(),
           builder: (context, snapshot) {
-            // 예약 목록 개수 계산
-            final reservationCount = snapshot.hasData ? snapshot.data!.length : 0;
-
-            return Column(
-              children: [
-                // 커스텀 헤더 위젯 (예약 개수 전달)
-                PastReservationHeaderWidget(
-                  count: reservationCount,
-                ),
-
-                // 예약 목록
-                Expanded(
-                  child: _buildReservationList(snapshot),
-                ),
-              ],
+            return RefreshIndicator(
+              onRefresh: _onRefresh,
+              color: const Color(0xFF237AFF),
+              child: _buildReservationList(snapshot),
             );
           },
         ),
@@ -148,46 +205,71 @@ class _PastReservationListScreenState extends State<PastReservationListScreen> {
   Widget _buildReservationList(AsyncSnapshot<List<Reservation>> snapshot) {
     // 로딩 중이면 로딩 표시
     if (snapshot.connectionState == ConnectionState.waiting) {
-      return const Center(
-        child: CircularProgressIndicator(
-          valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF237AFF)),
-        ),
+      return ListView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        children: const [
+          SizedBox(
+            height: 200,
+            child: Center(
+              child: CircularProgressIndicator(
+                valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF237AFF)),
+              ),
+            ),
+          ),
+        ],
       );
     }
 
     // 에러가 있으면 에러 메시지
     if (snapshot.hasError) {
-      return Center(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Text(
-            ReservationTranslations.getTranslation('loading_error', _currentLanguage),
-            style: const TextStyle(
-              fontSize: 15,
-              color: Colors.red,
+      return ListView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        children: [
+          SizedBox(
+            height: 200,
+            child: Center(
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Text(
+                  ReservationTranslations.getTranslation('loading_error', _currentLanguage),
+                  style: const TextStyle(
+                    fontSize: 15,
+                    color: Colors.red,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ),
             ),
-            textAlign: TextAlign.center,
           ),
-        ),
+        ],
       );
     }
 
     // 데이터가 없으면 안내 메시지
     if (!snapshot.hasData || snapshot.data!.isEmpty) {
-      return Center(
-        child: Text(
-          ReservationTranslations.getTranslation('no_past_reservations', _currentLanguage),
-          style: TextStyle(
-            fontSize: 16,
-            color: Colors.grey.shade600,
+      return ListView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        children: [
+          SizedBox(
+            height: 200,
+            child: Center(
+              child: Text(
+                ReservationTranslations.getTranslation('no_past_reservations', _currentLanguage),
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Colors.grey.shade600,
+                ),
+              ),
+            ),
           ),
-        ),
+        ],
       );
     }
 
     // 데이터가 있으면 목록 표시 (completed 시간순 정렬)
     final reservations = _sortReservationsByCompletedTime(List.from(snapshot.data!));
     return ListView.builder(
+      physics: const AlwaysScrollableScrollPhysics(),
       padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
       itemCount: reservations.length,
       itemBuilder: (context, index) {

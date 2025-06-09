@@ -398,16 +398,6 @@ class _MainPageState extends State<MainPage> with WidgetsBindingObserver {
 
     // 다른 탭들은 기존대로 BottomNavigation 표시
     return Scaffold(
-      appBar: TripFriendsAppBar(
-        countryNames: countryNames,
-        currentCountryCode: _currentLanguage.isNotEmpty ?
-        _currentLanguage :
-        currentCountryCode,
-        onCountryChanged: _handleCountryChanged,
-        refreshKeys: _refreshKeys,
-        isLoggedIn: _isLoggedIn,
-        translationService: translationService,
-      ),
       endDrawer: const SettingsDrawer(),
       body: Column(
         children: [

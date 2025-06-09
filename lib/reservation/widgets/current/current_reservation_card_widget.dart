@@ -189,25 +189,10 @@ class _CurrentReservationCardWidgetState extends State<CurrentReservationCardWid
                   ],
                 ),
 
-                // 두 번째 줄: 시간 차이 표시 (pending 상태일 때만)
-                if (reservation.status == 'pending' && timeRemainingText.isNotEmpty)
-                  Padding(
-                    padding: const EdgeInsets.only(top: 8),
-                    child: Text(
-                      timeRemainingText,
-                      style: const TextStyle(
-                        color: Color(0xFF3A53AF),
-                        fontSize: 12,
-                        fontWeight: FontWeight.w400,
-                      ),
-                    ),
-                  ),
+
               ],
             ),
           ),
-
-          // 구분선
-          const Divider(height: 1, color: Color(0xFFE5E5E5)),
 
           // 실시간 요금 섹션
           Container(
@@ -241,15 +226,19 @@ class _CurrentReservationCardWidgetState extends State<CurrentReservationCardWid
                               ),
                             ),
                             const SizedBox(width: 8),
-                            // 이용 시간 표시
+                            // 시간 표시 (pending: 남은 시간, in_progress: 이용 시간)
                             Container(
                               padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 3),
                               decoration: ShapeDecoration(
-                                color: const Color(0xFF0059B7),
+                                color: reservation.status == 'pending'
+                                    ? const Color(0xFF999999)  // pending: 회색
+                                    : const Color(0xFF0059B7),  // in_progress: 파란색
                                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
                               ),
                               child: Text(
-                                usedTime,
+                                reservation.status == 'pending'
+                                    ? timeRemainingText  // pending: 남은 시간
+                                    : usedTime,          // in_progress: 이용 시간
                                 style: const TextStyle(
                                   color: Colors.white,
                                   fontSize: 12,
@@ -259,23 +248,6 @@ class _CurrentReservationCardWidgetState extends State<CurrentReservationCardWid
                               ),
                             ),
                           ],
-                        ),
-
-                        // 오른쪽 영역: 새로고침 아이콘
-                        Padding(
-                          padding: const EdgeInsets.only(left: 16.0),
-                          child: GestureDetector(
-                            onTap: () {
-                              setState(() {
-                                // 상태가 변경되면 build 메서드가 다시 호출되어 실시간 요금이 재계산됨
-                              });
-                            },
-                            child: const Icon(
-                              Icons.refresh,
-                              color: Color(0xFF3182F6),
-                              size: 24,
-                            ),
-                          ),
                         ),
                       ],
                     ),
