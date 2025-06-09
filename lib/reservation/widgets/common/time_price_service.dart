@@ -1,10 +1,10 @@
 // lib/reservation/widgets/common/time_price_service.dart
-import '../../../services/translation_service.dart';
+import '../../../translations/reservation_translations.dart';
 
 class TimePriceService {
-  final TranslationService translationService;
+  final String currentLanguage;
 
-  TimePriceService(this.translationService);
+  TimePriceService(this.currentLanguage);
 
   // 도시 코드에 따른 시간대 오프셋 가져오기 (UTC 기준)
   int getTimezoneOffset(String cityCode) {
@@ -107,9 +107,9 @@ class TimePriceService {
 
       // 결과 생성
       if (difference.isNegative) {
-        return '${_formatDuration(-difference)} ${translationService.get("time_passed", "경과")}';
+        return '${_formatDuration(-difference)} ${ReservationTranslations.getTranslation("time_passed", currentLanguage)}';
       } else {
-        return '${_formatDuration(difference)} ${translationService.get("time_remaining", "남음")}';
+        return '${_formatDuration(difference)} ${ReservationTranslations.getTranslation("time_remaining", currentLanguage)}';
       }
     } catch (e) {
       print('시간 차이 계산 오류: $e');
@@ -120,11 +120,11 @@ class TimePriceService {
   // 시간 간격 포맷팅 - 항상 분까지 표시
   String _formatDuration(Duration duration) {
     if (duration.inDays > 0) {
-      return '${duration.inDays}${translationService.get("days", "일")} ${duration.inHours % 24}${translationService.get("hours", "시간")} ${duration.inMinutes % 60}${translationService.get("minutes", "분")}';
+      return '${duration.inDays}${ReservationTranslations.getTranslation("days", currentLanguage)} ${duration.inHours % 24}${ReservationTranslations.getTranslation("hours", currentLanguage)} ${duration.inMinutes % 60}${ReservationTranslations.getTranslation("minutes", currentLanguage)}';
     } else if (duration.inHours > 0) {
-      return '${duration.inHours}${translationService.get("hours", "시간")} ${duration.inMinutes % 60}${translationService.get("minutes", "분")}';
+      return '${duration.inHours}${ReservationTranslations.getTranslation("hours", currentLanguage)} ${duration.inMinutes % 60}${ReservationTranslations.getTranslation("minutes", currentLanguage)}';
     } else {
-      return '${duration.inMinutes}${translationService.get("minutes", "분")}';
+      return '${duration.inMinutes}${ReservationTranslations.getTranslation("minutes", currentLanguage)}';
     }
   }
 
@@ -139,13 +139,13 @@ class TimePriceService {
     // 결과를 저장할 맵
     Map<String, dynamic> result = {
       'realTimePrice': 0.0,
-      'usedTime': '0분', // 기본값
+      'usedTime': '0${ReservationTranslations.getTranslation("minutes", currentLanguage)}', // 기본값
     };
 
     // pending 상태인 경우: 기본 요금과 0분 이용 시간
     if (status == 'pending') {
       result['realTimePrice'] = pricePerHour;
-      result['usedTime'] = '0${translationService.get("minutes", "분")}';
+      result['usedTime'] = '0${ReservationTranslations.getTranslation("minutes", currentLanguage)}';
       return result;
     }
 
@@ -193,7 +193,7 @@ class TimePriceService {
         // 음수 시간 처리 (아직 예약 시간이 되지 않은 경우)
         if (usedMinutes <= 0) {
           result['realTimePrice'] = pricePerHour;
-          result['usedTime'] = '0${translationService.get("minutes", "분")}';
+          result['usedTime'] = '0${ReservationTranslations.getTranslation("minutes", currentLanguage)}';
           return result;
         }
 
@@ -220,9 +220,9 @@ class TimePriceService {
         // 사용 시간 문자열 형식으로 변환
         String usedTimeStr = '';
         if (hours > 0) {
-          usedTimeStr = '${hours}${translationService.get("hours", "시간")} ';
+          usedTimeStr = '${hours}${ReservationTranslations.getTranslation("hours", currentLanguage)} ';
         }
-        usedTimeStr += '${remainingMinutes}${translationService.get("minutes", "분")}';
+        usedTimeStr += '${remainingMinutes}${ReservationTranslations.getTranslation("minutes", currentLanguage)}';
 
         result['realTimePrice'] = totalPrice.toInt(); // 정수형으로 변환
         result['usedTime'] = usedTimeStr;
@@ -231,7 +231,7 @@ class TimePriceService {
         print('실시간 요금 계산 오류: $e');
         // 오류 발생 시 기본값 반환
         result['realTimePrice'] = pricePerHour;
-        result['usedTime'] = '0${translationService.get("minutes", "분")}';
+        result['usedTime'] = '0${ReservationTranslations.getTranslation("minutes", currentLanguage)}';
         return result;
       }
     }

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
-import '../../services/translation_service.dart';
+import '../../translations/reservation_translations.dart';
 
 /// 지도 관련 기능을 제공하는 서비스 클래스
 class MapService {
@@ -13,11 +13,11 @@ class MapService {
   ///
   /// [address] - 검색할 주소
   /// [context] - BuildContext (오류 메시지 표시용)
-  /// [translationService] - 번역 서비스 인스턴스
+  /// [currentLanguage] - 현재 언어 코드
   Future<bool> openMap(
       String address,
       BuildContext context,
-      TranslationService translationService) async {
+      String currentLanguage) async {
     try {
       final String encodedAddress = Uri.encodeComponent(address);
 
@@ -38,10 +38,7 @@ class MapService {
         ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(
-                  translationService.get(
-                      'map_error',
-                      '지도를 열 수 없습니다. 인터넷 연결을 확인해주세요.'
-                  )
+                  ReservationTranslations.getTranslation('map_error', currentLanguage)
               ),
               duration: const Duration(seconds: 2),
             )
@@ -57,10 +54,7 @@ class MapService {
         ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(
-                  translationService.get(
-                      'map_error',
-                      '지도를 열 수 없습니다. 인터넷 연결을 확인해주세요.'
-                  )
+                  ReservationTranslations.getTranslation('map_error', currentLanguage)
               ),
               duration: const Duration(seconds: 2),
             )

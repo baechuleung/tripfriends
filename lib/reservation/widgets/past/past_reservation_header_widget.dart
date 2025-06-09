@@ -1,15 +1,44 @@
 import 'package:flutter/material.dart';
-import '../../../services/translation_service.dart';
+import '../../../translations/reservation_translations.dart';
+import '../../../main.dart' show currentCountryCode, languageChangeController;
+import 'dart:async';
 
-class PastReservationHeaderWidget extends StatelessWidget {
+class PastReservationHeaderWidget extends StatefulWidget {
   final int count;
-  final TranslationService translationService;
 
   const PastReservationHeaderWidget({
     Key? key,
     required this.count,
-    required this.translationService,
   }) : super(key: key);
+
+  @override
+  State<PastReservationHeaderWidget> createState() => _PastReservationHeaderWidgetState();
+}
+
+class _PastReservationHeaderWidgetState extends State<PastReservationHeaderWidget> {
+  String _currentLanguage = 'KR';
+  StreamSubscription<String>? _languageSubscription;
+
+  @override
+  void initState() {
+    super.initState();
+    _currentLanguage = currentCountryCode;
+
+    // 언어 변경 리스너 등록
+    _languageSubscription = languageChangeController.stream.listen((newLanguage) {
+      if (mounted) {
+        setState(() {
+          _currentLanguage = newLanguage;
+        });
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _languageSubscription?.cancel();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -18,7 +47,7 @@ class PastReservationHeaderWidget extends StatelessWidget {
       child: Row(
         children: [
           Text(
-            translationService.get('past_reservations', '지난 예약 내역'),
+            ReservationTranslations.getTranslation('past_reservations', _currentLanguage),
             style: const TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w500,
@@ -29,11 +58,11 @@ class PastReservationHeaderWidget extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
             decoration: BoxDecoration(
-              color: const Color(0xFF999999), // 지난 예약이므로 회색으로 변경
+              color: const Color(0xFF999999),
               borderRadius: BorderRadius.circular(16),
             ),
             child: Text(
-              '$count',
+              '${widget.count}',
               style: const TextStyle(
                   color: Colors.white,
                   fontSize: 12,

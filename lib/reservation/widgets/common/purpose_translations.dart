@@ -1,10 +1,10 @@
 // purpose_translations.dart
-import '../../../services/translation_service.dart';
+import '../../../translations/reservation_translations.dart';
 
 class PurposeTranslations {
-  final TranslationService _translationService;
+  final String currentLanguage;
 
-  PurposeTranslations(this._translationService);
+  PurposeTranslations(this.currentLanguage);
 
   // 한국어 목적 텍스트에 대한 번역 키 매핑
   Map<String, String> getPurposeKeys() {
@@ -31,13 +31,13 @@ class PurposeTranslations {
     String translationKey = getTranslationKey(koreanPurpose);
 
     // 번역 키를 사용하여 현재 언어로 번역
-    return _translationService.get(translationKey, koreanPurpose);
+    return ReservationTranslations.getTranslation(translationKey, currentLanguage);
   }
 
   // 목적 목록을 번역된 텍스트로 변환
   String translatePurposeList(List<String> purposes) {
     if (purposes.isEmpty) {
-      return _translationService.get('no_purpose_specified', '목적 미지정');
+      return ReservationTranslations.getTranslation('no_purpose_specified', currentLanguage);
     }
 
     // 각 한국어 목적을 현재 언어로 번역

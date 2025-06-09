@@ -1,22 +1,22 @@
 import 'package:flutter/material.dart';
-import 'package:url_launcher/url_launcher.dart'; // URL 실행을 위한 패키지 추가
+import 'package:url_launcher/url_launcher.dart';
 import '../../models/reservation_model.dart';
 import '../../controllers/reservation_controller.dart';
-import '../../../services/translation_service.dart';
+import '../../../translations/reservation_translations.dart';
 import '../../services/map_service.dart';
 import '../common/purpose_translations.dart';
-import '../common/date_translations.dart'; // 날짜 번역 클래스 임포트
+import '../common/date_translations.dart';
 import '../common/reservation_chat_button_widget.dart';
+import '../../../main.dart' show currentCountryCode, languageChangeController;
+import 'dart:async';
 
 class PastReservationCardWidget extends StatefulWidget {
   final Reservation reservation;
-  final TranslationService translationService;
   final String? currentUserId;
 
   const PastReservationCardWidget({
     Key? key,
     required this.reservation,
-    required this.translationService,
     required this.currentUserId,
   }) : super(key: key);
 
@@ -25,17 +25,36 @@ class PastReservationCardWidget extends StatefulWidget {
 }
 
 class _PastReservationCardWidgetState extends State<PastReservationCardWidget> {
-  final Map<String, String> _translatedTexts = {};
   final MapService _mapService = MapService();
-  bool _isExpanded = false; // 접었다 펴는 상태 관리
+  bool _isExpanded = false;
   late PurposeTranslations _purposeTranslations;
-  late DateTranslations _dateTranslations; // 날짜 번역 객체
+  late DateTranslations _dateTranslations;
+  String _currentLanguage = 'KR';
+  StreamSubscription<String>? _languageSubscription;
 
   @override
   void initState() {
     super.initState();
-    _purposeTranslations = PurposeTranslations(widget.translationService);
-    _dateTranslations = DateTranslations(widget.translationService); // 날짜 번역 객체 초기화
+    _currentLanguage = currentCountryCode;
+    _purposeTranslations = PurposeTranslations(_currentLanguage);
+    _dateTranslations = DateTranslations(_currentLanguage);
+
+    // 언어 변경 리스너 등록
+    _languageSubscription = languageChangeController.stream.listen((newLanguage) {
+      if (mounted) {
+        setState(() {
+          _currentLanguage = newLanguage;
+          _purposeTranslations = PurposeTranslations(_currentLanguage);
+          _dateTranslations = DateTranslations(_currentLanguage);
+        });
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _languageSubscription?.cancel();
+    super.dispose();
   }
 
   // 지도 URL을 여는 메서드
@@ -46,7 +65,6 @@ class _PastReservationCardWidgetState extends State<PastReservationCardWidget> {
     if (await canLaunchUrl(mapUrl)) {
       await launchUrl(mapUrl, mode: LaunchMode.externalApplication);
     } else {
-      // URL을 열 수 없는 경우 - 오류 처리
       print('Could not launch $mapUrl');
     }
   }
@@ -54,7 +72,6 @@ class _PastReservationCardWidgetState extends State<PastReservationCardWidget> {
   @override
   Widget build(BuildContext context) {
     final controller = ReservationController();
-    final t = widget.translationService;
     final reservation = widget.reservation;
 
     // 디버그 로그 추가
@@ -62,9 +79,6 @@ class _PastReservationCardWidgetState extends State<PastReservationCardWidget> {
 
     // 날짜에서 년, 월, 일 단어만 번역 키를 통해 처리
     final String dateStr = _dateTranslations.translateDateFormat(reservation.useDate);
-
-    // 요일 정보가 있으면 사용하고, 없으면 빈 문자열
-    final String dayOfWeek = '';
 
     // 결제 금액 포맷
     final formattedPrice = controller.formatPrice(
@@ -102,7 +116,7 @@ class _PastReservationCardWidgetState extends State<PastReservationCardWidget> {
             child: Row(
               children: [
                 Text(
-                  t.get('service_completed_short', '서비스 완료'),
+                  ReservationTranslations.getTranslation('service_completed_short', _currentLanguage),
                   style: const TextStyle(
                     color: Color(0xFF999999),
                     fontSize: 14,
@@ -144,7 +158,7 @@ class _PastReservationCardWidgetState extends State<PastReservationCardWidget> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      t.get('final_price', '최종 요금'),
+                      ReservationTranslations.getTranslation('final_price', _currentLanguage),
                       style: const TextStyle(
                         color: Color(0xFF353535),
                         fontSize: 12,
@@ -155,7 +169,6 @@ class _PastReservationCardWidgetState extends State<PastReservationCardWidget> {
                     Row(
                       children: [
                         Text(
-                          // currentPriceInfo의 totalPrice 값을 사용
                           controller.formatPrice(reservation.totalPriceInfo, reservation.currencySymbol),
                           style: const TextStyle(
                             color: Color(0xFF353535),
@@ -190,7 +203,6 @@ class _PastReservationCardWidgetState extends State<PastReservationCardWidget> {
           ),
 
           // 접을 수 있는 세부 정보 섹션
-          // 헤더 부분 (항상 표시)
           InkWell(
             onTap: () {
               setState(() {
@@ -202,7 +214,7 @@ class _PastReservationCardWidgetState extends State<PastReservationCardWidget> {
               child: Row(
                 children: [
                   Text(
-                    t.get('reservation_details', '예약 상세 정보'),
+                    ReservationTranslations.getTranslation('reservation_details', _currentLanguage),
                     style: const TextStyle(
                       color: Color(0xFF353535),
                       fontSize: 14,
@@ -244,7 +256,7 @@ class _PastReservationCardWidgetState extends State<PastReservationCardWidget> {
                               fontSize: 14,
                               fontWeight: FontWeight.w500,
                             ),
-                            maxLines: 3, // 최대 3줄까지 표시
+                            maxLines: 3,
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
@@ -259,13 +271,13 @@ class _PastReservationCardWidgetState extends State<PastReservationCardWidget> {
                         const SizedBox(width: 8),
                         Expanded(
                           child: Text(
-                            '${reservation.personCount}${t.get("people_count", "명")}',
+                            '${reservation.personCount}${ReservationTranslations.getTranslation("people_count", _currentLanguage)}',
                             style: const TextStyle(
                               color: Color(0xFF353535),
                               fontSize: 14,
                               fontWeight: FontWeight.w500,
                             ),
-                            maxLines: 3, // 최대 3줄까지 표시
+                            maxLines: 3,
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
@@ -280,13 +292,13 @@ class _PastReservationCardWidgetState extends State<PastReservationCardWidget> {
                         const SizedBox(width: 8),
                         Expanded(
                           child: Text(
-                            dateStr, // 년, 월, 일 형식의 날짜
+                            dateStr,
                             style: const TextStyle(
                               color: Color(0xFF353535),
                               fontSize: 14,
                               fontWeight: FontWeight.w500,
                             ),
-                            maxLines: 3, // 최대 3줄까지 표시
+                            maxLines: 3,
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
@@ -309,7 +321,7 @@ class _PastReservationCardWidgetState extends State<PastReservationCardWidget> {
                               fontSize: 14,
                               fontWeight: FontWeight.w500,
                             ),
-                            maxLines: 3, // 최대 3줄까지 표시
+                            maxLines: 3,
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
@@ -328,13 +340,13 @@ class _PastReservationCardWidgetState extends State<PastReservationCardWidget> {
                         const SizedBox(width: 8),
                         Expanded(
                           child: Text(
-                            purposeText, // 번역된 목적 텍스트
+                            purposeText,
                             style: const TextStyle(
                               color: Color(0xFF353535),
                               fontSize: 14,
                               fontWeight: FontWeight.w500,
                             ),
-                            maxLines: 3, // 최대 3줄까지 표시
+                            maxLines: 3,
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
@@ -342,7 +354,7 @@ class _PastReservationCardWidgetState extends State<PastReservationCardWidget> {
                     ),
                     const SizedBox(height: 12),
 
-                    // 6. 주소(지도) - 밑줄 추가 및 지도 아이콘 추가 (같은 줄에 배치)
+                    // 6. 주소(지도)
                     Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -351,12 +363,10 @@ class _PastReservationCardWidgetState extends State<PastReservationCardWidget> {
                           child: Icon(Icons.location_on_outlined, size: 16, color: Color(0xFFCFCFCF)),
                         ),
                         const SizedBox(width: 8),
-                        // 주소 텍스트와 지도 아이콘을 하나의 Row로 묶음
                         Expanded(
                           child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.center, // 중앙 정렬
+                            crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
-                              // 주소 텍스트 (클릭 가능)
                               Expanded(
                                 child: InkWell(
                                   onTap: () => _openMapUrl(addressText),
@@ -366,21 +376,20 @@ class _PastReservationCardWidgetState extends State<PastReservationCardWidget> {
                                       color: Color(0xFF353535),
                                       fontSize: 14,
                                       fontWeight: FontWeight.w500,
-                                      decoration: TextDecoration.underline, // 밑줄 추가
+                                      decoration: TextDecoration.underline,
                                     ),
-                                    maxLines: 3, // 최대 3줄까지 표시
+                                    maxLines: 3,
                                     overflow: TextOverflow.ellipsis,
                                   ),
                                 ),
                               ),
-                              // 지도 아이콘 (같은 줄에 배치) - 패딩 제거 및 정렬 조정
                               GestureDetector(
                                 onTap: () => _openMapUrl(addressText),
                                 behavior: HitTestBehavior.opaque,
                                 child: Container(
                                   padding: EdgeInsets.zero,
-                                  height: 20, // 높이 명시적 설정
-                                  alignment: Alignment.center, // 중앙 정렬
+                                  height: 20,
+                                  alignment: Alignment.center,
                                   child: const Icon(
                                       Icons.map,
                                       color: Color(0xFF999999),
@@ -408,7 +417,7 @@ class _PastReservationCardWidgetState extends State<PastReservationCardWidget> {
             customerId: reservation.customerId,
             customerName: reservation.customerName,
             currentUserId: widget.currentUserId,
-            translationService: widget.translationService,
+            currentLanguage: _currentLanguage,
           ),
         ],
       ),

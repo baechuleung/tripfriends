@@ -4,8 +4,9 @@ import '../models/reservation_model.dart';
 import '../controllers/reservation_controller.dart';
 import '../widgets/current/current_reservation_header_widget.dart';
 import '../widgets/current/current_reservation_card_widget.dart';
-import '../../services/translation_service.dart';
-import 'package:intl/intl.dart';
+import '../../translations/reservation_translations.dart';
+import '../../main.dart' show currentCountryCode, languageChangeController;
+import 'dart:async';
 
 class CurrentReservationListScreen extends StatefulWidget {
   const CurrentReservationListScreen({Key? key}) : super(key: key);
@@ -16,20 +17,29 @@ class CurrentReservationListScreen extends StatefulWidget {
 
 class _CurrentReservationListScreenState extends State<CurrentReservationListScreen> {
   final ReservationController _controller = ReservationController();
-  final TranslationService _translationService = TranslationService();
   final FirebaseAuth _auth = FirebaseAuth.instance;
+  String _currentLanguage = 'KR';
+  StreamSubscription<String>? _languageSubscription;
 
   @override
   void initState() {
     super.initState();
-    _initTranslations();
+    _currentLanguage = currentCountryCode;
+
+    // 언어 변경 리스너 등록
+    _languageSubscription = languageChangeController.stream.listen((newLanguage) {
+      if (mounted) {
+        setState(() {
+          _currentLanguage = newLanguage;
+        });
+      }
+    });
   }
 
-  Future<void> _initTranslations() async {
-    await _translationService.init();
-    if (mounted) {
-      setState(() {});
-    }
+  @override
+  void dispose() {
+    _languageSubscription?.cancel();
+    super.dispose();
   }
 
   DateTime? _parseReservationDateTime(String useDate, String startTime) {
@@ -104,7 +114,6 @@ class _CurrentReservationListScreenState extends State<CurrentReservationListScr
               children: [
                 // 커스텀 헤더 위젯 (예약 개수 전달)
                 CurrentReservationHeaderWidget(
-                  translationService: _translationService,
                   count: reservationCount,
                 ),
 
@@ -136,7 +145,7 @@ class _CurrentReservationListScreenState extends State<CurrentReservationListScr
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Text(
-            _translationService.get('loading_error', '데이터를 불러오는 중 오류가 발생했습니다.'),
+            ReservationTranslations.getTranslation('loading_error', _currentLanguage),
             style: const TextStyle(
               fontSize: 15,
               color: Colors.red,
@@ -151,7 +160,7 @@ class _CurrentReservationListScreenState extends State<CurrentReservationListScr
     if (!snapshot.hasData || snapshot.data!.isEmpty) {
       return Center(
         child: Text(
-          _translationService.get('no_reservations', '예약 내역이 없습니다.'),
+          ReservationTranslations.getTranslation('no_reservations', _currentLanguage),
           style: TextStyle(
             fontSize: 16,
             color: Colors.grey.shade600,
@@ -168,7 +177,6 @@ class _CurrentReservationListScreenState extends State<CurrentReservationListScr
       itemBuilder: (context, index) {
         return CurrentReservationCardWidget(
           reservation: reservations[index],
-          translationService: _translationService,
           currentUserId: _auth.currentUser?.uid,
         );
       },

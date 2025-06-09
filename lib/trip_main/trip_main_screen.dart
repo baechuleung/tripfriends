@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
 import '../main.dart';
-import '../services/shared_preferences_service.dart';
 import '../services/translation_service.dart';
 import '../compents/appbar.dart';
 import '../compents/settings_drawer.dart';

@@ -18,7 +18,7 @@ class ReservationController {
     });
   }
 
-  // 지난 예약 목록 스트림
+  // 지난 예약 목록 스트림 
   Stream<List<Reservation>> getPastReservationsStream() {
     return _firebaseService.getPastReservationsStream().map((snapshot) {
       return snapshot.docs.map((doc) {

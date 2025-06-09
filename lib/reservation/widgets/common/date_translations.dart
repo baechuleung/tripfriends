@@ -1,10 +1,10 @@
 // date_translations.dart
-import '../../../services/translation_service.dart';
+import '../../../translations/reservation_translations.dart';
 
 class DateTranslations {
-  final TranslationService _translationService;
+  final String currentLanguage;
 
-  DateTranslations(this._translationService);
+  DateTranslations(this.currentLanguage);
 
   // 년, 월, 일 단어만 번역
   String translateDateFormat(String koreanDate) {
@@ -14,9 +14,9 @@ class DateTranslations {
 
     // '년', '월', '일' 단어만 번역 키를 통해 변환
     String translatedDate = koreanDate
-        .replaceAll('년', _translationService.get('year_unit', '년'))
-        .replaceAll('월', _translationService.get('month_unit', '월'))
-        .replaceAll('일', _translationService.get('day_unit', '일'));
+        .replaceAll('년', ReservationTranslations.getTranslation('year_unit', currentLanguage))
+        .replaceAll('월', ReservationTranslations.getTranslation('month_unit', currentLanguage))
+        .replaceAll('일', ReservationTranslations.getTranslation('day_unit', currentLanguage));
 
     return translatedDate;
   }

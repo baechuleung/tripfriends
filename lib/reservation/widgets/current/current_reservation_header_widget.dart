@@ -1,15 +1,44 @@
 import 'package:flutter/material.dart';
-import '../../../services/translation_service.dart';
+import '../../../translations/reservation_translations.dart';
+import '../../../main.dart' show currentCountryCode, languageChangeController;
+import 'dart:async';
 
-class CurrentReservationHeaderWidget extends StatelessWidget {
+class CurrentReservationHeaderWidget extends StatefulWidget {
   final int count;
-  final TranslationService translationService;
 
   const CurrentReservationHeaderWidget({
     Key? key,
     required this.count,
-    required this.translationService,
   }) : super(key: key);
+
+  @override
+  State<CurrentReservationHeaderWidget> createState() => _CurrentReservationHeaderWidgetState();
+}
+
+class _CurrentReservationHeaderWidgetState extends State<CurrentReservationHeaderWidget> {
+  String _currentLanguage = 'KR';
+  StreamSubscription<String>? _languageSubscription;
+
+  @override
+  void initState() {
+    super.initState();
+    _currentLanguage = currentCountryCode;
+
+    // 언어 변경 리스너 등록
+    _languageSubscription = languageChangeController.stream.listen((newLanguage) {
+      if (mounted) {
+        setState(() {
+          _currentLanguage = newLanguage;
+        });
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _languageSubscription?.cancel();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -18,7 +47,7 @@ class CurrentReservationHeaderWidget extends StatelessWidget {
       child: Row(
         children: [
           Text(
-            translationService.get('current_reservations', '예약목록'),
+            ReservationTranslations.getTranslation('current_reservations', _currentLanguage),
             style: const TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w500,
@@ -33,7 +62,7 @@ class CurrentReservationHeaderWidget extends StatelessWidget {
               borderRadius: BorderRadius.circular(16),
             ),
             child: Text(
-              '$count',
+              '${widget.count}',
               style: const TextStyle(
                   color: Colors.white,
                   fontSize: 12,

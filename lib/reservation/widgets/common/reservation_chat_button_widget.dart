@@ -1,26 +1,25 @@
 import 'package:flutter/material.dart';
-import '../../../services/translation_service.dart';
+import '../../../translations/reservation_translations.dart';
 import '../../../chat/screens/friend_chat_screen.dart';
 
 class ReservationChatButtonWidget extends StatelessWidget {
   final String customerId;
   final String customerName;
   final String? currentUserId;
-  final TranslationService translationService;
-  final String? reservationStatus; // 예약 상태 추가
+  final String currentLanguage;
+  final String? reservationStatus;
 
   const ReservationChatButtonWidget({
     Key? key,
     required this.customerId,
     required this.customerName,
     required this.currentUserId,
-    required this.translationService,
-    this.reservationStatus, // 예약 상태 파라미터 추가
+    required this.currentLanguage,
+    this.reservationStatus,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    final t = translationService;
     // 버튼 색상 설정 - pending이 아닌 경우 3182F6 색상 사용
     final bool isPending = reservationStatus == 'pending';
     final Color buttonBackgroundColor = isPending ? const Color(0xFFE8F2FF) : const Color(0xFF3182F6);
@@ -38,7 +37,7 @@ class ReservationChatButtonWidget extends StatelessWidget {
                 if (currentUserId == null) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
-                      content: Text(t.get('login_required', '로그인이 필요합니다')),
+                      content: Text(ReservationTranslations.getTranslation('login_required', currentLanguage)),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(4),
                       ),
@@ -67,7 +66,7 @@ class ReservationChatButtonWidget extends StatelessWidget {
               style: ElevatedButton.styleFrom(
                 backgroundColor: buttonBackgroundColor,
                 foregroundColor: buttonTextColor,
-                minimumSize: const Size(double.infinity, 48), // 버튼 높이 증가
+                minimumSize: const Size(double.infinity, 48),
                 padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(6),
@@ -80,13 +79,13 @@ class ReservationChatButtonWidget extends StatelessWidget {
                 children: [
                   const Icon(
                     Icons.chat_bubble_outline,
-                    size: 20, // 아이콘 크기 증가
+                    size: 20,
                   ),
                   const SizedBox(width: 8),
                   Text(
-                    t.get('start_chat', '채팅하기'),
+                    ReservationTranslations.getTranslation('start_chat', currentLanguage),
                     style: const TextStyle(
-                      fontSize: 16, // 글자 크기 증가
+                      fontSize: 16,
                       fontWeight: FontWeight.w500,
                     ),
                   ),

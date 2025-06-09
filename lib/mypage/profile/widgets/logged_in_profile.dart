@@ -226,7 +226,7 @@ class _LoggedInProfileWidgetState extends State<LoggedInProfileWidget> {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   Text(
-                    currentLabels['edit'] ?? '프로필 수정',
+                    currentLabels['profile_edit'] ?? '프로필 수정',  // 'edit' 대신 'profile_edit' 사용
                     style: TextStyle(
                       color: const Color(0xFF4E5968),
                       fontSize: 14,

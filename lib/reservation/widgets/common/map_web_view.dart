@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:webview_flutter/webview_flutter.dart';
-import '../../../services/translation_service.dart';
+import '../../../translations/reservation_translations.dart';
+import '../../../main.dart' show currentCountryCode, languageChangeController;
+import 'dart:async';
 
 class MapWebView extends StatefulWidget {
   final String address;
@@ -17,11 +19,23 @@ class MapWebView extends StatefulWidget {
 class _MapWebViewState extends State<MapWebView> {
   late WebViewController _webViewController;
   bool _isLoading = true;
-  final TranslationService _translationService = TranslationService();
+  String _currentLanguage = 'KR';
+  StreamSubscription<String>? _languageSubscription;
 
   @override
   void initState() {
     super.initState();
+    _currentLanguage = currentCountryCode;
+
+    // 언어 변경 리스너 등록
+    _languageSubscription = languageChangeController.stream.listen((newLanguage) {
+      if (mounted) {
+        setState(() {
+          _currentLanguage = newLanguage;
+        });
+      }
+    });
+
     // URL 인코딩
     final String encodedAddress = Uri.encodeComponent(widget.address);
     // 구글 지도 URL 생성
@@ -51,10 +65,16 @@ class _MapWebViewState extends State<MapWebView> {
   }
 
   @override
+  void dispose() {
+    _languageSubscription?.cancel();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(_translationService.get('location_map', '위치 지도')),
+        title: Text(ReservationTranslations.getTranslation('location_map', _currentLanguage)),
         backgroundColor: const Color(0xFF3182F6),
         foregroundColor: Colors.white,
         elevation: 0,

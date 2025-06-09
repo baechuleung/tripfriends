@@ -9,6 +9,7 @@ class ProfileTranslation {
     "approval_waiting": "승인 대기중",
     "my_profile": "나의 프로필",
     "edit": "수정하기",
+    "profile_edit": "프로필 수정",  // 새로 추가
   };
 
   static Future<Map<String, String>> loadTranslations(String? lastCountryCode) async {
@@ -20,6 +21,7 @@ class ProfileTranslation {
         "approval_waiting": MypageTranslations.getTranslation('approval_waiting', countryCode),
         "my_profile": MypageTranslations.getTranslation('my_profile', countryCode),
         "edit": MypageTranslations.getTranslation('edit', countryCode),
+        "profile_edit": MypageTranslations.getTranslation('profile_edit', countryCode),  // 새로 추가
       };
     } catch (e) {
       debugPrint('Error loading translations: $e');

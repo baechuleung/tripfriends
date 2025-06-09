@@ -20,50 +20,56 @@ class InfoUIComponents {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildHeader(context),
-        const SizedBox(height: 8),
         _buildInfoCard(context, data, price, currencySymbol),
+        const SizedBox(height: 16),
+        _buildEditButton(context),
       ],
     );
   }
 
-  // 헤더 구성
-  static Widget _buildHeader(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.end,
-        children: [
-          _buildEditButton(context),
-        ],
-      ),
-    );
-  }
-
-  // 수정 버튼
+  // 수정 버튼 - logged_in_profile과 동일한 스타일
   static Widget _buildEditButton(BuildContext context) {
     final language = currentCountryCode.toUpperCase();
 
-    return TextButton(
-      style: TextButton.styleFrom(
-        padding: EdgeInsets.zero,
-        minimumSize: Size.zero,
-        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-      ),
-      onPressed: () => _navigateToEditDetail(context),
-      child: Row(
-        children: [
-          const Icon(Icons.edit, size: 14, color: InfoConstants.primaryBlue),
-          const SizedBox(width: 4),
-          Text(
-            MypageTranslations.getTranslation('edit', language),
-            style: const TextStyle(
-              color: InfoConstants.primaryBlue,
-              fontSize: 12,
-              fontWeight: FontWeight.w500,
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16.0),
+      child: GestureDetector(
+        onTap: () => _navigateToEditDetail(context),
+        child: Container(
+          width: double.infinity,
+          height: 40,
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+          decoration: ShapeDecoration(
+            color: Colors.white,
+            shape: RoundedRectangleBorder(
+              side: BorderSide(
+                width: 1,
+                color: const Color(0xFFD9D9D9),
+              ),
+              borderRadius: BorderRadius.circular(10),
             ),
           ),
-        ],
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Text(
+                MypageTranslations.getTranslation('myinfo_edit', language),
+                style: TextStyle(
+                  color: const Color(0xFF4E5968),
+                  fontSize: 14,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              const SizedBox(width: 5),
+              Icon(
+                Icons.edit,
+                size: 16,
+                color: const Color(0xFF4E5968),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -86,7 +92,7 @@ class InfoUIComponents {
       BuildContext context,
       Map<String, dynamic> data,
       int price,
-      String currencySymbol,
+      String currencySymbol
       ) {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16.0),
@@ -108,11 +114,7 @@ class InfoUIComponents {
         children: [
           _buildLanguageSection(data['languages']),
           const SizedBox(height: 16),
-          const Divider(height: 1, thickness: 1, color: InfoConstants.dividerColor),
-          const SizedBox(height: 16),
           data.containsKey('introduction') ? _buildIntroductionSection(data['introduction']) : const SizedBox(),
-          data.containsKey('introduction') ? const SizedBox(height: 16) : const SizedBox(),
-          data.containsKey('introduction') ? const Divider(height: 1, thickness: 1, color: InfoConstants.dividerColor) : const SizedBox(),
           data.containsKey('introduction') ? const SizedBox(height: 16) : const SizedBox(),
           _buildPriceSection(price, currencySymbol),
         ],
@@ -150,77 +152,26 @@ class InfoUIComponents {
           width: double.infinity,
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-            color: InfoConstants.lightBlue,
+            color: const Color(0xFFF9F9F9),
             borderRadius: BorderRadius.circular(12),
           ),
           child: Text(
             introduction,
             style: const TextStyle(
-              color: InfoConstants.titleColor,
+              color: const Color(0xFF4E5968),
               fontSize: 14,
               height: 1.5,
             ),
           ),
         ),
-        // 적립금 안내 텍스트를 소개글 박스 아래에 추가
-        const SizedBox(height: 8),
-        _buildRewardNoticeSection(),
       ],
-    );
-  }
-
-  // 적립금 안내 섹션
-  static Widget _buildRewardNoticeSection() {
-    final language = currentCountryCode.toUpperCase();
-
-    return StreamBuilder<QuerySnapshot>(
-      stream: _infoService.getRewardHistoryStream(),
-      builder: (context, snapshot) {
-        // 적립금을 이미 받았는지 확인
-        bool hasReward = snapshot.hasData && snapshot.data!.docs.isNotEmpty;
-
-        // 이미 적립금을 받았으면 아무것도 표시하지 않음
-        if (hasReward) {
-          return const SizedBox.shrink();
-        }
-
-        // 적립금을 받지 않았으면 안내 텍스트 표시
-        return Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-          decoration: BoxDecoration(
-            color: const Color(0xFFFFEBEE), // 연한 빨간색 배경
-            borderRadius: BorderRadius.circular(8),
-            border: Border.all(color: const Color(0xFFE57373), width: 1), // 빨간색 테두리
-          ),
-          child: Row(
-            children: [
-              const Icon(
-                Icons.card_giftcard,
-                size: 16,
-                color: Color(0xFFE53935), // 빨간색 아이콘
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  MypageTranslations.getTranslation('profile_reward_notice', language),
-                  style: const TextStyle(
-                    color: Color(0xFFD32F2F), // 진한 빨간색 텍스트
-                    fontSize: 12,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        );
-      },
     );
   }
 
   // 가격 정보 섹션
   static Widget _buildPriceSection(
       int price,
-      String currencySymbol,
+      String currencySymbol
       ) {
     final language = currentCountryCode.toUpperCase();
     final formattedPrice = _infoService.formatPrice(price);
@@ -249,78 +200,75 @@ class InfoUIComponents {
         ),
         const SizedBox(height: 8),
 
-        // 시간당 요금과 10분당 요금 테이블로 표시
+        // 시간당 요금과 10분당 요금 - 하나의 박스
         Container(
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: InfoConstants.dividerColor, width: 1),
+            color: const Color(0xFFF9F9F9),
+            borderRadius: BorderRadius.circular(8),
           ),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(12),
-            child: Table(
-              border: TableBorder.all(
-                color: InfoConstants.dividerColor,
-                width: 1,
-              ),
-              children: [
-                // 1시간 행
-                TableRow(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(8),
-                      alignment: Alignment.center,
-                      child: Text(
+          child: Row(
+            children: [
+              // 1시간
+              Expanded(
+                child: Container(
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  child: Column(
+                    children: [
+                      Text(
                         MypageTranslations.getTranslation('one_hour', language),
                         style: const TextStyle(
                           fontSize: 14,
-                          fontWeight: FontWeight.w500,
+                          fontWeight: FontWeight.w400,
+                          color: Color(0xFF4E5968),
                         ),
                       ),
-                    ),
-                    Container(
-                      padding: const EdgeInsets.all(8),
-                      alignment: Alignment.center,
-                      child: Text(
+                      const SizedBox(height: 8),
+                      Text(
                         '$currencySymbol $formattedPrice',
                         style: const TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
-                          color: InfoConstants.primaryBlue,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: Color(0xFF3182F6),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-                // 10분 행
-                TableRow(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(8),
-                      alignment: Alignment.center,
-                      child: Text(
+              ),
+              // Divider
+              Container(
+                width: 1,
+                height: 60,
+                color: const Color(0xFFE0E0E0),
+              ),
+              // 10분
+              Expanded(
+                child: Container(
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  child: Column(
+                    children: [
+                      Text(
                         MypageTranslations.getTranslation('per_10_min', language),
                         style: const TextStyle(
                           fontSize: 14,
-                          fontWeight: FontWeight.w500,
+                          fontWeight: FontWeight.w400,
+                          color: Color(0xFF4E5968),
                         ),
                       ),
-                    ),
-                    Container(
-                      padding: const EdgeInsets.all(8),
-                      alignment: Alignment.center,
-                      child: Text(
+                      const SizedBox(height: 8),
+                      Text(
                         '$currencySymbol $formattedPrice10Min',
                         style: const TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
-                          color: InfoConstants.primaryBlue,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: Color(0xFF3182F6),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ],
@@ -377,7 +325,7 @@ class InfoUIComponents {
           margin: const EdgeInsets.only(right: 8, bottom: 8),
           padding: const EdgeInsets.all(5),
           decoration: ShapeDecoration(
-            color: InfoConstants.lightBlue,
+            color: const Color(0xFFF9F9F9),
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
           ),
           child: Row(
@@ -388,7 +336,7 @@ class InfoUIComponents {
               Text(
                 translatedLanguage,
                 style: const TextStyle(
-                  color: InfoConstants.primaryBlue,
+                  color: const Color(0xFF4E5968),
                   fontSize: 12,
                   fontWeight: FontWeight.w500,
                 ),

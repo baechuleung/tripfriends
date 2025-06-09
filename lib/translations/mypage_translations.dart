@@ -35,6 +35,20 @@ class MypageTranslations {
       "TH": "แก้ไข",
       "PH": "Edit"
     },
+    "profile_edit": {
+      "KR": "프로필 수정",
+      "VN": "Chỉnh sửa hồ sơ",
+      "JP": "プロフィール編集",
+      "TH": "แก้ไขโปรไฟล์",
+      "PH": "Edit Profile"
+    },
+    "myinfo_edit": {
+      "KR": "내정보 수정",
+      "VN": "Chỉnh sửa thông tin của tôi",
+      "JP": "個人情報編集",
+      "TH": "แก้ไขข้อมูลของฉัน",
+      "PH": "Edit My Info"
+    },
 
     // Active Status
     "friend_status": {
@@ -89,11 +103,11 @@ class MypageTranslations {
       "PH": "My Activity Fee"
     },
     "one_hour": {
-      "KR": "1 시간",
-      "VN": "1 giờ",
-      "JP": "1時間",
-      "TH": "1 ชั่วโมง",
-      "PH": "1 hour"
+      "KR": "기본 1 시간",
+      "VN": "Cơ bản 1 giờ",
+      "JP": "基本 1時間",
+      "TH": "พื้นฐาน 1 ชั่วโมง",
+      "PH": "Basic 1 hour"
     },
     "per_10_min": {
       "KR": "10 분당",
