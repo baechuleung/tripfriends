@@ -1,16 +1,12 @@
 import 'package:flutter/material.dart';
-import '../../services/translation_service.dart';
+import '../../translations/mypage_translations.dart';
+import '../../main.dart'; // currentCountryCode
 import 'recommended_friends_controller.dart';
 import 'widgets/partner_code_widget.dart';
 import 'widgets/friends_list_widget.dart';
 
 class RecommendedFriendsPage extends StatefulWidget {
-  final TranslationService? translationService;
-
-  const RecommendedFriendsPage({
-    Key? key,
-    this.translationService,
-  }) : super(key: key);
+  const RecommendedFriendsPage({Key? key}) : super(key: key);
 
   @override
   State<RecommendedFriendsPage> createState() => _RecommendedFriendsPageState();
@@ -22,7 +18,7 @@ class _RecommendedFriendsPageState extends State<RecommendedFriendsPage> {
   @override
   void initState() {
     super.initState();
-    _controller = RecommendedFriendsController(translationService: widget.translationService);
+    _controller = RecommendedFriendsController();
     _loadData();
   }
 
@@ -35,6 +31,8 @@ class _RecommendedFriendsPageState extends State<RecommendedFriendsPage> {
 
   @override
   Widget build(BuildContext context) {
+    final language = currentCountryCode.toUpperCase();
+
     return Scaffold(
       backgroundColor: const Color(0xFFF5F6FA),
       appBar: _buildAppBar(),

@@ -1,14 +1,10 @@
 import 'package:flutter/material.dart';
 import 'active_controller.dart';
-import '../../services/translation_service.dart';
+import '../../translations/mypage_translations.dart';
+import '../../main.dart'; // currentCountryCode
 
 class ActiveToggleWidget extends StatefulWidget {
-  final TranslationService translationService;
-
-  const ActiveToggleWidget({
-    Key? key,
-    required this.translationService,
-  }) : super(key: key);
+  const ActiveToggleWidget({Key? key}) : super(key: key);
 
   @override
   State<ActiveToggleWidget> createState() => _ActiveToggleWidgetState();
@@ -26,6 +22,8 @@ class _ActiveToggleWidgetState extends State<ActiveToggleWidget> {
 
   @override
   Widget build(BuildContext context) {
+    final language = currentCountryCode.toUpperCase();
+
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16), // 좌우 마진 16
       child: ListenableBuilder(
@@ -51,7 +49,7 @@ class _ActiveToggleWidgetState extends State<ActiveToggleWidget> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      widget.translationService.get('friend_status', '프렌즈 활동 상태'),
+                      MypageTranslations.getTranslation('friend_status', language),
                       style: const TextStyle(
                         color: const Color(0xFF4E5968),
                         fontSize: 14,
@@ -61,8 +59,8 @@ class _ActiveToggleWidgetState extends State<ActiveToggleWidget> {
                     const SizedBox(height: 4),
                     Text(
                       _controller.isActive
-                          ? widget.translationService.get('status_active', '활성화 상태에서는 예약을 받을 수 있습니다.')
-                          : widget.translationService.get('status_inactive', 'OFF 상태에서는 예약을 받을 수 없습니다.'),
+                          ? MypageTranslations.getTranslation('status_active', language)
+                          : MypageTranslations.getTranslation('status_inactive', language),
                       style: TextStyle(
                         fontSize: 12,
                         color: const Color(0xFF4E5968),

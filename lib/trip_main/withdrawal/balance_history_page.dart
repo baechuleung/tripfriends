@@ -1,15 +1,11 @@
 import 'package:flutter/material.dart';
-import '../../services/translation_service.dart';
+import '../../translations/mypage_translations.dart';
+import '../../main.dart'; // currentCountryCode
 import 'controller/balance_history_controller.dart';
 import 'widgets/balance_history_item_widget.dart';
 
 class BalanceHistoryPage extends StatefulWidget {
-  final TranslationService? translationService;
-
-  const BalanceHistoryPage({
-    Key? key,
-    this.translationService,
-  }) : super(key: key);
+  const BalanceHistoryPage({Key? key}) : super(key: key);
 
   @override
   State<BalanceHistoryPage> createState() => _BalanceHistoryPageState();
@@ -24,24 +20,14 @@ class _BalanceHistoryPageState extends State<BalanceHistoryPage> {
   @override
   void initState() {
     super.initState();
-    _controller = BalanceHistoryController(translationService: widget.translationService);
-    _initTranslation();
+    _controller = BalanceHistoryController();
+    _loadData();
   }
 
   @override
   void dispose() {
     _mounted = false;
     super.dispose();
-  }
-
-  Future<void> _initTranslation() async {
-    if (widget.translationService != null) {
-      await widget.translationService!.init();
-      if (_mounted) {
-        setState(() {});
-      }
-    }
-    await _loadData();
   }
 
   Future<void> _loadData() async {
@@ -109,11 +95,13 @@ class _BalanceHistoryPageState extends State<BalanceHistoryPage> {
 
   @override
   Widget build(BuildContext context) {
+    final language = currentCountryCode.toUpperCase();
+
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
         title: Text(
-          widget.translationService?.get('balance_history', '적립금 내역') ?? '적립금 내역',
+          MypageTranslations.getTranslation('balance_history', language),
           style: const TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.w600,
@@ -155,13 +143,15 @@ class _BalanceHistoryPageState extends State<BalanceHistoryPage> {
   }
 
   Widget _buildFilterOptions() {
+    final language = currentCountryCode.toUpperCase();
+
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            widget.translationService?.get('filter_type', '유형') ?? '유형',
+            MypageTranslations.getTranslation('filter_type', language),
             style: const TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.bold,
@@ -173,17 +163,17 @@ class _BalanceHistoryPageState extends State<BalanceHistoryPage> {
             scrollDirection: Axis.horizontal,
             child: Row(
               children: [
-                _buildTypeFilterButton('all', widget.translationService?.get('filter_all', '전체') ?? '전체'),
+                _buildTypeFilterButton('all', MypageTranslations.getTranslation('filter_all', language)),
                 const SizedBox(width: 8),
-                _buildTypeFilterButton('earn', widget.translationService?.get('filter_earn', '적립') ?? '적립'),
+                _buildTypeFilterButton('earn', MypageTranslations.getTranslation('filter_earn', language)),
                 const SizedBox(width: 8),
-                _buildTypeFilterButton('withdrawal', widget.translationService?.get('filter_withdrawal', '출금') ?? '출금'),
+                _buildTypeFilterButton('withdrawal', MypageTranslations.getTranslation('filter_withdrawal', language)),
               ],
             ),
           ),
           const SizedBox(height: 16),
           Text(
-            widget.translationService?.get('filter_period', '기간') ?? '기간',
+            MypageTranslations.getTranslation('filter_period', language),
             style: const TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.bold,
@@ -195,13 +185,13 @@ class _BalanceHistoryPageState extends State<BalanceHistoryPage> {
             scrollDirection: Axis.horizontal,
             child: Row(
               children: [
-                _buildDateFilterButton('all', widget.translationService?.get('filter_period_all', '전체') ?? '전체'),
+                _buildDateFilterButton('all', MypageTranslations.getTranslation('filter_period_all', language)),
                 const SizedBox(width: 8),
-                _buildDateFilterButton('week', widget.translationService?.get('filter_period_week', '일주일') ?? '일주일'),
+                _buildDateFilterButton('week', MypageTranslations.getTranslation('filter_period_week', language)),
                 const SizedBox(width: 8),
-                _buildDateFilterButton('month', widget.translationService?.get('filter_period_month', '1개월') ?? '1개월'),
+                _buildDateFilterButton('month', MypageTranslations.getTranslation('filter_period_month', language)),
                 const SizedBox(width: 8),
-                _buildDateFilterButton('3months', widget.translationService?.get('filter_period_3months', '3개월') ?? '3개월'),
+                _buildDateFilterButton('3months', MypageTranslations.getTranslation('filter_period_3months', language)),
               ],
             ),
           ),
@@ -261,6 +251,8 @@ class _BalanceHistoryPageState extends State<BalanceHistoryPage> {
   }
 
   Widget _buildErrorState() {
+    final language = currentCountryCode.toUpperCase();
+
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -288,7 +280,7 @@ class _BalanceHistoryPageState extends State<BalanceHistoryPage> {
                 ),
               ),
               child: Text(
-                widget.translationService?.get('try_again', '다시 시도') ?? '다시 시도',
+                MypageTranslations.getTranslation('try_again', language),
                 style: const TextStyle(color: Colors.white),
               ),
             ),
@@ -299,6 +291,8 @@ class _BalanceHistoryPageState extends State<BalanceHistoryPage> {
   }
 
   Widget _buildEmptyState() {
+    final language = currentCountryCode.toUpperCase();
+
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -308,7 +302,7 @@ class _BalanceHistoryPageState extends State<BalanceHistoryPage> {
             Icon(Icons.article_outlined, size: 48, color: Colors.grey[400]),
             const SizedBox(height: 16),
             Text(
-              widget.translationService?.get('no_balance_history', '적립금 내역이 없습니다') ?? '적립금 내역이 없습니다',
+              MypageTranslations.getTranslation('no_balance_history', language),
               style: TextStyle(
                 fontSize: 16,
                 color: Colors.grey[600],
@@ -322,12 +316,13 @@ class _BalanceHistoryPageState extends State<BalanceHistoryPage> {
   }
 
   Widget _buildBalanceHistoryList() {
+    final language = currentCountryCode.toUpperCase();
     final filteredHistory = _filteredHistory;
 
     if (filteredHistory.isEmpty) {
       return Center(
         child: Text(
-          widget.translationService?.get('no_filtered_history', '해당 내역이 없습니다') ?? '해당 내역이 없습니다',
+          MypageTranslations.getTranslation('no_filtered_history', language),
           style: TextStyle(
             fontSize: 16,
             color: Colors.grey[600],
@@ -357,6 +352,8 @@ class _BalanceHistoryPageState extends State<BalanceHistoryPage> {
   }
 
   Widget _buildListHeader(int itemCount) {
+    final language = currentCountryCode.toUpperCase();
+
     return Container(
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
       child: Column(
@@ -366,14 +363,14 @@ class _BalanceHistoryPageState extends State<BalanceHistoryPage> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                widget.translationService?.get('total_transactions', '총 거래 건수') ?? '총 거래 건수',
+                MypageTranslations.getTranslation('total_transactions', language),
                 style: TextStyle(
                   fontSize: 14,
                   color: Colors.grey[600],
                 ),
               ),
               Text(
-                '$itemCount${widget.translationService?.get('count_unit', '건') ?? '건'}',
+                '$itemCount${MypageTranslations.getTranslation('count_unit', language)}',
                 style: const TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.bold,

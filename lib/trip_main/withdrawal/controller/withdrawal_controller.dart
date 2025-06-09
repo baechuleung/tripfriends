@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '../../../services/translation_service.dart';
+import '../../../translations/mypage_translations.dart';
+import '../../../main.dart'; // currentCountryCode
 
 class WithdrawalController {
-  final TranslationService? translationService;
   final TextEditingController bankNameController = TextEditingController();
   final TextEditingController accountNumberController = TextEditingController();
   final TextEditingController accountHolderController = TextEditingController();
@@ -20,18 +20,10 @@ class WithdrawalController {
   String withdrawalLimit = '100,000';
   bool hasWithdrawalInfo = false;
 
-  WithdrawalController({this.translationService});
-
-  // 번역 초기화
-  Future<void> initTranslations() async {
-    if (translationService != null) {
-      await translationService!.init();
-    }
-  }
+  WithdrawalController();
 
   // 초기화 메서드
   Future<void> init() async {
-    await initTranslations();
     await loadUserData();
     await checkBankInfo();
   }
@@ -139,6 +131,8 @@ class WithdrawalController {
 
   // 출금 신청
   Future<String> requestWithdrawal() async {
+    final language = currentCountryCode.toUpperCase();
+
     try {
       final user = FirebaseAuth.instance.currentUser;
       if (user == null) return 'user_not_found';
@@ -165,10 +159,7 @@ class WithdrawalController {
           .doc()
           .id;
 
-      String description = '적립금 출금';
-      if (translationService != null) {
-        description = translationService!.get('withdrawal_description', '적립금 출금');
-      }
+      String description = MypageTranslations.getTranslation('withdrawal_description', language);
 
       await FirebaseFirestore.instance
           .collection('tripfriends_users')

@@ -5,13 +5,13 @@ import '../services/shared_preferences_service.dart';
 import '../services/translation_service.dart';
 import '../compents/appbar.dart';
 import '../compents/settings_drawer.dart';
-import 'widgets/reservation_info_card.dart';
-import 'widgets/horizontal_reservation_cards.dart';
-import 'widgets/point_section.dart';
-import 'widgets/bottom_nav_section.dart';
-import 'widgets/trip_friends_banner.dart';
-import 'widgets/event_banner.dart';
-import 'widgets/main_footer.dart';
+import '../trip_main/widgets/reservation_info_card.dart';
+import '../trip_main/widgets/horizontal_reservation_cards.dart';
+import '../trip_main/widgets/point_section.dart';
+import '../trip_main/widgets/bottom_nav_section.dart';
+import '../trip_main/widgets/trip_friends_banner.dart';
+import '../trip_main/widgets/event_banner.dart';
+import '../trip_main/widgets/main_footer.dart';
 
 class MainScreen extends StatefulWidget {
   final Function(int)? onNavigateToTab;

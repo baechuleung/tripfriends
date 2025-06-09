@@ -1,34 +1,22 @@
 import 'package:flutter/material.dart';
-import '../../../services/translation_service.dart';
+import '../../../translations/mypage_translations.dart';
+import '../../../main.dart'; // currentCountryCode
 import 'withdrawal_dialog.dart';
 
 class WithdrawalDialogManager {
   final BuildContext context;
-  final TranslationService? translationService;
 
-  WithdrawalDialogManager({
-    required this.context,
-    this.translationService,
-  }) {
-    // 초기화 시 번역도 초기화
-    _initTranslation();
-  }
-
-  // 번역 초기화 메서드
-  Future<void> _initTranslation() async {
-    if (translationService != null) {
-      await translationService!.init();
-    }
-  }
+  WithdrawalDialogManager({required this.context});
 
   // 출금 성공 다이얼로그 표시
   void showSuccessDialog({Function()? afterConfirm}) {
+    final language = currentCountryCode.toUpperCase();
+
     WithdrawalDialog.showSuccessDialog(
       context: context,
-      title: translationService?.get('withdrawal_request', '출금 신청') ?? '출금 신청',
-      content: translationService?.get('withdrawal_success', '출금 요청은 관리자가 수동으로 처리하며, 2~3일 소요됩니다.') ??
-          '출금 요청은 관리자가 수동으로 처리하며, 2~3일 소요됩니다.',
-      buttonText: translationService?.get('confirm', '확인') ?? '확인',
+      title: MypageTranslations.getTranslation('withdrawal_request', language),
+      content: MypageTranslations.getTranslation('withdrawal_success', language),
+      buttonText: MypageTranslations.getTranslation('confirm', language),
       autoDismiss: true,
       onConfirm: afterConfirm,
     );
@@ -40,11 +28,13 @@ class WithdrawalDialogManager {
     required String defaultErrorMessage,
     Function()? afterConfirm,
   }) {
+    final language = currentCountryCode.toUpperCase();
+
     WithdrawalDialog.showErrorDialog(
       context: context,
-      title: translationService?.get('error', '오류') ?? '오류',
-      content: translationService?.get(errorKey, defaultErrorMessage) ?? defaultErrorMessage,
-      buttonText: translationService?.get('confirm', '확인') ?? '확인',
+      title: MypageTranslations.getTranslation('error', language),
+      content: MypageTranslations.getTranslation(errorKey, language),
+      buttonText: MypageTranslations.getTranslation('confirm', language),
       onConfirm: afterConfirm,
     );
   }
@@ -54,13 +44,14 @@ class WithdrawalDialogManager {
     required Function() onConfirm,
     Function()? onCancel,
   }) {
+    final language = currentCountryCode.toUpperCase();
+
     WithdrawalDialog.showConfirmWithdrawalDialog(
       context: context,
-      title: translationService?.get('confirm_withdrawal', '출금 확인') ?? '출금 확인',
-      content: translationService?.get('confirm_withdrawal_message', '정말로 출금 신청을 하시겠습니까?') ??
-          '정말로 출금 신청을 하시겠습니까?',
-      confirmText: translationService?.get('withdraw', '출금하기') ?? '출금하기',
-      cancelText: translationService?.get('cancel', '취소') ?? '취소',
+      title: MypageTranslations.getTranslation('confirm_withdrawal', language),
+      content: MypageTranslations.getTranslation('confirm_withdrawal_message', language),
+      confirmText: MypageTranslations.getTranslation('withdraw', language),
+      cancelText: MypageTranslations.getTranslation('cancel', language),
       onConfirm: onConfirm,
       onCancel: onCancel,
     );
@@ -76,9 +67,11 @@ class WithdrawalDialogManager {
 
   // 출금 처리 중 로딩 다이얼로그 표시
   void showLoadingDialog() {
+    final language = currentCountryCode.toUpperCase();
+
     WithdrawalDialog.showLoadingDialog(
       context: context,
-      message: translationService?.get('processing', '처리 중...') ?? '처리 중...',
+      message: MypageTranslations.getTranslation('processing', language),
     );
   }
 

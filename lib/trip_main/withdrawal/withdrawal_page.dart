@@ -1,16 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import '../../services/translation_service.dart';
+import '../../translations/mypage_translations.dart';
+import '../../main.dart'; // currentCountryCode
 import 'controller/withdrawal_controller.dart';
 import 'withdrawal_dialog/withdrawal_dialog_manager.dart';
 
 class WithdrawalPage extends StatefulWidget {
-  final TranslationService? translationService;
-
-  const WithdrawalPage({
-    Key? key,
-    this.translationService,
-  }) : super(key: key);
+  const WithdrawalPage({Key? key}) : super(key: key);
 
   @override
   State<WithdrawalPage> createState() => _WithdrawalPageState();
@@ -24,7 +20,7 @@ class _WithdrawalPageState extends State<WithdrawalPage> {
   @override
   void initState() {
     super.initState();
-    _controller = WithdrawalController(translationService: widget.translationService);
+    _controller = WithdrawalController();
     _loadData();
 
     // 출금 금액 입력시 콤마 추가 리스너
@@ -35,10 +31,7 @@ class _WithdrawalPageState extends State<WithdrawalPage> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     // 다이얼로그 매니저 초기화 (context 필요)
-    _dialogManager = WithdrawalDialogManager(
-      context: context,
-      translationService: widget.translationService,
-    );
+    _dialogManager = WithdrawalDialogManager(context: context);
   }
 
   @override
@@ -110,11 +103,13 @@ class _WithdrawalPageState extends State<WithdrawalPage> {
 
   @override
   Widget build(BuildContext context) {
+    final language = currentCountryCode.toUpperCase();
+
     return Scaffold(
       backgroundColor: const Color(0xFFF5F6FA),
       appBar: AppBar(
         title: Text(
-          widget.translationService?.get('withdraw', '출금하기') ?? '출금하기',
+          MypageTranslations.getTranslation('withdraw', language),
           style: const TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.w500,
@@ -144,6 +139,8 @@ class _WithdrawalPageState extends State<WithdrawalPage> {
   }
 
   Widget _buildWithdrawalForm() {
+    final language = currentCountryCode.toUpperCase();
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -154,7 +151,7 @@ class _WithdrawalPageState extends State<WithdrawalPage> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            widget.translationService?.get('bank_info', '출금 계좌 정보') ?? '출금 계좌 정보',
+            MypageTranslations.getTranslation('bank_info', language),
             style: const TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.bold,
@@ -164,38 +161,38 @@ class _WithdrawalPageState extends State<WithdrawalPage> {
           const SizedBox(height: 16),
           _buildTextField(
             controller: _controller.bankNameController,
-            label: widget.translationService?.get('bank_name', '은행명') ?? '은행명',
-            hint: widget.translationService?.get('enter_bank_name', '은행명을 입력해주세요') ?? '은행명을 입력해주세요',
+            label: MypageTranslations.getTranslation('bank_name', language),
+            hint: MypageTranslations.getTranslation('enter_bank_name', language),
             readOnly: _controller.hasWithdrawalInfo,
           ),
           const SizedBox(height: 12),
           _buildTextField(
             controller: _controller.accountNumberController,
-            label: widget.translationService?.get('account_number', '계좌번호') ?? '계좌번호',
-            hint: widget.translationService?.get('enter_account_number', '계좌번호를 입력해주세요') ?? '계좌번호를 입력해주세요',
+            label: MypageTranslations.getTranslation('account_number', language),
+            hint: MypageTranslations.getTranslation('enter_account_number', language),
             keyboardType: TextInputType.number,
             readOnly: _controller.hasWithdrawalInfo,
           ),
           const SizedBox(height: 12),
           _buildTextField(
             controller: _controller.accountHolderController,
-            label: widget.translationService?.get('account_holder', '예금주') ?? '예금주',
-            hint: widget.translationService?.get('enter_account_holder', '예금주를 입력해주세요') ?? '예금주를 입력해주세요',
+            label: MypageTranslations.getTranslation('account_holder', language),
+            hint: MypageTranslations.getTranslation('enter_account_holder', language),
             readOnly: _controller.hasWithdrawalInfo,
           ),
           const SizedBox(height: 12),
           _buildTextField(
             controller: _controller.receiverAddressController,
-            label: widget.translationService?.get('receiver_address', '수취인 주소') ?? '수취인 주소',
-            hint: widget.translationService?.get('enter_receiver_address', '수취인 주소를 입력해주세요') ?? '수취인 주소를 입력해주세요',
+            label: MypageTranslations.getTranslation('receiver_address', language),
+            hint: MypageTranslations.getTranslation('enter_receiver_address', language),
             readOnly: _controller.hasWithdrawalInfo,
             maxLines: 3,
           ),
           const SizedBox(height: 12),
           _buildTextField(
             controller: _controller.swiftCodeController,
-            label: widget.translationService?.get('swift_code', 'SWIFT 코드') ?? 'SWIFT 코드',
-            hint: widget.translationService?.get('enter_swift_code', 'SWIFT 코드를 입력해주세요') ?? 'SWIFT 코드를 입력해주세요',
+            label: MypageTranslations.getTranslation('swift_code', language),
+            hint: MypageTranslations.getTranslation('enter_swift_code', language),
             readOnly: _controller.hasWithdrawalInfo,
           ),
           if (_controller.hasWithdrawalInfo) ...[
@@ -209,7 +206,7 @@ class _WithdrawalPageState extends State<WithdrawalPage> {
                   });
                 },
                 child: Text(
-                  widget.translationService?.get('edit_bank_info', '계좌 정보 수정') ?? '계좌 정보 수정',
+                  MypageTranslations.getTranslation('edit_bank_info', language),
                   style: const TextStyle(
                     color: Color(0xFF4169E1),
                     fontWeight: FontWeight.w500,
@@ -220,7 +217,7 @@ class _WithdrawalPageState extends State<WithdrawalPage> {
           ],
           const SizedBox(height: 20),
           Text(
-            widget.translationService?.get('withdrawal_amount', '출금액') ?? '출금액',
+            MypageTranslations.getTranslation('withdrawal_amount', language),
             style: const TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.bold,
@@ -257,7 +254,7 @@ class _WithdrawalPageState extends State<WithdrawalPage> {
           ),
           const SizedBox(height: 8),
           Text(
-            widget.translationService?.get('minimum_withdrawal_info', '* 최소 출금 금액은 100,000원 이상이어야 합니다.') ?? '* 최소 출금 금액은 100,000원 이상이어야 합니다.',
+            MypageTranslations.getTranslation('minimum_withdrawal_info', language),
             style: TextStyle(
               fontSize: 12,
               color: Colors.grey[600],
@@ -327,6 +324,8 @@ class _WithdrawalPageState extends State<WithdrawalPage> {
   }
 
   Widget _buildWithdrawalButton() {
+    final language = currentCountryCode.toUpperCase();
+
     // 포인트가 100,000 미만이면 버튼 비활성화
     final withdrawalAmount = int.tryParse(_controller.point.replaceAll(',', '')) ?? 0;
     final isButtonEnabled = withdrawalAmount >= 100000;
@@ -345,7 +344,7 @@ class _WithdrawalPageState extends State<WithdrawalPage> {
           elevation: 0,
         ),
         child: Text(
-          widget.translationService?.get('withdraw', '출금하기') ?? '출금하기',
+          MypageTranslations.getTranslation('withdraw', language),
           style: TextStyle(
             color: isButtonEnabled ? Colors.white : Colors.grey[600],
             fontSize: 16,

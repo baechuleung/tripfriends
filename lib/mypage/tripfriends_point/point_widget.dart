@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '../../services/translation_service.dart';
+import '../../translations/mypage_translations.dart';
+import '../../main.dart'; // currentCountryCode
 import 'point_item.dart';
 
 class PointWidget extends StatefulWidget {
@@ -19,20 +20,11 @@ class PointWidget extends StatefulWidget {
 class _PointWidgetState extends State<PointWidget> {
   bool _mounted = true;
   late Stream<DocumentSnapshot> _userStream;
-  final TranslationService _translationService = TranslationService();
 
   @override
   void initState() {
     super.initState();
-    _initTranslations();
     initUserStream();
-  }
-
-  Future<void> _initTranslations() async {
-    await _translationService.init();
-    if (_mounted) {
-      setState(() {});
-    }
   }
 
   void initUserStream() {
@@ -46,12 +38,6 @@ class _PointWidgetState extends State<PointWidget> {
   }
 
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    _initTranslations();
-  }
-
-  @override
   void dispose() {
     _mounted = false;
     super.dispose();
@@ -59,12 +45,14 @@ class _PointWidgetState extends State<PointWidget> {
 
   @override
   Widget build(BuildContext context) {
+    final language = currentCountryCode.toUpperCase();
+
     // 파라미터로 값이 제공된 경우 사용
     if (widget.currentPoint != null) {
       return PointItem(
-        title: _translationService.get('my_point', 'MY POINT'),
+        title: MypageTranslations.getTranslation('my_point', language),
         currentPoint: widget.currentPoint!,
-        rankUpText: _translationService.get('rank_up', 'LANK UP!'),
+        rankUpText: MypageTranslations.getTranslation('rank_up', language),
         rankUpPoint: 500,
       );
     }
@@ -78,7 +66,11 @@ class _PointWidgetState extends State<PointWidget> {
       stream: _userStream,
       builder: (context, snapshot) {
         if (snapshot.hasError) {
-          return Center(child: Text(_translationService.get('error_occurred', '오류가 발생했습니다: ${snapshot.error}')));
+          return Center(
+            child: Text(
+                MypageTranslations.getTranslation('error_occurred', language) + ': ${snapshot.error}'
+            ),
+          );
         }
 
         if (snapshot.connectionState == ConnectionState.waiting) {
@@ -95,9 +87,9 @@ class _PointWidgetState extends State<PointWidget> {
 
         // PointItem 위젯으로 UI 구성
         return PointItem(
-          title: _translationService.get('my_point', 'MY POINT'),
+          title: MypageTranslations.getTranslation('my_point', language),
           currentPoint: currentPoint,
-          rankUpText: _translationService.get('rank_up', 'LANK UP!'),
+          rankUpText: MypageTranslations.getTranslation('rank_up', language),
           rankUpPoint: 500,
         );
       },

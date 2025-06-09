@@ -3,11 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import '../../../services/translation_service.dart';
+import '../../../translations/mypage_translations.dart';
 import '../../../main.dart';  // currentCountryCode 접근을 위해 추가
 
 class BalanceController {
-  final TranslationService translationService;
   bool _isInitialized = false;
 
   // 잔액 관련 정보
@@ -16,24 +15,10 @@ class BalanceController {
   String currencyCode = "KRW";
   String withdrawalLimit = "100,000";
 
-  BalanceController({TranslationService? translationService})
-      : this.translationService = translationService ?? TranslationService();
-
-  // 번역 서비스 getter
-  TranslationService get getTranslationService => translationService;
+  BalanceController();
 
   // 초기화 여부 확인
   bool get isInitialized => _isInitialized;
-
-  // 번역 초기화
-  Future<void> initTranslations() async {
-    try {
-      await translationService.init();
-      debugPrint('번역 서비스 초기화 완료. 현재 국가 코드: $currentCountryCode');
-    } catch (e) {
-      debugPrint('번역 서비스 초기화 오류: $e');
-    }
-  }
 
   // 사용자 데이터 스트림 가져오기
   Stream<DocumentSnapshot> getUserStream() {
@@ -143,7 +128,6 @@ class BalanceController {
   // 초기화 메서드
   Future<void> init() async {
     debugPrint('BalanceController 초기화 시작');
-    await initTranslations();
     await loadUserData();
     _isInitialized = true;
     debugPrint('BalanceController 초기화 완료');

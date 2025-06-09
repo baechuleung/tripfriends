@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '../../services/translation_service.dart';
+import '../../translations/mypage_translations.dart';
+import '../../main.dart'; // currentCountryCode
 import 'info_service.dart';
 import 'info_ui_components.dart';
 
@@ -23,38 +24,19 @@ class InfoWidget extends StatefulWidget {
 
 class _InfoWidgetState extends State<InfoWidget> {
   bool _mounted = true;
-  final TranslationService _translationService = TranslationService();
   final InfoService _infoService = InfoService();
   Stream<DocumentSnapshot>? _userStream;
 
   @override
   void initState() {
     super.initState();
-    _initTranslations();
     _initUserStream();
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    _initTranslations();
   }
 
   @override
   void dispose() {
     _mounted = false;
     super.dispose();
-  }
-
-  Future<void> _initTranslations() async {
-    try {
-      await _translationService.init();
-      if (_mounted) {
-        setState(() {});
-      }
-    } catch (e) {
-      debugPrint('Translation initialization error: $e');
-    }
   }
 
   void _initUserStream() {
@@ -78,11 +60,10 @@ class _InfoWidgetState extends State<InfoWidget> {
       final int price = widget.basePrice ?? 10000;
       final String currencySymbol = widget.currencySymbol ?? '₩';
       return InfoUIComponents.buildInfoLayout(
-          context: context,
-          data: widget.Data!,
-          price: price,
-          currencySymbol: currencySymbol,
-          translationService: _translationService
+        context: context,
+        data: widget.Data!,
+        price: price,
+        currencySymbol: currencySymbol,
       );
     }
 
@@ -96,12 +77,14 @@ class _InfoWidgetState extends State<InfoWidget> {
     return StreamBuilder<DocumentSnapshot>(
       stream: _userStream,
       builder: (context, snapshot) {
+        final language = currentCountryCode.toUpperCase();
+
         // 에러 처리
         if (snapshot.hasError) {
-          return Center(child: Text(_translationService.get(
+          return Center(child: Text(MypageTranslations.getTranslation(
               'error_occurred',
-              '오류가 발생했습니다: ${snapshot.error}'
-          )));
+              language
+          ) + ': ${snapshot.error}'));
         }
 
         // 로딩 처리
@@ -127,11 +110,10 @@ class _InfoWidgetState extends State<InfoWidget> {
 
         // UI 구성
         return InfoUIComponents.buildInfoLayout(
-            context: context,
-            data: parsedData,
-            price: price,
-            currencySymbol: currencySymbol,
-            translationService: _translationService
+          context: context,
+          data: parsedData,
+          price: price,
+          currencySymbol: currencySymbol,
         );
       },
     );

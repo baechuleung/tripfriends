@@ -8,8 +8,6 @@ import '../services/auth_service.dart';
 import '../utils/profile_translation.dart';
 import '../services/profile_media_service.dart';
 import 'profile_media_slider.dart';
-import 'profile_header.dart';
-import 'profile_completion_notice.dart';
 
 class LoggedInProfileWidget extends StatefulWidget {
   const LoggedInProfileWidget({super.key});
@@ -24,9 +22,7 @@ class _LoggedInProfileWidgetState extends State<LoggedInProfileWidget> {
   late Stream<DocumentSnapshot> _stream;
   int _userPoint = 0;
   late Map<String, dynamic> _userData = {};
-
   int _reviewCount = 0;
-  bool _hasProfileCompletionReward = false;
   ProfileMediaService? _mediaService;
   bool _isLoadingMedia = true;
 
@@ -38,7 +34,6 @@ class _LoggedInProfileWidgetState extends State<LoggedInProfileWidget> {
       _stream = AuthService.tripfriendsStream(user.uid);
       _loadUserPoint(user.uid);
       _loadReviewCount(user.uid);
-      _checkProfileCompletionReward(user.uid);
 
       // 미디어 서비스 초기화
       _mediaService = ProfileMediaService(
@@ -99,38 +94,6 @@ class _LoggedInProfileWidgetState extends State<LoggedInProfileWidget> {
     }
   }
 
-  // 프로필 완료 보상 확인 메소드
-  Future<void> _checkProfileCompletionReward(String userId) async {
-    try {
-      // profile_completion 보상 확인
-      final profileCompletionSnapshot = await FirebaseFirestore.instance
-          .collection('tripfriends_users')
-          .doc(userId)
-          .collection('balance_history')
-          .where('source', isEqualTo: 'profile_completion')
-          .get();
-
-      // video_upload 보상 확인
-      final videoUploadSnapshot = await FirebaseFirestore.instance
-          .collection('tripfriends_users')
-          .doc(userId)
-          .collection('balance_history')
-          .where('source', isEqualTo: 'video_upload')
-          .get();
-
-      if (mounted) {
-        setState(() {
-          // profile_completion이 있거나 video_upload가 있으면 보상 알림 표시 안함
-          _hasProfileCompletionReward =
-              profileCompletionSnapshot.docs.isNotEmpty ||
-                  videoUploadSnapshot.docs.isNotEmpty;
-        });
-      }
-    } catch (e) {
-      print('프로필 완료 보상 확인 오류: $e');
-    }
-  }
-
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -180,7 +143,6 @@ class _LoggedInProfileWidgetState extends State<LoggedInProfileWidget> {
     // 수정 페이지에서 변경이 있었다면 UI 업데이트 (선택 사항)
     if (result == true && mounted) {
       setState(() {});
-      _checkProfileCompletionReward(uid);
       _loadProfileMedia(uid);
     }
   }
@@ -229,14 +191,6 @@ class _LoggedInProfileWidgetState extends State<LoggedInProfileWidget> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // 프로필 헤더 (수정 버튼만 포함)
-        ProfileHeader(
-          onEditPressed: () => _navigateToEditProfile(user.uid),
-          currentLabels: currentLabels,
-        ),
-
-        const SizedBox(height: 8), // 제목과 카드 사이 간격
-
         // 프로필 이미지/비디오 슬라이더
         ProfileMediaSlider(
           isLoading: _isLoadingMedia,
@@ -244,6 +198,51 @@ class _LoggedInProfileWidgetState extends State<LoggedInProfileWidget> {
           mediaService: _mediaService,
           reviewCount: _reviewCount,
           currentLabels: currentLabels,
+        ),
+
+        const SizedBox(height: 16), // 슬라이더와 수정 버튼 사이 간격
+
+        // 프로필 수정 버튼
+        Container(
+          margin: const EdgeInsets.symmetric(horizontal: 16.0),
+          child: GestureDetector(
+            onTap: () => _navigateToEditProfile(user.uid),
+            child: Container(
+              width: double.infinity,
+              height: 40,
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+              decoration: ShapeDecoration(
+                color: Colors.white,
+                shape: RoundedRectangleBorder(
+                  side: BorderSide(
+                    width: 1,
+                    color: const Color(0xFFD9D9D9),
+                  ),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Text(
+                    currentLabels['edit'] ?? '프로필 수정',
+                    style: TextStyle(
+                      color: const Color(0xFF4E5968),
+                      fontSize: 14,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  const SizedBox(width: 5),
+                  Icon(
+                    Icons.edit,
+                    size: 16,
+                    color: const Color(0xFF4E5968),
+                  ),
+                ],
+              ),
+            ),
+          ),
         ),
 
         // 승인 대기 사유 표시 (승인 대기 상태이고 사유가 있을 때만)
@@ -281,10 +280,6 @@ class _LoggedInProfileWidgetState extends State<LoggedInProfileWidget> {
               ],
             ),
           ),
-
-        // 프로필 완료 적립금 알림 (balance_history에 profile_completion이 없는 경우에만 표시)
-        if (!_hasProfileCompletionReward)
-          ProfileCompletionNotice(currentLabels: currentLabels),
       ],
     );
   }

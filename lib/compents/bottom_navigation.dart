@@ -4,7 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'dart:convert';
 import '../main.dart';
-import '../main/main_screen.dart';
+import '../trip_main/trip_main_screen.dart';
 import '../mypage/mypage.dart';
 import '../globals.dart';
 import '../reservation/screens/current_reservation_list_screen.dart';
@@ -151,37 +151,87 @@ class _CustomBottomNavigationState extends State<CustomBottomNavigation> {
 
     return Scaffold(
       body: pages[widget.selectedIndex],
-      bottomNavigationBar: BottomNavigationBar(
-        items: <BottomNavigationBarItem>[
-          BottomNavigationBarItem(
-            icon: Icon(widget.selectedIndex == 0 ? Icons.home_rounded : Icons.home_outlined),
-            label: navLabels['home'],
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(widget.selectedIndex == 1 ? Icons.event_note_rounded : Icons.event_note_outlined),
-            label: navLabels['reservation_list'],
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(widget.selectedIndex == 2 ? Icons.event_available_rounded : Icons.event_available_outlined),
-            label: navLabels['past_reservations'],
-          ),
-          BottomNavigationBarItem(
-            icon: Tooltip(
-              message: navLabels['chat_list'] ?? '채팅 리스트',
-              child: Icon(widget.selectedIndex == 3 ? Icons.chat_rounded : Icons.chat_outlined),
+      bottomNavigationBar: Container(
+        height: 75, // 높이를 80에서 75로 감소
+        child: BottomNavigationBar(
+          items: <BottomNavigationBarItem>[
+            BottomNavigationBarItem(
+              icon: Padding(
+                padding: const EdgeInsets.only(bottom: 6.0), // 아이콘 아래 패딩 추가
+                child: Image.asset(
+                  widget.selectedIndex == 0
+                      ? 'assets/bottom/home_on.png'
+                      : 'assets/bottom/home_off.png',
+                  width: 26, // 28에서 26으로 감소
+                  height: 26, // 28에서 26으로 감소
+                ),
+              ),
+              label: navLabels['home'],
             ),
-            label: navLabels['chat_list'],
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(widget.selectedIndex == 4 ? Icons.account_circle_rounded : Icons.account_circle_outlined),
-            label: navLabels['my_info'],
-          ),
-        ],
-        currentIndex: widget.selectedIndex,
-        selectedItemColor: const Color(0xFF5963D0),
-        unselectedItemColor: Colors.grey,
-        onTap: widget.onItemSelected,
-        type: BottomNavigationBarType.fixed,
+            BottomNavigationBarItem(
+              icon: Padding(
+                padding: const EdgeInsets.only(bottom: 6.0), // 아이콘 아래 패딩 추가
+                child: Image.asset(
+                  widget.selectedIndex == 1
+                      ? 'assets/bottom/event_note_on.png'
+                      : 'assets/bottom/event_note_off.png',
+                  width: 26, // 28에서 26으로 감소
+                  height: 26, // 28에서 26으로 감소
+                ),
+              ),
+              label: navLabels['reservation_list'],
+            ),
+            BottomNavigationBarItem(
+              icon: Padding(
+                padding: const EdgeInsets.only(bottom: 6.0), // 아이콘 아래 패딩 추가
+                child: Image.asset(
+                  widget.selectedIndex == 2
+                      ? 'assets/bottom/event_upcoming_on.png'
+                      : 'assets/bottom/event_upcoming_off.png',
+                  width: 26, // 28에서 26으로 감소
+                  height: 26, // 28에서 26으로 감소
+                ),
+              ),
+              label: navLabels['past_reservations'],
+            ),
+            BottomNavigationBarItem(
+              icon: Tooltip(
+                message: navLabels['chat_list'] ?? '채팅 리스트',
+                child: Padding(
+                  padding: const EdgeInsets.only(bottom: 6.0), // 아이콘 아래 패딩 추가
+                  child: Image.asset(
+                    widget.selectedIndex == 3
+                        ? 'assets/bottom/tooltip_on.png'
+                        : 'assets/bottom/tooltip_off.png',
+                    width: 26, // 28에서 26으로 감소
+                    height: 26, // 28에서 26으로 감소
+                  ),
+                ),
+              ),
+              label: navLabels['chat_list'],
+            ),
+            BottomNavigationBarItem(
+              icon: Padding(
+                padding: const EdgeInsets.only(bottom: 6.0), // 아이콘 아래 패딩 추가
+                child: Image.asset(
+                  widget.selectedIndex == 4
+                      ? 'assets/bottom/account_circle_on.png'
+                      : 'assets/bottom/account_circle_off.png',
+                  width: 26, // 28에서 26으로 감소
+                  height: 26, // 28에서 26으로 감소
+                ),
+              ),
+              label: navLabels['my_info'],
+            ),
+          ],
+          currentIndex: widget.selectedIndex,
+          selectedItemColor: const Color(0xFF3182F6), // 선택된 아이템 색상 변경
+          unselectedItemColor: const Color(0xFF999999), // 선택되지 않은 아이템 색상 변경
+          selectedFontSize: 12, // 선택된 글자 크기 고정
+          unselectedFontSize: 12, // 선택되지 않은 글자 크기 고정
+          onTap: widget.onItemSelected,
+          type: BottomNavigationBarType.fixed,
+        ),
       ),
     );
   }

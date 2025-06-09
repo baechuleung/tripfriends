@@ -1,24 +1,15 @@
 import 'package:flutter/material.dart';
-import '../../services/translation_service.dart';
+import '../../translations/mypage_translations.dart';
+import '../../main.dart'; // currentCountryCode
 import 'recommended_friends_page.dart';
 
 class RecommendedFriendsButtonWidget extends StatelessWidget {
-  final TranslationService? translationService;
-
-  const RecommendedFriendsButtonWidget({
-    Key? key,
-    this.translationService,
-  }) : super(key: key);
-
-  String _getTranslatedText(String key, String defaultText) {
-    if (translationService == null) {
-      return defaultText;
-    }
-    return translationService!.get(key, defaultText);
-  }
+  const RecommendedFriendsButtonWidget({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    final language = currentCountryCode.toUpperCase();
+
     return Container(
       height: 80,
       margin: const EdgeInsets.symmetric(horizontal: 16.0),
@@ -33,9 +24,7 @@ class RecommendedFriendsButtonWidget extends StatelessWidget {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => RecommendedFriendsPage(
-                translationService: translationService,
-              ),
+              builder: (context) => const RecommendedFriendsPage(),
             ),
           );
         },
@@ -56,7 +45,7 @@ class RecommendedFriendsButtonWidget extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      _getTranslatedText('recommended_friends', '추천 프렌즈'),
+                      MypageTranslations.getTranslation('recommended_friends', language),
                       style: const TextStyle(
                         color: Color(0xFF353535),
                         fontSize: 14,
@@ -65,10 +54,7 @@ class RecommendedFriendsButtonWidget extends StatelessWidget {
                     ),
                     const SizedBox(height: 4.0),
                     Text(
-                      _getTranslatedText(
-                        'recommended_friends_desc',
-                        '나를 추천한 친구들의 목록을 확인하세요!',
-                      ),
+                      MypageTranslations.getTranslation('recommended_friends_desc', language),
                       style: const TextStyle(
                         color: Color(0xFF7269F7),
                         fontSize: 12,

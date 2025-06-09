@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import '../../services/translation_service.dart';
+import '../../translations/mypage_translations.dart';
+import '../../main.dart'; // currentCountryCode
 import '../../auth/edit_detail_page.dart';
 import 'info_service.dart';
 import 'info_constants.dart';
@@ -15,33 +16,34 @@ class InfoUIComponents {
     required Map<String, dynamic> data,
     required int price,
     required String currencySymbol,
-    required TranslationService translationService,
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildHeader(context, translationService),
+        _buildHeader(context),
         const SizedBox(height: 8),
-        _buildInfoCard(context, data, price, currencySymbol, translationService),
+        _buildInfoCard(context, data, price, currencySymbol),
       ],
     );
   }
 
   // 헤더 구성
-  static Widget _buildHeader(BuildContext context, TranslationService translationService) {
+  static Widget _buildHeader(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16.0),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
-          _buildEditButton(context, translationService),
+          _buildEditButton(context),
         ],
       ),
     );
   }
 
   // 수정 버튼
-  static Widget _buildEditButton(BuildContext context, TranslationService translationService) {
+  static Widget _buildEditButton(BuildContext context) {
+    final language = currentCountryCode.toUpperCase();
+
     return TextButton(
       style: TextButton.styleFrom(
         padding: EdgeInsets.zero,
@@ -54,7 +56,7 @@ class InfoUIComponents {
           const Icon(Icons.edit, size: 14, color: InfoConstants.primaryBlue),
           const SizedBox(width: 4),
           Text(
-            translationService.get('edit', '수정하기'),
+            MypageTranslations.getTranslation('edit', language),
             style: const TextStyle(
               color: InfoConstants.primaryBlue,
               fontSize: 12,
@@ -85,7 +87,6 @@ class InfoUIComponents {
       Map<String, dynamic> data,
       int price,
       String currencySymbol,
-      TranslationService translationService
       ) {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16.0),
@@ -105,22 +106,24 @@ class InfoUIComponents {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildLanguageSection(data['languages'], translationService),
+          _buildLanguageSection(data['languages']),
           const SizedBox(height: 16),
           const Divider(height: 1, thickness: 1, color: InfoConstants.dividerColor),
           const SizedBox(height: 16),
-          data.containsKey('introduction') ? _buildIntroductionSection(data['introduction'], translationService) : const SizedBox(),
+          data.containsKey('introduction') ? _buildIntroductionSection(data['introduction']) : const SizedBox(),
           data.containsKey('introduction') ? const SizedBox(height: 16) : const SizedBox(),
           data.containsKey('introduction') ? const Divider(height: 1, thickness: 1, color: InfoConstants.dividerColor) : const SizedBox(),
           data.containsKey('introduction') ? const SizedBox(height: 16) : const SizedBox(),
-          _buildPriceSection(price, currencySymbol, translationService),
+          _buildPriceSection(price, currencySymbol),
         ],
       ),
     );
   }
 
   // 소개 섹션 - 데이터베이스에서 가져온 정보 사용
-  static Widget _buildIntroductionSection(String introduction, TranslationService translationService) {
+  static Widget _buildIntroductionSection(String introduction) {
+    final language = currentCountryCode.toUpperCase();
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -133,7 +136,7 @@ class InfoUIComponents {
             ),
             const SizedBox(width: 4),
             Text(
-              translationService.get('introduction', '소개'),
+              MypageTranslations.getTranslation('introduction', language),
               style: const TextStyle(
                 color: InfoConstants.textGrey,
                 fontSize: 12,
@@ -161,13 +164,15 @@ class InfoUIComponents {
         ),
         // 적립금 안내 텍스트를 소개글 박스 아래에 추가
         const SizedBox(height: 8),
-        _buildRewardNoticeSection(translationService),
+        _buildRewardNoticeSection(),
       ],
     );
   }
 
   // 적립금 안내 섹션
-  static Widget _buildRewardNoticeSection(TranslationService translationService) {
+  static Widget _buildRewardNoticeSection() {
+    final language = currentCountryCode.toUpperCase();
+
     return StreamBuilder<QuerySnapshot>(
       stream: _infoService.getRewardHistoryStream(),
       builder: (context, snapshot) {
@@ -197,10 +202,7 @@ class InfoUIComponents {
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
-                  translationService.get(
-                      'profile_reward_notice',
-                      '소개글 300자 이상 작성 시 ₫36,000 지급!'
-                  ),
+                  MypageTranslations.getTranslation('profile_reward_notice', language),
                   style: const TextStyle(
                     color: Color(0xFFD32F2F), // 진한 빨간색 텍스트
                     fontSize: 12,
@@ -219,8 +221,8 @@ class InfoUIComponents {
   static Widget _buildPriceSection(
       int price,
       String currencySymbol,
-      TranslationService translationService
       ) {
+    final language = currentCountryCode.toUpperCase();
     final formattedPrice = _infoService.formatPrice(price);
     final formattedPrice10Min = _infoService.formatPrice((price / 6).round());
 
@@ -236,7 +238,7 @@ class InfoUIComponents {
             ),
             const SizedBox(width: 4),
             Text(
-              translationService.get('price_table', '나의 활동비'),
+              MypageTranslations.getTranslation('price_table', language),
               style: const TextStyle(
                 color: InfoConstants.textGrey,
                 fontSize: 12,
@@ -268,7 +270,7 @@ class InfoUIComponents {
                       padding: const EdgeInsets.all(8),
                       alignment: Alignment.center,
                       child: Text(
-                        translationService.get('one_hour', '1 시간'),
+                        MypageTranslations.getTranslation('one_hour', language),
                         style: const TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w500,
@@ -296,7 +298,7 @@ class InfoUIComponents {
                       padding: const EdgeInsets.all(8),
                       alignment: Alignment.center,
                       child: Text(
-                        translationService.get('per_10_min', '10 분당'),
+                        MypageTranslations.getTranslation('per_10_min', language),
                         style: const TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w500,
@@ -326,10 +328,9 @@ class InfoUIComponents {
   }
 
   // 언어 정보 섹션
-  static Widget _buildLanguageSection(
-      List<dynamic>? languageList,
-      TranslationService translationService
-      ) {
+  static Widget _buildLanguageSection(List<dynamic>? languageList) {
+    final language = currentCountryCode.toUpperCase();
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -342,7 +343,7 @@ class InfoUIComponents {
             ),
             const SizedBox(width: 4),
             Text(
-              translationService.get('available_languages', '사용 가능 언어'),
+              MypageTranslations.getTranslation('available_languages', language),
               style: const TextStyle(
                 color: InfoConstants.textGrey,
                 fontSize: 12,
@@ -352,25 +353,24 @@ class InfoUIComponents {
           ],
         ),
         const SizedBox(height: 8),
-        _buildLanguageList(languageList, translationService),
+        _buildLanguageList(languageList),
       ],
     );
   }
 
   // 언어 목록 렌더링
-  static Widget _buildLanguageList(
-      List<dynamic>? languageList,
-      TranslationService translationService
-      ) {
+  static Widget _buildLanguageList(List<dynamic>? languageList) {
+    final language = currentCountryCode.toUpperCase();
+
     if (languageList == null || languageList.isEmpty) {
       return const SizedBox();
     }
 
     try {
       List<Widget> languageWidgets = languageList.map((lang) {
-        String translatedLanguage = translationService.get(
+        String translatedLanguage = MypageTranslations.getTranslation(
             lang.toString().toLowerCase(),
-            lang.toString()
+            language
         );
 
         return Container(

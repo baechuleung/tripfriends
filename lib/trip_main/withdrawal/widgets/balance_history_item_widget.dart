@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import '../controller/balance_history_controller.dart';
+import '../../../translations/mypage_translations.dart';
+import '../../../main.dart'; // currentCountryCode
 
 class BalanceHistoryItemWidget extends StatefulWidget {
   final Map<String, dynamic> historyItem;
@@ -16,29 +18,6 @@ class BalanceHistoryItemWidget extends StatefulWidget {
 }
 
 class _BalanceHistoryItemWidgetState extends State<BalanceHistoryItemWidget> {
-  bool _mounted = true;
-
-  @override
-  void initState() {
-    super.initState();
-    _initTranslation();
-  }
-
-  @override
-  void dispose() {
-    _mounted = false;
-    super.dispose();
-  }
-
-  Future<void> _initTranslation() async {
-    if (widget.controller.translationService != null) {
-      await widget.controller.translationService!.init();
-      if (_mounted) {
-        setState(() {});
-      }
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     final String type = widget.historyItem['type'] ?? 'unknown';
@@ -200,6 +179,8 @@ class _BalanceHistoryItemWidgetState extends State<BalanceHistoryItemWidget> {
 
   // 거래 유형별 제목 가져오기
   String _getTransactionTitle(String type) {
+    final language = currentCountryCode.toUpperCase();
+
     // 데이터에 거래 제목이 있으면 사용
     if (widget.historyItem['title'] != null && widget.historyItem['title'].toString().isNotEmpty) {
       return widget.historyItem['title'];
@@ -214,13 +195,13 @@ class _BalanceHistoryItemWidgetState extends State<BalanceHistoryItemWidget> {
     // 없으면 유형별 기본값 사용
     switch (type) {
       case 'earn':
-        return widget.controller.translationService?.get('earn_points', '적립금 적립') ?? '적립금 적립';
+        return MypageTranslations.getTranslation('earn_points', language);
       case 'use':
-        return widget.controller.translationService?.get('use_points', '적립금 사용') ?? '적립금 사용';
+        return MypageTranslations.getTranslation('use_points', language);
       case 'withdrawal':
-        return widget.controller.translationService?.get('withdraw_points', '적립금 출금') ?? '적립금 출금';
+        return MypageTranslations.getTranslation('withdraw_points', language);
       default:
-        return widget.controller.translationService?.get('points_transaction', '적립금 거래') ?? '적립금 거래';
+        return MypageTranslations.getTranslation('points_transaction', language);
     }
   }
 

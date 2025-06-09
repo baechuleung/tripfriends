@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'dart:convert';
 import '../../controller/detail/register_detail_controller.dart';
+import '../../controller/detail/validation_controller.dart';
 import '../../../../main.dart';
+import '../../../../translations/auth_detail_translations.dart';
 
 class IntroductionInput extends StatefulWidget {
   final RegisterDetailController controller;
@@ -17,64 +19,28 @@ class IntroductionInput extends StatefulWidget {
 }
 
 class _IntroductionInputState extends State<IntroductionInput> {
-  Map<String, String> currentLabels = {
-    "introduction": "자기소개",
-    "introduction_placeholder": "당신의 특별한 경험과 장점을 알려주세요.\n여행자들에게 어떤 도움을 줄 수 있는지 설명해주세요.",
-    "introduction_point_info": "300자 이상 작성 시 적립금을 받을 수 있습니다.",
-  };
-
-  bool get isEligibleForPoints =>
-      widget.controller.introductionController.text.trim().length >=
-          RegisterDetailController.minimumIntroductionLength;
-
   @override
   void initState() {
     super.initState();
-    loadTranslations();
-    // 텍스트 변경 감지를 위한 리스너 추가
     widget.controller.introductionController.addListener(_onTextChanged);
   }
 
   @override
   void dispose() {
-    // 리스너 제거
     widget.controller.introductionController.removeListener(_onTextChanged);
     super.dispose();
   }
 
   void _onTextChanged() {
-    // 텍스트가 변경될 때마다 화면 갱신 (포인트 지급 자격 상태 업데이트)
     setState(() {});
-  }
-
-  Future<void> loadTranslations() async {
-    try {
-      final String translationJson = await rootBundle.loadString('assets/data/auth_translations.json');
-      final translationData = json.decode(translationJson);
-      final translations = translationData['translations'];
-
-      setState(() {
-        currentLabels.forEach((key, _) {
-          if (translations[key] != null) {
-            currentLabels[key] = translations[key][currentCountryCode] ??
-                translations[key]['KR'] ??
-                currentLabels[key];
-          }
-        });
-      });
-    } catch (e) {
-      debugPrint('Error loading translations: $e');
-    }
   }
 
   @override
   Widget build(BuildContext context) {
     // 현재 입력된 자기소개 텍스트 길이
     final currentLength = widget.controller.introductionController.text.trim().length;
-    // 최소 필요 길이
-    final requiredLength = RegisterDetailController.minimumIntroductionLength;
-    // 포인트 지급 자격 여부
-    final isEligible = currentLength >= requiredLength;
+    // 100자 이상일 때 색상 변경
+    final isColorChangeEligible = currentLength >= 100;
 
     return Container(
       decoration: ShapeDecoration(
@@ -93,7 +59,7 @@ class _IntroductionInputState extends State<IntroductionInput> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  currentLabels['introduction']!,
+                  AuthDetailTranslations.getTranslation('introduction', currentCountryCode),
                   style: TextStyle(
                     color: const Color(0xFF353535),
                     fontSize: 14,
@@ -108,7 +74,7 @@ class _IntroductionInputState extends State<IntroductionInput> {
             Container(
               decoration: BoxDecoration(
                 border: Border.all(
-                  color: isEligible ? Color(0xFF3182F6).withOpacity(0.5) : const Color(0xFFE5E5E5),
+                  color: isColorChangeEligible ? Color(0xFF3182F6).withOpacity(0.5) : const Color(0xFFE5E5E5),
                 ),
                 borderRadius: BorderRadius.circular(5),
               ),
@@ -116,21 +82,24 @@ class _IntroductionInputState extends State<IntroductionInput> {
                 controller: widget.controller.introductionController,
                 maxLines: 5,
                 maxLength: 500,
+                inputFormatters: [
+                  LengthLimitingTextInputFormatter(500),
+                ],
                 decoration: InputDecoration(
                   contentPadding: const EdgeInsets.all(16),
                   border: InputBorder.none,
-                  hintText: currentLabels['introduction_placeholder'],
+                  hintText: AuthDetailTranslations.getTranslation('introduction_placeholder', currentCountryCode),
                   hintStyle: const TextStyle(
                     color: Color(0xFF999999),
                     fontSize: 12,
                     fontWeight: FontWeight.w500,
                   ),
                   counterStyle: TextStyle(
-                    color: isEligible ? Color(0xFF3182F6) : Color(0xFF999999),
+                    color: isColorChangeEligible ? Color(0xFF3182F6) : Color(0xFF999999),
                     fontSize: 12,
                     fontWeight: FontWeight.w500,
                   ),
-                  counterText: '$currentLength/$requiredLength',
+                  counterText: '$currentLength/500',
                 ),
                 style: const TextStyle(
                   color: Color(0xFF353535),
@@ -142,9 +111,9 @@ class _IntroductionInputState extends State<IntroductionInput> {
                   return Container(
                     margin: const EdgeInsets.only(right: 16.0, bottom: 8.0),
                     child: Text(
-                      '$currentLength/$requiredLength',
+                      '$currentLength/500',
                       style: TextStyle(
-                        color: isEligible ? Color(0xFF3182F6) : Color(0xFF999999),
+                        color: isColorChangeEligible ? Color(0xFF3182F6) : Color(0xFF999999),
                         fontSize: 12,
                         fontWeight: FontWeight.w500,
                       ),
@@ -153,27 +122,154 @@ class _IntroductionInputState extends State<IntroductionInput> {
                 },
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 8),
+            // 100자 미만일 때 경고 메시지
+            if (currentLength < 100) ...[
+              Padding(
+                padding: const EdgeInsets.only(bottom: 8.0),
+                child: Row(
+                  children: [
+                    const Icon(
+                      Icons.info_outline,
+                      size: 14,
+                      color: Color(0xFFFF5050),
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      AuthDetailTranslations.getTranslation('introduction_min_length', currentCountryCode),
+                      style: const TextStyle(
+                        color: Color(0xFFFF5050),
+                        fontSize: 12,
+                        fontWeight: FontWeight.w400,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
             Container(
               width: double.infinity,
-              height: 40,
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-              decoration: ShapeDecoration(
-                color: const Color(0xFFFF3E6C),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(5),
+                border: Border.all(color: const Color(0xFFE5E5E5)),
               ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    currentLabels['introduction_point_info']!,
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 12,
-                      fontFamily: 'Spoqa Han Sans Neo',
+                    '<${AuthDetailTranslations.getTranslation('introduction_writing_guide_title', currentCountryCode)}>',
+                    style: const TextStyle(
+                      color: Color(0xFF353535),
+                      fontSize: 14,
                       fontWeight: FontWeight.w700,
                     ),
+                  ),
+                  const SizedBox(height: 16),
+
+                  // 자기소개 작성 안내
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Icon(
+                        Icons.report_gmailerrorred,
+                        size: 20,
+                        color: Color(0xFFFF5050),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              AuthDetailTranslations.getTranslation('introduction_writing_guide', currentCountryCode),
+                              style: const TextStyle(
+                                color: Color(0xFF353535),
+                                fontSize: 13,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              '• ${AuthDetailTranslations.getTranslation('introduction_reward_desc', currentCountryCode)}',
+                              style: const TextStyle(
+                                color: Color(0xFF666666),
+                                fontSize: 12,
+                                fontWeight: FontWeight.w400,
+                                height: 1.4,
+                              ),
+                            ),
+                            Text(
+                              '• ${AuthDetailTranslations.getTranslation('introduction_content_guide', currentCountryCode)}',
+                              style: const TextStyle(
+                                color: Color(0xFF666666),
+                                fontSize: 12,
+                                fontWeight: FontWeight.w400,
+                                height: 1.4,
+                              ),
+                            ),
+                            Text(
+                              '• ${AuthDetailTranslations.getTranslation('introduction_warning_desc', currentCountryCode)}',
+                              style: const TextStyle(
+                                color: Color(0xFF666666),
+                                fontSize: 12,
+                                fontWeight: FontWeight.w400,
+                                height: 1.4,
+                              ),
+                            ),
+                            Text(
+                              '• ${AuthDetailTranslations.getTranslation('introduction_ad_warning', currentCountryCode)}',
+                              style: const TextStyle(
+                                color: Color(0xFF666666),
+                                fontSize: 12,
+                                fontWeight: FontWeight.w400,
+                                height: 1.4,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+
+                  // 적립금 지급 안내
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Icon(
+                        Icons.report_gmailerrorred,
+                        size: 20,
+                        color: Color(0xFFFF5050),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              AuthDetailTranslations.getTranslation('reward_payment_guide', currentCountryCode),
+                              style: const TextStyle(
+                                color: Color(0xFF353535),
+                                fontSize: 13,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              '• ${AuthDetailTranslations.getTranslation('reward_review_notice', currentCountryCode)}',
+                              style: const TextStyle(
+                                color: Color(0xFF666666),
+                                fontSize: 12,
+                                fontWeight: FontWeight.w400,
+                                height: 1.4,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),

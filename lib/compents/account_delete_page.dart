@@ -168,33 +168,51 @@ class _AccountDeletePageState extends State<AccountDeletePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(_t('delete_account')),
+        title: Text(
+          _t('delete_account'),
+          style: const TextStyle(
+            color: Color(0xFF353535),
+            fontSize: 16,
+            fontFamily: 'Spoqa Han Sans Neo',
+            fontWeight: FontWeight.w500,
+          ),
+        ),
         backgroundColor: Colors.white,
         foregroundColor: Colors.black,
         elevation: 0,
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
-          : SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                _t('delete_check'),
-                style: const TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
+          : Container(
+        height: MediaQuery.of(context).size.height,
+        margin: const EdgeInsets.only(left: 8, right: 8, top: 16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  _t('delete_check'),
+                  style: const TextStyle(
+                    color: Color(0xFF353535),
+                    fontSize: 18,
+                    fontFamily: 'Spoqa Han Sans Neo',
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 16),
-              _buildWarningCard(),
-              const SizedBox(height: 24),
-              _buildAgreementCheckbox(),
-              const SizedBox(height: 32),
-              _buildDeleteButton(),
-            ],
+                const SizedBox(height: 24),
+                _buildWarningCard(),
+                const SizedBox(height: 32),
+                _buildAgreementCheckbox(),
+                const SizedBox(height: 40),
+                _buildDeleteButton(),
+              ],
+            ),
           ),
         ),
       ),
@@ -202,66 +220,181 @@ class _AccountDeletePageState extends State<AccountDeletePage> {
   }
 
   Widget _buildWarningCard() {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.grey[100],
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            _t('delete_warning'),
-            style: const TextStyle(fontWeight: FontWeight.bold),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          _t('delete_warning'),
+          style: const TextStyle(
+            color: Color(0xFF4E5968),
+            fontSize: 14,
+            fontFamily: 'Spoqa Han Sans Neo',
+            fontWeight: FontWeight.w700,
           ),
-          const SizedBox(height: 8),
-          Text('• ${_t('delete_warning_1')}'),
-          Text('• ${_t('delete_warning_2')}'),
-          Text('• ${_t('delete_warning_3')}'),
-          Text('• ${_t('delete_warning_4')}'),
-          Text('• ${_t('delete_warning_5')}'),
-        ],
-      ),
+        ),
+        const SizedBox(height: 16),
+        Padding(
+          padding: const EdgeInsets.only(left: 16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                '• ${_t('delete_warning_1')}',
+                style: const TextStyle(
+                  color: Color(0xFF353535),
+                  fontSize: 14,
+                  fontFamily: 'Spoqa Han Sans Neo',
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                '• ${_t('delete_warning_2')}',
+                style: const TextStyle(
+                  color: Color(0xFF353535),
+                  fontSize: 14,
+                  fontFamily: 'Spoqa Han Sans Neo',
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                '• ${_t('delete_warning_3')}',
+                style: const TextStyle(
+                  color: Color(0xFF353535),
+                  fontSize: 14,
+                  fontFamily: 'Spoqa Han Sans Neo',
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                '• ${_t('delete_warning_4')}',
+                style: const TextStyle(
+                  color: Color(0xFF353535),
+                  fontSize: 14,
+                  fontFamily: 'Spoqa Han Sans Neo',
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                '• ${_t('delete_warning_5')}',
+                style: const TextStyle(
+                  color: Color(0xFF353535),
+                  fontSize: 14,
+                  fontFamily: 'Spoqa Han Sans Neo',
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 
   Widget _buildAgreementCheckbox() {
     return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Checkbox(
-          value: _isChecked,
-          onChanged: (value) {
+        GestureDetector(
+          onTap: () {
             setState(() {
-              _isChecked = value ?? false;
+              _isChecked = !_isChecked;
             });
           },
+          child: Container(
+            width: 24,
+            height: 24,
+            decoration: BoxDecoration(
+              color: _isChecked ? const Color(0xFF5A7EF5) : Colors.white,
+              borderRadius: BorderRadius.circular(4),
+              border: Border.all(
+                color: _isChecked ? const Color(0xFF5A7EF5) : const Color(0xFFE0E0E0),
+                width: 1.5,
+              ),
+            ),
+            child: _isChecked
+                ? const Icon(
+              Icons.check,
+              color: Colors.white,
+              size: 16,
+            )
+                : null,
+          ),
         ),
+        const SizedBox(width: 12),
         Expanded(
-          child: Text(_t('delete_agreement')),
+          child: Text(
+            _t('delete_agreement'),
+            style: const TextStyle(
+              color: Color(0xFF353535),
+              fontSize: 14,
+              fontFamily: 'Spoqa Han Sans Neo',
+              fontWeight: FontWeight.w700,
+            ),
+          ),
         ),
       ],
     );
   }
 
   Widget _buildDeleteButton() {
-    return SizedBox(
-      width: double.infinity,
-      height: 50,
-      child: ElevatedButton(
-        onPressed: _isChecked ? _showDeleteConfirmationDialog : null,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.red,
-          disabledBackgroundColor: Colors.grey,
-        ),
-        child: Text(
-          _t('delete_account'),
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 16,
+    return Row(
+      children: [
+        Expanded(
+          child: Container(
+            height: 45,
+            decoration: ShapeDecoration(
+              color: const Color(0xFFE8F2FF),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
+            ),
+            child: InkWell(
+              onTap: () {
+                Navigator.of(context).pop();
+              },
+              borderRadius: BorderRadius.circular(5),
+              child: Center(
+                child: Text(
+                  _t('cancel'),
+                  style: const TextStyle(
+                    color: Color(0xFF3182F6),
+                    fontSize: 14,
+                    fontFamily: 'Spoqa Han Sans Neo',
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+            ),
           ),
         ),
-      ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Container(
+            height: 45,
+            decoration: ShapeDecoration(
+              color: _isChecked ? const Color(0xFFFFE8E8) : const Color(0xFFE0E0E0),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
+            ),
+            child: InkWell(
+              onTap: _isChecked ? _showDeleteConfirmationDialog : null,
+              borderRadius: BorderRadius.circular(5),
+              child: Center(
+                child: Text(
+                  _t('delete_account'),
+                  style: TextStyle(
+                    color: _isChecked ? const Color(0xFFFF5050) : const Color(0xFF999999),
+                    fontSize: 14,
+                    fontFamily: 'Spoqa Han Sans Neo',
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

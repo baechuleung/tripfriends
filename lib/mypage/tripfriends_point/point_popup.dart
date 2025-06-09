@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
-import '../../services/translation_service.dart';
+import '../../translations/mypage_translations.dart';
+import '../../main.dart'; // currentCountryCode
 
 class PointPopup extends StatelessWidget {
   final int points;
   final VoidCallback onConfirm;
   final VoidCallback onCancel;
-  final TranslationService _translationService = TranslationService();
 
-  PointPopup({
+  const PointPopup({
     Key? key,
     required this.points,
     required this.onConfirm,
@@ -27,6 +27,8 @@ class PointPopup extends StatelessWidget {
   }
 
   Widget contentBox(BuildContext context) {
+    final language = currentCountryCode.toUpperCase();
+
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -40,7 +42,7 @@ class PointPopup extends StatelessWidget {
           const SizedBox(height: 16),
           // LANK UP! 타이틀
           Text(
-            _translationService.get('rank_up', 'LANK UP!'),
+            MypageTranslations.getTranslation('rank_up', language),
             style: const TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.bold,
@@ -62,7 +64,7 @@ class PointPopup extends StatelessWidget {
                   ),
                 ),
                 TextSpan(
-                  text: _translationService.get('point_usage_question', '를\n사용하시겠습니까?'),
+                  text: MypageTranslations.getTranslation('point_usage_question', language),
                   style: const TextStyle(
                     fontSize: 16,
                     color: Color(0xFF767676),
@@ -88,7 +90,7 @@ class PointPopup extends StatelessWidget {
                     ),
                     alignment: Alignment.center,
                     child: Text(
-                      _translationService.get('cancel', '취소'),
+                      MypageTranslations.getTranslation('cancel', language),
                       style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
@@ -111,7 +113,7 @@ class PointPopup extends StatelessWidget {
                     ),
                     alignment: Alignment.center,
                     child: Text(
-                      _translationService.get('confirm', '확인'),
+                      MypageTranslations.getTranslation('confirm', language),
                       style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,

@@ -3,7 +3,7 @@ import 'package:flutter/services.dart';
 import 'dart:convert';
 import 'dart:async';
 import 'main.dart';
-import 'main/main_screen.dart';
+import 'trip_main/trip_main_screen.dart';
 import 'auth/auth_main_page.dart';
 import 'services/shared_preferences_service.dart';
 import 'services/translation_service.dart';

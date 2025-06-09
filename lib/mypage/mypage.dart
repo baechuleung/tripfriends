@@ -2,17 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'dart:convert';
 import '../main.dart';
-import 'profile/widgets/logged_in_profile.dart'; // profile.dart 대신 logged_in_profile.dart에서 가져오기
+import 'profile/widgets/logged_in_profile.dart';
 import '../services/shared_preferences_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../mypage/tripfriends_info/info_widget.dart';
-import '../services/translation_service.dart'; // TranslationService 임포트 추가
-import 'recommended_friends/recommended_friends_button_widget.dart'; // 나를 추천한 친구들 버튼 위젯 임포트 추가
-import 'withdrawal/widgets/balance_card_widget.dart'; // balance_card_widget 추가
-import 'withdrawal/controller/balance_controller.dart'; // balance_controller 추가
-import '../compents/logout/logout_controller.dart'; // 로그아웃 컨트롤러 추가
-import '../compents/logout/logout_widget.dart'; // 로그아웃 위젯 추가
-import 'active/active_toggle_widget.dart'; // Active 토글 위젯 추가
+import 'recommended_friends/recommended_friends_button_widget.dart';
+import 'active/active_toggle_widget.dart';
 
 class MyPage extends StatefulWidget {
   const MyPage({super.key});
@@ -23,35 +18,12 @@ class MyPage extends StatefulWidget {
 class _MyPageState extends State<MyPage> {
   Map<String, String> countryNames = {};
   Key _profileKey = UniqueKey();
-  final TranslationService _translationService = TranslationService(); // TranslationService 인스턴스 생성
-  late BalanceController _balanceController; // balance_controller 인스턴스 추가
-  late LogoutController _logoutController; // 로그아웃 컨트롤러 인스턴스 추가
 
   @override
   void initState() {
     super.initState();
     loadTranslations();
-    _initTranslationService(); // TranslationService 초기화 메소드 호출
     SharedPreferencesService.validateAndCleanSession();
-
-    // balance_controller 초기화 추가
-    _balanceController = BalanceController();
-    _balanceController.init();
-
-    // 로그아웃 컨트롤러 초기화
-    _logoutController = LogoutController();
-  }
-
-  // TranslationService 초기화 메소드 추가
-  Future<void> _initTranslationService() async {
-    try {
-      await _translationService.init();
-      if (mounted) {
-        setState(() {});
-      }
-    } catch (e) {
-      debugPrint('Error initializing translation service: $e');
-    }
   }
 
   Future<void> loadTranslations() async {
@@ -95,20 +67,11 @@ class _MyPageState extends State<MyPage> {
                   // 로그인 상태
                   LoggedInProfileWidget(key: _profileKey),
                   const SizedBox(height: 16),
-                  ActiveToggleWidget(
-                    translationService: _translationService,
-                  ), // Active 토글 위젯 추가
+                  const ActiveToggleWidget(), // Active 토글 위젯 추가
                   const SizedBox(height: 16),
                   const InfoWidget(),
                   const SizedBox(height: 16),
-                  RecommendedFriendsButtonWidget(translationService: _translationService),
-                  const SizedBox(height: 16),
-                  BalanceCardWidget(controller: _balanceController),
-                  const SizedBox(height: 24),
-                  LogoutButtonWidget(
-                    controller: _logoutController,
-                    translationService: _translationService,
-                  ), // 번역 서비스가 적용된 로그아웃 버튼 추가
+                  const RecommendedFriendsButtonWidget(),
                 ],
                 const SizedBox(height: 16),
               ],

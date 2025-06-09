@@ -2,12 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '../../services/translation_service.dart';
+import '../../translations/mypage_translations.dart';
+import '../../main.dart'; // currentCountryCode
 
 class RecommendedFriendsController {
-  final TranslationService? translationService;
-
-  RecommendedFriendsController({this.translationService});
+  RecommendedFriendsController();
 
   // 사용자 정보 - 적립금 관련 속성 제거, 파트너 코드만 유지
   String referrerCode = "";
@@ -17,15 +16,10 @@ class RecommendedFriendsController {
   bool isLoading = true;
   String errorMessage = '';
 
-  // 번역 서비스 getter
-  TranslationService? get getTranslationService => translationService;
-
   // 번역 텍스트 가져오기
   String getTranslatedText(String key, String defaultText) {
-    if (translationService == null) {
-      return defaultText;
-    }
-    return translationService!.get(key, defaultText);
+    final language = currentCountryCode.toUpperCase();
+    return MypageTranslations.getTranslation(key, language);
   }
 
   // 사용자 데이터 로드 - 적립금 관련 속성 제거
@@ -62,7 +56,7 @@ class RecommendedFriendsController {
       final user = FirebaseAuth.instance.currentUser;
       if (user == null) {
         isLoading = false;
-        errorMessage = '로그인이 필요합니다';
+        errorMessage = getTranslatedText('login_required', '로그인이 필요합니다');
         return;
       }
 
@@ -74,7 +68,7 @@ class RecommendedFriendsController {
 
       if (!currentUserData.exists) {
         isLoading = false;
-        errorMessage = '사용자 정보를 찾을 수 없습니다';
+        errorMessage = getTranslatedText('user_not_found', '사용자 정보를 찾을 수 없습니다');
         return;
       }
 
@@ -142,7 +136,10 @@ class RecommendedFriendsController {
       isLoading = false;
     } catch (e) {
       isLoading = false;
-      errorMessage = '추천받은 친구 목록을 불러오는 중 오류가 발생했습니다';
+      errorMessage = getTranslatedText(
+          'error_loading_history',
+          '추천받은 친구 목록을 불러오는 중 오류가 발생했습니다'
+      );
       debugPrint('친구 목록 로드 에러: $e');
     }
   }

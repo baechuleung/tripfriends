@@ -4,9 +4,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../translations/main_translations.dart';
 import '../../main.dart' show currentCountryCode, languageChangeController;
 import 'dart:async';
-import '../../mypage/withdrawal/balance_history_page.dart';
-import '../../mypage/withdrawal/withdrawal_page.dart';
-import '../../services/translation_service.dart';
+import '../withdrawal/balance_history_page.dart';
+import '../withdrawal/withdrawal_page.dart';
 
 class PointSection extends StatefulWidget {
   const PointSection({super.key});
@@ -177,14 +176,10 @@ class _PointSectionState extends State<PointSection> {
                   Expanded(
                     child: GestureDetector(
                       onTap: () {
-                        // TranslationService 인스턴스 생성
-                        final translationService = TranslationService();
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => BalanceHistoryPage(
-                              translationService: translationService,
-                            ),
+                            builder: (context) => const BalanceHistoryPage(),
                           ),
                         );
                       },
@@ -210,14 +205,10 @@ class _PointSectionState extends State<PointSection> {
                   Expanded(
                     child: GestureDetector(
                       onTap: () {
-                        // TranslationService 인스턴스 생성
-                        final translationService = TranslationService();
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => WithdrawalPage(
-                              translationService: translationService,
-                            ),
+                            builder: (context) => const WithdrawalPage(),
                           ),
                         );
                       },

@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '../../../services/translation_service.dart';
+import '../../../translations/mypage_translations.dart';
+import '../../../main.dart'; // currentCountryCode
 
 class BalanceHistoryController {
-  final TranslationService? translationService;
-
   // 상태 관리
   bool isLoading = true;
   String errorMessage = '';
@@ -14,18 +13,10 @@ class BalanceHistoryController {
   // 사용자 정보 추가
   String currencySymbol = '₩';  // 기본값 설정
 
-  BalanceHistoryController({this.translationService});
-
-  // 번역 초기화
-  Future<void> initTranslations() async {
-    if (translationService != null) {
-      await translationService!.init();
-    }
-  }
+  BalanceHistoryController();
 
   // 초기화 메서드
   Future<void> init() async {
-    await initTranslations();
     await loadUserData();  // 사용자 데이터 로드 추가
     await loadBalanceHistory();
   }
@@ -54,6 +45,7 @@ class BalanceHistoryController {
 
   // 적립금 내역 로드
   Future<void> loadBalanceHistory() async {
+    final language = currentCountryCode.toUpperCase();
     isLoading = true;
     errorMessage = '';
     balanceHistory = [];
@@ -62,7 +54,7 @@ class BalanceHistoryController {
       final user = FirebaseAuth.instance.currentUser;
       if (user == null) {
         isLoading = false;
-        errorMessage = translationService?.get('error_login_required', '로그인이 필요합니다') ?? '로그인이 필요합니다';
+        errorMessage = MypageTranslations.getTranslation('error_login_required', language);
         return;
       }
 
@@ -108,10 +100,7 @@ class BalanceHistoryController {
       isLoading = false;
     } catch (e) {
       isLoading = false;
-      errorMessage = translationService?.get(
-          'error_loading_history',
-          '적립금 내역을 불러오는 중 오류가 발생했습니다'
-      ) ?? '적립금 내역을 불러오는 중 오류가 발생했습니다';
+      errorMessage = MypageTranslations.getTranslation('error_loading_history', language);
       debugPrint('적립금 내역 로드 에러: $e');
     }
   }
@@ -123,45 +112,48 @@ class BalanceHistoryController {
 
   // 거래 유형 텍스트 가져오기
   String getTypeText(String type) {
+    final language = currentCountryCode.toUpperCase();
     switch (type) {
       case 'earn':
-        return translationService?.get('type_earn', '적립') ?? '적립';
+        return MypageTranslations.getTranslation('type_earn', language);
       case 'withdrawal':
-        return translationService?.get('type_withdrawal', '출금') ?? '출금';
+        return MypageTranslations.getTranslation('type_withdrawal', language);
       default:
-        return translationService?.get('type_unknown', '기타') ?? '기타';
+        return MypageTranslations.getTranslation('type_unknown', language);
     }
   }
 
 // source 값에 따른 번역 텍스트 가져오기
   String getSourceText(String source) {
+    final language = currentCountryCode.toUpperCase();
     switch (source) {
       case 'video_upload':
-        return translationService?.get('source_video_upload', '동영상 업로드') ?? '동영상 업로드';
+        return MypageTranslations.getTranslation('source_video_upload', language);
       case 'profile_completion':
-        return translationService?.get('source_profile_completion', '프로필 완성') ?? '프로필 완성';
+        return MypageTranslations.getTranslation('source_profile_completion', language);
       case 'withdrawal':
-        return translationService?.get('source_withdrawal', '적립금 출금') ?? '적립금 출금';
+        return MypageTranslations.getTranslation('source_withdrawal', language);
       case 'referral':
-        return translationService?.get('source_referral', '친구 초대') ?? '친구 초대';
+        return MypageTranslations.getTranslation('source_referral', language);
       case 'review':
-        return translationService?.get('source_review', '리뷰 작성') ?? '리뷰 작성';
+        return MypageTranslations.getTranslation('source_review', language);
       default:
-        return translationService?.get('source_unknown', '적립금 적립') ?? '적립금 적립';
+        return MypageTranslations.getTranslation('source_unknown', language);
     }
   }
 
   // 출금 상태 텍스트 가져오기 (withdrawal_status 필드가 있는 경우)
   String getWithdrawalStatusText(String status) {
+    final language = currentCountryCode.toUpperCase();
     switch (status) {
       case 'pending':
-        return translationService?.get('status_pending', '처리 중') ?? '처리 중';
+        return MypageTranslations.getTranslation('status_pending', language);
       case 'completed':
-        return translationService?.get('status_completed', '완료') ?? '완료';
+        return MypageTranslations.getTranslation('status_completed', language);
       case 'rejected':
-        return translationService?.get('status_rejected', '거절됨') ?? '거절됨';
+        return MypageTranslations.getTranslation('status_rejected', language);
       default:
-        return translationService?.get('status_unknown', '알 수 없음') ?? '알 수 없음';
+        return MypageTranslations.getTranslation('status_unknown', language);
     }
   }
 

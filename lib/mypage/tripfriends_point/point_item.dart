@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import '../../services/translation_service.dart';
+import '../../translations/mypage_translations.dart';
+import '../../main.dart'; // currentCountryCode
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'point_popup.dart'; // 팝업 위젯 임포트
@@ -20,10 +21,12 @@ class PointItem extends StatelessWidget {
 
   // 추천 프렌즈 활성화 함수
   Future<void> _activateRecommendation(BuildContext context) async {
+    final language = currentCountryCode.toUpperCase();
+
     try {
       final user = FirebaseAuth.instance.currentUser;
       if (user == null) {
-        _showErrorSnackBar(context, TranslationService().get('login_required', '로그인이 필요합니다.'));
+        _showErrorSnackBar(context, MypageTranslations.getTranslation('login_required', language));
         return;
       }
 
@@ -34,20 +37,20 @@ class PointItem extends StatelessWidget {
           .get();
 
       if (!userDoc.exists) {
-        _showErrorSnackBar(context, TranslationService().get('user_not_found', '사용자 정보를 찾을 수 없습니다.'));
+        _showErrorSnackBar(context, MypageTranslations.getTranslation('user_not_found', language));
         return;
       }
 
       final userData = userDoc.data();
       if (userData == null) {
-        _showErrorSnackBar(context, TranslationService().get('no_user_data', '사용자 데이터가 없습니다.'));
+        _showErrorSnackBar(context, MypageTranslations.getTranslation('no_user_data', language));
         return;
       }
 
       // 현재 포인트 확인
       final currentUserPoint = userData['point'] ?? 0;
       if (currentUserPoint < 500) {
-        _showErrorSnackBar(context, TranslationService().get('insufficient_points', '포인트가 부족합니다.'));
+        _showErrorSnackBar(context, MypageTranslations.getTranslation('insufficient_points', language));
         return;
       }
 
@@ -64,9 +67,9 @@ class PointItem extends StatelessWidget {
       });
 
       // 성공 메시지 표시
-      _showSuccessSnackBar(context, TranslationService().get('recommendation_activated', '추천 프렌즈가 활성화되었습니다!'));
+      _showSuccessSnackBar(context, MypageTranslations.getTranslation('recommendation_activated', language));
     } catch (e) {
-      _showErrorSnackBar(context, TranslationService().get('error_occurred', '오류가 발생했습니다: ') + e.toString());
+      _showErrorSnackBar(context, MypageTranslations.getTranslation('error_occurred', language) + ': ' + e.toString());
     }
   }
 
@@ -113,8 +116,7 @@ class PointItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // TranslationService 인스턴스화
-    final TranslationService _translationService = TranslationService();
+    final language = currentCountryCode.toUpperCase();
 
     // 포인트 형식 지정 (천 단위 구분자 추가)
     final formattedPoint = currentPoint.toString()
@@ -137,7 +139,7 @@ class PointItem extends StatelessWidget {
                 child: Row(
                   children: [
                     Text(
-                      _translationService.get('recommended_friends', '추천 프렌즈'),
+                      MypageTranslations.getTranslation('recommended_friends', language),
                       style: const TextStyle(
                         fontSize: 16,
                         color: Color(0xFF353535),
@@ -224,7 +226,7 @@ class PointItem extends StatelessWidget {
                       ),
                       child: Center(
                         child: Text(
-                          '$rankUpText ${rankUpPoint} P ${_translationService.get('p_usage', '사용')}',
+                          '$rankUpText ${rankUpPoint} P ${MypageTranslations.getTranslation('p_usage', language)}',
                           style: const TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.bold,
@@ -255,7 +257,7 @@ class PointItem extends StatelessWidget {
                   ),
                   child: Center(
                     child: Text(
-                      '$rankUpText ${rankUpPoint} ${_translationService.get('p_usage', '사용')}',
+                      '$rankUpText ${rankUpPoint} ${MypageTranslations.getTranslation('p_usage', language)}',
                       style: const TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.bold,

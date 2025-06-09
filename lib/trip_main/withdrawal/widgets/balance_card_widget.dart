@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../controller/balance_controller.dart';
-import '../../withdrawal/withdrawal_page.dart';
+import '../withdrawal_page.dart';
 import '../balance_history_page.dart';
 import '../../../main.dart';  // currentCountryCode 접근용
+import '../../../translations/mypage_translations.dart';
 
 class BalanceCardWidget extends StatefulWidget {
   final BalanceController controller;
@@ -40,7 +41,6 @@ class _BalanceCardWidgetState extends State<BalanceCardWidget> {
     // 디버그 정보 출력
     debugPrint('BalanceCardWidget 초기화 완료');
     debugPrint('현재 국가 코드: $currentCountryCode');
-    debugPrint('컨트롤러 언어 코드: ${widget.controller.getCurrentLanguage()}');
   }
 
   @override
@@ -65,15 +65,12 @@ class _BalanceCardWidgetState extends State<BalanceCardWidget> {
 
   // 적립금 카드 내용
   Widget _buildBalanceCardContent(BuildContext context) {
+    final language = currentCountryCode.toUpperCase();
+
     // minimum_withdrawal 번역 준비
-    String minimumWithdrawalText = '출금은 {symbol} {amount} 이상 부터 가능합니다.';
+    String minimumWithdrawalText = MypageTranslations.getTranslation('minimum_withdrawal', language);
 
-    String translatedText = widget.controller.translationService.get(
-        'minimum_withdrawal',
-        minimumWithdrawalText
-    );
-
-    minimumWithdrawalText = translatedText
+    minimumWithdrawalText = minimumWithdrawalText
         .replaceAll('{symbol}', widget.controller.currencySymbol)
         .replaceAll('{amount}', widget.controller.withdrawalLimit);
 
@@ -221,7 +218,8 @@ class _BalanceCardWidgetState extends State<BalanceCardWidget> {
   }
 
   Widget _buildBalanceHistoryButton(BuildContext context) {
-    String balanceHistoryText = widget.controller.translationService.get('balance_history', '적립금내역');
+    final language = currentCountryCode.toUpperCase();
+    String balanceHistoryText = MypageTranslations.getTranslation('balance_history', language);
     debugPrint('번역된 적립금내역 텍스트: $balanceHistoryText');
 
     return SizedBox(
@@ -231,9 +229,7 @@ class _BalanceCardWidgetState extends State<BalanceCardWidget> {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => BalanceHistoryPage(
-                translationService: widget.controller.getTranslationService,
-              ),
+              builder: (context) => const BalanceHistoryPage(),
             ),
           ).then((_) {
             // 내역 화면에서 돌아오면 데이터 갱신
@@ -262,7 +258,8 @@ class _BalanceCardWidgetState extends State<BalanceCardWidget> {
   }
 
   Widget _buildWithdrawButton(BuildContext context) {
-    String withdrawText = widget.controller.translationService.get('withdraw', '출금하기');
+    final language = currentCountryCode.toUpperCase();
+    String withdrawText = MypageTranslations.getTranslation('withdraw', language);
     debugPrint('번역된 출금하기 텍스트: $withdrawText');
 
     return SizedBox(
@@ -272,9 +269,7 @@ class _BalanceCardWidgetState extends State<BalanceCardWidget> {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => WithdrawalPage(
-                translationService: widget.controller.getTranslationService,
-              ),
+              builder: (context) => const WithdrawalPage(),
             ),
           ).then((_) {
             // 출금 화면에서 돌아오면 데이터 갱신
