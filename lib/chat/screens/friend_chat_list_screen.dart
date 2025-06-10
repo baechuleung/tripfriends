@@ -86,53 +86,78 @@ class _ChatListScreenState extends State<ChatListScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF9FAFB),
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(
+            Icons.arrow_back_ios,
+            color: Color(0xFF353535),
+            size: 20,
+          ),
+          onPressed: () {
+            // MainPage의 홈 탭(인덱스 0)으로 이동
+            Navigator.of(context).pushNamedAndRemoveUntil(
+              '/',
+                  (route) => false,
+            );
+          },
+        ),
+        titleSpacing: 0,
+        title: Row(
+          children: [
+            Text(
+              _chatListTitle,
+              style: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w500,
+                color: Color(0xFF353535),
+              ),
+            ),
+            const SizedBox(width: 8),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+              decoration: BoxDecoration(
+                color: const Color(0xFF237AFF),
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Text(
+                '${_chatItems.length}',
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          // 편집 아이콘 (세로 점 3개)
+          if (_chatItems.isNotEmpty)
+            GestureDetector(
+              onTap: () => _controller.toggleEditMode(),
+              child: Padding(
+                padding: const EdgeInsets.only(right: 16),
+                child: Icon(
+                  _isEditMode ? Icons.close : Icons.more_vert,
+                  color: const Color(0xFF353535),
+                  size: 24,
+                ),
+              ),
+            ),
+        ],
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(1.0),
+          child: Container(
+            color: const Color(0xFFE5E5E5),
+            height: 1.0,
+          ),
+        ),
+      ),
       body: SafeArea(
         child: Column(
           children: [
-            // 헤더 부분 (타이틀과 카운트, 편집 버튼)
-            Container(
-              padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
-              child: Row(
-                children: [
-                  Text(
-                    _chatListTitle,
-                    style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w500,
-                        color: Color(0xFF353535)
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF237AFF),
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    child: Text(
-                      '${_chatItems.length}',
-                      style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 12,
-                          fontWeight: FontWeight.w500
-                      ),
-                    ),
-                  ),
-                  const Spacer(),
-                  // 편집 아이콘 (세로 점 3개)
-                  if (_chatItems.isNotEmpty)
-                    GestureDetector(
-                      onTap: () => _controller.toggleEditMode(),
-                      child: Icon(
-                        _isEditMode ? Icons.close : Icons.more_vert,
-                        color: const Color(0xFF353535),
-                        size: 24,
-                      ),
-                    ),
-                ],
-              ),
-            ),
-
             // 채팅 목록
             Expanded(
               child: Container(

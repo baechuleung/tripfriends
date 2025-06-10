@@ -1,4 +1,4 @@
-// lib/translations/main_translations.dart
+// lib/translations/trip_main_translations.dart
 
 class MainTranslations {
   static String getTranslation(String key, String language) {

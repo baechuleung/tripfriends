@@ -6,6 +6,15 @@ class MypageTranslations {
   }
 
   static const Map<String, Map<String, String>> translations = {
+    // Page Title
+    "my_page": {
+      "KR": "마이페이지",
+      "VN": "Trang cá nhân",
+      "JP": "マイページ",
+      "TH": "หน้าของฉัน",
+      "PH": "My Page"
+    },
+
     // Profile Section
     "approval_complete": {
       "KR": "승인 완료",
@@ -244,7 +253,7 @@ class MypageTranslations {
     "confirm": {
       "KR": "확인",
       "VN": "Xác nhận",
-      "JP": "確認",
+      "JP": "확認",
       "TH": "ยืนยัน",
       "PH": "Confirm"
     },

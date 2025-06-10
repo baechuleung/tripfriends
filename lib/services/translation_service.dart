@@ -103,7 +103,6 @@ class TranslationService {
       // 로드할 모든 JSON 파일 리스트
       final List<String> translationFiles = [
         'assets/data/auth_translations.json',
-        'assets/data/bottom_translations.json',
         'assets/data/city.json',
         'assets/data/country.json',
         'assets/data/currency.json',

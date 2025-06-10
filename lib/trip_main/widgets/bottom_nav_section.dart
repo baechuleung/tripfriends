@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
-import '../../translations/main_translations.dart';
+import '../../translations/trip_main_translations.dart';
 import '../../main.dart' show currentCountryCode, languageChangeController;
+import '../../compents/tripfriends_manual/screens/manual_detail_page.dart';
+import '../../services/translation_service.dart';
 import 'dart:async';
 
 class BottomNavSection extends StatefulWidget {
@@ -134,9 +136,17 @@ class _BottomNavSectionState extends State<BottomNavSection> {
           Expanded(
             child: _NavItem(
               iconPath: 'assets/main/shopping_cart.png',
-              label: MainTranslations.getTranslation('purchase_ticket', _currentLanguage),
+              label: MainTranslations.getTranslation('how_to_use', _currentLanguage),
               onTap: () {
-                // 이용권 구매 페이지로 이동
+                // 트립프렌즈 이용방법 페이지로 이동
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => ManualDetailPage(
+                      translationService: TranslationService(),
+                    ),
+                  ),
+                );
               },
             ),
           ),

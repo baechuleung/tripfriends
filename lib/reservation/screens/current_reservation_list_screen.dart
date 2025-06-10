@@ -4,6 +4,7 @@ import '../models/reservation_model.dart';
 import '../controllers/reservation_controller.dart';
 import '../widgets/current/current_reservation_header_widget.dart';
 import '../widgets/current/current_reservation_card_widget.dart';
+import '../widgets/common/reward_banner_widget.dart';
 import '../../translations/reservation_translations.dart';
 import '../../main.dart' show currentCountryCode, languageChangeController;
 import 'dart:async';
@@ -252,16 +253,23 @@ class _CurrentReservationListScreenState extends State<CurrentReservationListScr
 
     // 데이터가 있으면 목록 표시 (시간순 정렬)
     final reservations = _sortReservationsByDateTime(List.from(snapshot.data!));
-    return ListView.builder(
+    return ListView(
       physics: const AlwaysScrollableScrollPhysics(),
-      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
-      itemCount: reservations.length,
-      itemBuilder: (context, index) {
-        return CurrentReservationCardWidget(
-          reservation: reservations[index],
-          currentUserId: _auth.currentUser?.uid,
-        );
-      },
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      children: [
+        // 적립금 지급 안내 배너
+        const RewardBannerWidget(),
+        // 예약 목록
+        ...reservations.map((reservation) {
+          return Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            child: CurrentReservationCardWidget(
+              reservation: reservation,
+              currentUserId: _auth.currentUser?.uid,
+            ),
+          );
+        }).toList(),
+      ],
     );
   }
 }

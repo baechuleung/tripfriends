@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../compents/tripfriends_manual/screens/manual_detail_page.dart';
 import '../../services/translation_service.dart';
-import '../../translations/main_translations.dart';
+import '../../translations/trip_main_translations.dart';
 
 class TripFriendsBanner extends StatelessWidget {
   final String language;

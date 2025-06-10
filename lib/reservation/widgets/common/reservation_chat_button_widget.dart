@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:material_symbols_icons/symbols.dart';
 import '../../../translations/reservation_translations.dart';
 import '../../../chat/screens/friend_chat_screen.dart';
 
@@ -20,12 +21,6 @@ class ReservationChatButtonWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // 버튼 색상 설정 - pending이 아닌 경우 3182F6 색상 사용
-    final bool isPending = reservationStatus == 'pending';
-    final Color buttonBackgroundColor = isPending ? const Color(0xFFE8F2FF) : const Color(0xFF3182F6);
-    final Color buttonTextColor = isPending ? const Color(0xFF237AFF) : Colors.white;
-    final Color buttonBorderColor = isPending ? const Color(0xFF237AFF).withOpacity(0.3) : Colors.transparent;
-
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
       child: Row(
@@ -64,13 +59,12 @@ class ReservationChatButtonWidget extends StatelessWidget {
                 );
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: buttonBackgroundColor,
-                foregroundColor: buttonTextColor,
+                backgroundColor: const Color(0xFF0059B7),
+                foregroundColor: Colors.white,
                 minimumSize: const Size(double.infinity, 48),
                 padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(6),
-                  side: BorderSide(color: buttonBorderColor),
                 ),
                 elevation: 0,
               ),
@@ -78,14 +72,17 @@ class ReservationChatButtonWidget extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   const Icon(
-                    Icons.chat_bubble_outline,
+                    Symbols.forum_rounded,
                     size: 20,
+                    color: Colors.white,
                   ),
                   const SizedBox(width: 8),
                   Text(
                     ReservationTranslations.getTranslation('start_chat', currentLanguage),
                     style: const TextStyle(
-                      fontSize: 16,
+                      color: Colors.white,
+                      fontSize: 14,
+                      fontFamily: 'Spoqa Han Sans Neo',
                       fontWeight: FontWeight.w500,
                     ),
                   ),

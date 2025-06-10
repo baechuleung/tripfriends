@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '../../translations/main_translations.dart';
+import '../../translations/trip_main_translations.dart';
 import '../../main.dart' show currentCountryCode, languageChangeController;
 import 'dart:async';
 import '../withdrawal/balance_history_page.dart';

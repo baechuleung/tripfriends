@@ -255,6 +255,35 @@ class ReservationTranslations {
       "JP": "位置地図",
       "TH": "แผนที่ตำแหน่ง",
       "PH": "Location Map"
+    },
+    // Reward Banner
+    "reward_info_title": {
+      "KR": "적립금 지급 안내",
+      "VN": "Hướng dẫn thanh toán điểm thưởng",
+      "JP": "ポイント支給のご案内",
+      "TH": "แจ้งการจ่ายคะแนนสะสม",
+      "PH": "Reward Points Information"
+    },
+    "reward_info_desc_1": {
+      "KR": "예약자가 이용완료 후 리뷰작성 시, ",
+      "VN": "Khi người đặt viết đánh giá sau khi sử dụng dịch vụ, ",
+      "JP": "予約者がサービス利用後にレビューを作成すると、",
+      "TH": "เมื่อผู้จองเขียนรีวิวหลังใช้บริการ ",
+      "PH": "When the customer writes a review after service, "
+    },
+    "reward_amount": {
+      "KR": "₫ 9,000",
+      "VN": "₫ 9,000",
+      "JP": "₫ 9,000",
+      "TH": "₫ 9,000",
+      "PH": "₫ 9,000"
+    },
+    "reward_info_desc_2": {
+      "KR": "이 지급됩니다! 리뷰를 받을 수 있도록 좋은 서비스로 마무리해 보세요 😊",
+      "VN": "sẽ được thanh toán! Hãy hoàn thành với dịch vụ tốt để nhận được đánh giá 😊",
+      "JP": "が支給されます！レビューをもらえるよう良いサービスで仕上げましょう 😊",
+      "TH": "จะได้รับ! จบด้วยบริการที่ดีเพื่อรับรีวิว 😊",
+      "PH": "will be paid! Finish with good service to receive reviews 😊"
     }
   };
 }

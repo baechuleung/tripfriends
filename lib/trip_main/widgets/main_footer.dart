@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../translations/main_translations.dart';
+import '../../translations/trip_main_translations.dart';
 
 class MainFooter extends StatelessWidget {
   final String language;

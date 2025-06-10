@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'dart:async';
 import '../../translations/location_mapper.dart';
-import '../../translations/main_translations.dart';
+import '../../translations/trip_main_translations.dart';
 import '../../main.dart' show currentCountryCode, languageChangeController;
 
 class ReservationInfoCard extends StatefulWidget {

@@ -28,5 +28,40 @@ class ComponentsTranslations {
       "TH": "ยืนยัน",
       "PH": "Confirm"
     },
+    "home": {
+      "KR": "홈",
+      "VN": "Trang chủ",
+      "JP": "ホーム",
+      "TH": "หน้าแรก",
+      "PH": "Home"
+    },
+    "reservation_list": {
+      "KR": "예약목록",
+      "VN": "Đang đặt",
+      "JP": "予約一覧",
+      "TH": "จองอยู่",
+      "PH": "Ongoing"
+    },
+    "past_reservations": {
+      "KR": "지난예약",
+      "VN": "Đã đặt",
+      "JP": "過去予約",
+      "TH": "เก่าจอง",
+      "PH": "History"
+    },
+    "chat_list": {
+      "KR": "채팅 리스트",
+      "VN": "Trò chuyện",
+      "JP": "チャット",
+      "TH": "รายการแชท",
+      "PH": "Chat List"
+    },
+    "my_info": {
+      "KR": "내정보",
+      "VN": "Thông tin",
+      "JP": "マイ情報",
+      "TH": "ข้อมูลของฉัน",
+      "PH": "My Info"
+    }
   };
 }

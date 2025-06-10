@@ -115,15 +115,7 @@ class _PastReservationCardWidgetState extends State<PastReservationCardWidget> {
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             child: Row(
               children: [
-                Text(
-                  ReservationTranslations.getTranslation('service_completed_short', _currentLanguage),
-                  style: const TextStyle(
-                    color: Color(0xFF999999),
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-                const Spacer(),
+                // 예약 번호 (왼쪽)
                 Container(
                   padding: const EdgeInsets.all(5),
                   decoration: ShapeDecoration(
@@ -142,86 +134,77 @@ class _PastReservationCardWidgetState extends State<PastReservationCardWidget> {
                     ),
                   ),
                 ),
-              ],
-            ),
-          ),
-
-          // 구분선
-          const Divider(height: 1, color: Color(0xFFE5E5E5)),
-
-          // 최종 요금 섹션
-          Container(
-            padding: const EdgeInsets.all(16),
-            child: Row(
-              children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      ReservationTranslations.getTranslation('final_price', _currentLanguage),
-                      style: const TextStyle(
-                        color: Color(0xFF353535),
-                        fontSize: 12,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Row(
-                      children: [
-                        Text(
-                          controller.formatPrice(reservation.totalPriceInfo, reservation.currencySymbol),
-                          style: const TextStyle(
-                            color: Color(0xFF353535),
-                            fontSize: 18,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        // 이용 시간 표시
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 3),
-                          decoration: ShapeDecoration(
-                            color: const Color(0xFF999999),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
-                          ),
-                          child: Text(
-                            reservation.usedTime,
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 12,
-                              fontWeight: FontWeight.w700,
-                              height: 1.20,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
+                const Spacer(),
+                // 서비스 완료 상태 (오른쪽)
+                Text(
+                  ReservationTranslations.getTranslation('service_completed_short', _currentLanguage),
+                  style: const TextStyle(
+                    color: Color(0xFF999999),
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                  ),
                 ),
               ],
             ),
           ),
 
-          // 접을 수 있는 세부 정보 섹션
+          // 최종 요금 섹션 (클릭 가능)
           InkWell(
             onTap: () {
               setState(() {
                 _isExpanded = !_isExpanded;
               });
             },
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: Container(
+              padding: const EdgeInsets.all(16),
               child: Row(
                 children: [
-                  Text(
-                    ReservationTranslations.getTranslation('reservation_details', _currentLanguage),
-                    style: const TextStyle(
-                      color: Color(0xFF353535),
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                    ),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        ReservationTranslations.getTranslation('final_price', _currentLanguage),
+                        style: const TextStyle(
+                          color: Color(0xFF353535),
+                          fontSize: 12,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Row(
+                        children: [
+                          Text(
+                            controller.formatPrice(reservation.totalPriceInfo, reservation.currencySymbol),
+                            style: const TextStyle(
+                              color: Color(0xFF353535),
+                              fontSize: 18,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          // 이용 시간 표시
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 3),
+                            decoration: ShapeDecoration(
+                              color: const Color(0xFF999999),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
+                            ),
+                            child: Text(
+                              reservation.usedTime,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 12,
+                                fontWeight: FontWeight.w700,
+                                height: 1.20,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
                   ),
                   const Spacer(),
+                  // 화살표 아이콘
                   Icon(
                     _isExpanded ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down,
                     color: Colors.grey[600],
@@ -238,179 +221,200 @@ class _PastReservationCardWidgetState extends State<PastReservationCardWidget> {
             child: AnimatedOpacity(
               duration: const Duration(milliseconds: 300),
               opacity: _isExpanded ? 1.0 : 0.0,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // 1. 고객 이름
-                    Row(
-                      children: [
-                        const Icon(Icons.assignment_ind_outlined, size: 16, color: Color(0xFFCFCFCF)),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: Text(
-                            reservation.customerName,
-                            style: const TextStyle(
-                              color: Color(0xFF353535),
-                              fontSize: 14,
-                              fontWeight: FontWeight.w500,
-                            ),
-                            maxLines: 3,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  // 구분선
+                  const Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 16),
+                    child: Divider(height: 1, color: Color(0xFFE5E5E5)),
+                  ),
 
-                    // 2. 인원수
-                    Row(
-                      children: [
-                        const Icon(Icons.group_outlined, size: 16, color: Color(0xFFCFCFCF)),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: Text(
-                            '${reservation.personCount}${ReservationTranslations.getTranslation("people_count", _currentLanguage)}',
-                            style: const TextStyle(
-                              color: Color(0xFF353535),
-                              fontSize: 14,
-                              fontWeight: FontWeight.w500,
-                            ),
-                            maxLines: 3,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                      ],
+                  // 예약상세 정보 텍스트
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    child: Text(
+                      ReservationTranslations.getTranslation('reservation_details', _currentLanguage),
+                      style: const TextStyle(
+                        color: Color(0xFF353535),
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
-                    const SizedBox(height: 12),
+                  ),
 
-                    // 3. 날짜
-                    Row(
-                      children: [
-                        const Icon(Icons.event_available_outlined, size: 16, color: Color(0xFFCFCFCF)),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: Text(
-                            dateStr,
-                            style: const TextStyle(
-                              color: Color(0xFF353535),
-                              fontSize: 14,
-                              fontWeight: FontWeight.w500,
-                            ),
-                            maxLines: 3,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 12),
-
-                    // 4. 시작 시간
-                    Row(
-                      children: [
-                        const Icon(Icons.access_time, size: 16, color: Color(0xFFCFCFCF)),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: Text(
-                            reservation.startTime.isNotEmpty
-                                ? reservation.startTime
-                                : reservation.useTime,
-                            style: const TextStyle(
-                              color: Color(0xFF353535),
-                              fontSize: 14,
-                              fontWeight: FontWeight.w500,
-                            ),
-                            maxLines: 3,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 12),
-
-                    // 5. 일정 목적
-                    Row(
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Padding(
-                          padding: const EdgeInsets.only(top: 2),
-                          child: Icon(Icons.interests_outlined, size: 16, color: const Color(0xFFCFCFCF)),
-                        ),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: Text(
-                            purposeText,
-                            style: const TextStyle(
-                              color: Color(0xFF353535),
-                              fontSize: 14,
-                              fontWeight: FontWeight.w500,
+                        // 1. 고객 이름
+                        Row(
+                          children: [
+                            const Icon(Icons.assignment_ind_outlined, size: 16, color: Color(0xFFCFCFCF)),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                reservation.customerName,
+                                style: const TextStyle(
+                                  color: Color(0xFF353535),
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                                maxLines: 3,
+                                overflow: TextOverflow.ellipsis,
+                              ),
                             ),
-                            maxLines: 3,
-                            overflow: TextOverflow.ellipsis,
-                          ),
+                          ],
                         ),
-                      ],
-                    ),
-                    const SizedBox(height: 12),
+                        const SizedBox(height: 12),
 
-                    // 6. 주소(지도)
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Padding(
-                          padding: EdgeInsets.only(top: 2),
-                          child: Icon(Icons.location_on_outlined, size: 16, color: Color(0xFFCFCFCF)),
+                        // 2. 인원수
+                        Row(
+                          children: [
+                            const Icon(Icons.group_outlined, size: 16, color: Color(0xFFCFCFCF)),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                '${reservation.personCount}${ReservationTranslations.getTranslation("people_count", _currentLanguage)}',
+                                style: const TextStyle(
+                                  color: Color(0xFF353535),
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                                maxLines: 3,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
                         ),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              Expanded(
-                                child: InkWell(
-                                  onTap: () => _openMapUrl(addressText),
-                                  child: Text(
-                                    addressText,
-                                    style: const TextStyle(
-                                      color: Color(0xFF353535),
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w500,
-                                      decoration: TextDecoration.underline,
+                        const SizedBox(height: 12),
+
+                        // 3. 날짜
+                        Row(
+                          children: [
+                            const Icon(Icons.event_available_outlined, size: 16, color: Color(0xFFCFCFCF)),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                dateStr,
+                                style: const TextStyle(
+                                  color: Color(0xFF353535),
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                                maxLines: 3,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 12),
+
+                        // 4. 시작 시간
+                        Row(
+                          children: [
+                            const Icon(Icons.access_time, size: 16, color: Color(0xFFCFCFCF)),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                reservation.startTime.isNotEmpty
+                                    ? reservation.startTime
+                                    : reservation.useTime,
+                                style: const TextStyle(
+                                  color: Color(0xFF353535),
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                                maxLines: 3,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 12),
+
+                        // 5. 일정 목적
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.only(top: 2),
+                              child: Icon(Icons.interests_outlined, size: 16, color: const Color(0xFFCFCFCF)),
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                purposeText,
+                                style: const TextStyle(
+                                  color: Color(0xFF353535),
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                                maxLines: 3,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 12),
+
+                        // 6. 주소(지도)
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Padding(
+                              padding: EdgeInsets.only(top: 2),
+                              child: Icon(Icons.location_on_outlined, size: 16, color: Color(0xFFCFCFCF)),
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  Expanded(
+                                    child: InkWell(
+                                      onTap: () => _openMapUrl(addressText),
+                                      child: Text(
+                                        addressText,
+                                        style: const TextStyle(
+                                          color: Color(0xFF353535),
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w500,
+                                          decoration: TextDecoration.underline,
+                                        ),
+                                        maxLines: 3,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
                                     ),
-                                    maxLines: 3,
-                                    overflow: TextOverflow.ellipsis,
                                   ),
-                                ),
-                              ),
-                              GestureDetector(
-                                onTap: () => _openMapUrl(addressText),
-                                behavior: HitTestBehavior.opaque,
-                                child: Container(
-                                  padding: EdgeInsets.zero,
-                                  height: 20,
-                                  alignment: Alignment.center,
-                                  child: const Icon(
-                                      Icons.map,
-                                      color: Color(0xFF999999),
-                                      size: 20
+                                  GestureDetector(
+                                    onTap: () => _openMapUrl(addressText),
+                                    behavior: HitTestBehavior.opaque,
+                                    child: Container(
+                                      padding: EdgeInsets.zero,
+                                      height: 20,
+                                      alignment: Alignment.center,
+                                      child: const Icon(
+                                          Icons.map,
+                                          color: Color(0xFF999999),
+                                          size: 20
+                                      ),
+                                    ),
                                   ),
-                                ),
+                                ],
                               ),
-                            ],
-                          ),
+                            ),
+                          ],
                         ),
+                        const SizedBox(height: 12),
                       ],
                     ),
-                    const SizedBox(height: 12),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
           ),
-
-          // 구분선
-          const Divider(height: 1, color: Color(0xFFE5E5E5)),
 
           // 버튼 섹션 - 채팅하기 버튼만 표시
           ReservationChatButtonWidget(

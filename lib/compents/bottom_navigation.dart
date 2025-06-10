@@ -1,8 +1,6 @@
 // lib/compents/bottom_navigation.dart
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'dart:convert';
 import '../main.dart';
 import '../trip_main/trip_main_screen.dart';
 import '../mypage/mypage.dart';
@@ -11,6 +9,7 @@ import '../reservation/screens/current_reservation_list_screen.dart';
 import '../reservation/screens/past_reservation_list_screen.dart';
 import '../chat/screens/friend_chat_list_screen.dart';
 import '../services/translation_service.dart';
+import '../translations/components_translations.dart';
 
 class CustomBottomNavigation extends StatefulWidget {
   final int selectedIndex;
@@ -29,7 +28,6 @@ class CustomBottomNavigation extends StatefulWidget {
 }
 
 class _CustomBottomNavigationState extends State<CustomBottomNavigation> {
-  Map<String, dynamic> translations = {};
   String? lastCountryCode;
   bool _mounted = true;
   Map<String, String> navLabels = {
@@ -57,7 +55,7 @@ class _CustomBottomNavigationState extends State<CustomBottomNavigation> {
     super.initState();
     lastCountryCode = currentCountryCode;
     _translationService = TranslationService();
-    loadTranslations();
+    updateLabels();
 
     // 전역 함수에 탭 변경 함수 등록
     navigateToTab = widget.onItemSelected;
@@ -68,7 +66,7 @@ class _CustomBottomNavigationState extends State<CustomBottomNavigation> {
     super.didChangeDependencies();
     // currentCountryCode가 변경되었는지 확인
     if (lastCountryCode != currentCountryCode) {
-      loadTranslations();
+      updateLabels();
     }
   }
 
@@ -77,7 +75,7 @@ class _CustomBottomNavigationState extends State<CustomBottomNavigation> {
     super.didUpdateWidget(oldWidget);
     // 위젯이 업데이트될 때마다 언어 코드 변경 여부 확인
     if (lastCountryCode != currentCountryCode) {
-      loadTranslations();
+      updateLabels();
     }
   }
 
@@ -88,39 +86,21 @@ class _CustomBottomNavigationState extends State<CustomBottomNavigation> {
     super.dispose();
   }
 
-  Future<void> loadTranslations() async {
+  void updateLabels() {
     if (!_mounted) return;
 
-    try {
-      final String translationJson = await rootBundle.loadString('assets/data/bottom_translations.json');
-      final translationData = json.decode(translationJson);
+    setState(() {
+      lastCountryCode = currentCountryCode;
+      final countryCode = currentCountryCode.toUpperCase();
 
-      if (!_mounted) return;
-
-      setState(() {
-        translations = translationData['translations'];
-        lastCountryCode = currentCountryCode; // 현재 언어 코드 업데이트
-
-        // 번역된 네비게이션 라벨 설정
-        final countryCode = currentCountryCode.toUpperCase();
-
-        if (translations.containsKey('past_reservations') &&
-            translations.containsKey('reservation_list') &&
-            translations.containsKey('my_info')) {
-
-          navLabels = {
-            "home": translations['home']?[countryCode] ?? "홈",
-            "reservation_list": translations['reservation_list'][countryCode] ?? "예약목록",
-            "past_reservations": translations['past_reservations'][countryCode] ?? "지난예약",
-            "chat_list": translations['chat_list']?[countryCode] ?? "채팅 리스트",
-            "my_info": translations['my_info'][countryCode] ?? "내정보"
-          };
-        }
-      });
-    } catch (e) {
-      if (!_mounted) return;
-      debugPrint('Error loading translations: $e');
-    }
+      navLabels = {
+        "home": ComponentsTranslations.getTranslation('home', countryCode),
+        "reservation_list": ComponentsTranslations.getTranslation('reservation_list', countryCode),
+        "past_reservations": ComponentsTranslations.getTranslation('past_reservations', countryCode),
+        "chat_list": ComponentsTranslations.getTranslation('chat_list', countryCode),
+        "my_info": ComponentsTranslations.getTranslation('my_info', countryCode)
+      };
+    });
   }
 
   @override

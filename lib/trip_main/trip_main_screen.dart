@@ -90,13 +90,6 @@ class _MainScreenState extends State<MainScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // 트립프렌즈 배너
-                TripFriendsBanner(
-                  language: _currentLanguage.isNotEmpty ? _currentLanguage : currentCountryCode,
-                ),
-
-                const SizedBox(height: 12),
-
                 // 예약 정보 카드
                 const ReservationInfoCard(),
 
