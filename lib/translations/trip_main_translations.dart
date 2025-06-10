@@ -40,11 +40,11 @@ class MainTranslations {
 
     // TripFriendsBanner
     "how_to_use": {
-      "KR": "이용방법 알아보기",
-      "VN": "Tìm hiểu cách sử dụng",
-      "JP": "利用方法を知る",
-      "TH": "เรียนรู้วิธีใช้งาน",
-      "PH": "Learn how to use"
+      "KR": "이용방법",
+      "VN": "Cách sử dụng",
+      "JP": "利用方法",
+      "TH": "วิธีใช้งาน",
+      "PH": "How to use"
     },
     // ReservationCards
     "reservation": {
