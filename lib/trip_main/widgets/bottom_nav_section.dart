@@ -135,7 +135,7 @@ class _BottomNavSectionState extends State<BottomNavSection> {
           ),
           Expanded(
             child: _NavItem(
-              iconPath: 'assets/main/shopping_cart.png',
+              iconPath: 'assets/main/help.png',
               label: MainTranslations.getTranslation('how_to_use', _currentLanguage),
               onTap: () {
                 // 트립프렌즈 이용방법 페이지로 이동
@@ -177,7 +177,7 @@ class _NavItem extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
         child: Column(
           mainAxisSize: MainAxisSize.min,
-          mainAxisAlignment: MainAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.center,  // start -> center로 변경
           children: [
             Stack(
               clipBehavior: Clip.none,

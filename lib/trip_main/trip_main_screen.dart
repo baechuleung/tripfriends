@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'dart:async';
 import '../main.dart';
 import '../services/translation_service.dart';
-import '../compents/appbar.dart';
 import '../compents/settings_drawer.dart';
 import '../trip_main/widgets/reservation_info_card.dart';
 import '../trip_main/widgets/horizontal_reservation_cards.dart';
@@ -70,20 +69,9 @@ class _MainScreenState extends State<MainScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.grey[100],
-      appBar: TripFriendsAppBar(
-        countryNames: widget.countryNames,
-        currentCountryCode: _currentLanguage.isNotEmpty ?
-        _currentLanguage :
-        currentCountryCode,
-        onCountryChanged: _handleCountryChanged,
-        refreshKeys: _refreshKeys,
-        isLoggedIn: _isLoggedIn,
-        translationService: widget.translationService,
-      ),
-      endDrawer: const SettingsDrawer(),
-      body: SafeArea(
+    return Container(
+      color: Colors.grey[100],
+      child: SafeArea(
         child: SingleChildScrollView(
           child: Padding(
             padding: const EdgeInsets.all(16.0),

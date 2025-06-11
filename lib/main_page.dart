@@ -4,14 +4,17 @@ import 'dart:convert';
 import 'dart:async';
 import 'main.dart';
 import 'trip_main/trip_main_screen.dart';
+import 'job_main/job_main_screen.dart';
+import 'talk_main/talk_main_screen.dart';
+import 'info_main/info_main_screen.dart';
 import 'auth/auth_main_page.dart';
 import 'services/shared_preferences_service.dart';
 import 'services/translation_service.dart';
-import 'services/version_check_service.dart'; // 버전 체크 서비스 추가
+import 'services/version_check_service.dart';
 import 'compents/bottom_navigation.dart';
 import 'compents/appbar.dart';
 import 'compents/settings_drawer.dart';
-import 'compents/tripfriends_manual/manual_widget.dart';
+import 'compents/top_tab_bar.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'auth/register_page.dart';
@@ -28,8 +31,8 @@ class _MainPageState extends State<MainPage> with WidgetsBindingObserver {
   Map<String, String> countryNames = {};
   Key _authWidgetKey = UniqueKey();
   Key _bottomNavKey = UniqueKey();
-  Key _manualKey = UniqueKey();
   int _selectedIndex = 0;
+  int _selectedTabIndex = 0;
   bool _isLoggedIn = false;
   bool _isCheckingSession = false;
   bool _isProfileComplete = false;
@@ -70,7 +73,6 @@ class _MainPageState extends State<MainPage> with WidgetsBindingObserver {
     loadTranslations();
     _checkLoginStatus();
 
-    // 버전 체크 추가
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
         VersionCheckService.checkVersion(context);
@@ -168,10 +170,9 @@ class _MainPageState extends State<MainPage> with WidgetsBindingObserver {
       if (realLoggedIn) {
         await _checkProfileCompletion();
 
-        // 방금 로그인한 경우 홈 탭(인덱스 0)으로 이동
         if (justLoggedIn && _isProfileComplete && mounted) {
           setState(() {
-            _selectedIndex = 0; // 홈 탭 인덱스
+            _selectedIndex = 0;
           });
           debugPrint('📍 로그인 성공 - 홈 탭으로 이동');
         }
@@ -348,7 +349,6 @@ class _MainPageState extends State<MainPage> with WidgetsBindingObserver {
     setState(() {
       _authWidgetKey = UniqueKey();
       _bottomNavKey = UniqueKey();
-      _manualKey = UniqueKey();
     });
   }
 
@@ -358,9 +358,35 @@ class _MainPageState extends State<MainPage> with WidgetsBindingObserver {
     setState(() {
       _authWidgetKey = UniqueKey();
       _bottomNavKey = UniqueKey();
-      _manualKey = UniqueKey();
     });
     _checkRealLoginStatus();
+  }
+
+  Widget _getTabContent() {
+    switch (_selectedTabIndex) {
+      case 0: // travel
+        return MainScreen(
+          countryNames: countryNames,
+          currentLanguage: _currentLanguage,
+          onCountryChanged: _handleCountryChanged,
+          refreshKeys: _refreshKeys,
+          translationService: translationService,
+          onNavigateToTab: (index) {
+            if (!mounted) return;
+            setState(() {
+              _selectedIndex = index;
+            });
+          },
+        );
+      case 1: // job search
+        return const JobMainScreen();
+      case 2: // Talk
+        return const TalkMainScreen();
+      case 3: // information
+        return const InfoMainScreen();
+      default:
+        return Container();
+    }
   }
 
   @override
@@ -379,48 +405,94 @@ class _MainPageState extends State<MainPage> with WidgetsBindingObserver {
       );
     }
 
-    // 홈 탭(인덱스 0)이 선택된 경우 MainScreen 표시
+    // 홈 탭(인덱스 0)이 선택된 경우 기존 로직 유지
     if (_selectedIndex == 0) {
-      return MainScreen(
-        countryNames: countryNames,
-        currentLanguage: _currentLanguage,
-        onCountryChanged: _handleCountryChanged,
-        refreshKeys: _refreshKeys,
-        translationService: translationService,
-        onNavigateToTab: (index) {
-          if (!mounted) return;
-          setState(() {
-            _selectedIndex = index;
-          });
-        },
-      );
-    }
-
-    // 다른 탭들은 기존대로 BottomNavigation 표시
-    return Scaffold(
-      endDrawer: const SettingsDrawer(),
-      body: Column(
-        children: [
-          TripFriendsManual(
-            key: _manualKey,
+      // travel 탭이 선택된 경우에만 앱바와 탭바 표시
+      if (_selectedTabIndex == 0) {
+        return Scaffold(
+          appBar: TripFriendsAppBar(
+            countryNames: countryNames,
+            currentCountryCode: _currentLanguage,
+            onCountryChanged: _handleCountryChanged,
+            refreshKeys: _refreshKeys,
+            isLoggedIn: _isLoggedIn,
             translationService: translationService,
           ),
-
-          Expanded(
-            child: CustomBottomNavigation(
-              key: _bottomNavKey,
-              selectedIndex: _selectedIndex,
-              onItemSelected: (index) {
-                if (!mounted) return;
-                setState(() {
-                  _selectedIndex = index;
-                });
-              },
-              mainContent: Container(),
-            ),
+          endDrawer: const SettingsDrawer(),
+          body: Column(
+            children: [
+              const SizedBox(height: 10), // 앱바와 탭바 사이 간격
+              TopTabBar(
+                selectedIndex: _selectedTabIndex,
+                onTabSelected: (index) {
+                  setState(() {
+                    _selectedTabIndex = index;
+                  });
+                },
+                language: _currentLanguage,
+              ),
+              Expanded(
+                child: MainScreen(
+                  countryNames: countryNames,
+                  currentLanguage: _currentLanguage,
+                  onCountryChanged: _handleCountryChanged,
+                  refreshKeys: _refreshKeys,
+                  translationService: translationService,
+                  onNavigateToTab: (index) {
+                    if (!mounted) return;
+                    setState(() {
+                      _selectedIndex = index;
+                    });
+                  },
+                ),
+              ),
+            ],
           ),
-        ],
-      ),
+        );
+      } else {
+        // 다른 상단 탭들 (job search, Talk, information)
+        return Scaffold(
+          appBar: TripFriendsAppBar(
+            countryNames: countryNames,
+            currentCountryCode: _currentLanguage,
+            onCountryChanged: _handleCountryChanged,
+            refreshKeys: _refreshKeys,
+            isLoggedIn: _isLoggedIn,
+            translationService: translationService,
+          ),
+          endDrawer: const SettingsDrawer(),
+          body: Column(
+            children: [
+              const SizedBox(height: 10), // 앱바와 탭바 사이 간격
+              TopTabBar(
+                selectedIndex: _selectedTabIndex,
+                onTabSelected: (index) {
+                  setState(() {
+                    _selectedTabIndex = index;
+                  });
+                },
+                language: _currentLanguage,
+              ),
+              Expanded(
+                child: _getTabContent(),
+              ),
+            ],
+          ),
+        );
+      }
+    }
+
+    // travel 탭의 하위 페이지들은 탭바와 앱바 없이 CustomBottomNavigation만 표시
+    return CustomBottomNavigation(
+      key: _bottomNavKey,
+      selectedIndex: _selectedIndex,
+      onItemSelected: (index) {
+        if (!mounted) return;
+        setState(() {
+          _selectedIndex = index;
+        });
+      },
+      mainContent: Container(),
     );
   }
 }

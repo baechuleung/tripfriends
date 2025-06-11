@@ -29,150 +29,131 @@ class _BalanceHistoryItemWidgetState extends State<BalanceHistoryItemWidget> {
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildTypeIndicator(type),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      widget.controller.formatDate(widget.historyItem['created_at']),
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.grey[600],
-                      ),
-                    ),
-                    Text(
-                      isWithdrawal
-                          ? widget.controller.getWithdrawalStatusText(withdrawalStatus)
-                          : widget.controller.getTypeText(type),
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w500,
-                        color: isWithdrawal
-                            ? widget.controller.getWithdrawalStatusColor(withdrawalStatus)
-                            : widget.controller.getTypeColor(type),
-                      ),
-                    ),
-                  ],
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                widget.controller.formatDate(widget.historyItem['created_at']),
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Colors.grey[600],
                 ),
-                const SizedBox(height: 6),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      _getTransactionTitle(type),
-                      style: const TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                    Row(
-                      children: [
-                        Text(
-                          // 적립은 '+', 출금/사용은 '-' 기호 추가
-                          '${_getAmountPrefix(type)}$currencySymbol ',
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold,
-                            color: _getAmountColor(type),
-                          ),
-                        ),
-                        Text(
-                          widget.controller.formatAmount(widget.historyItem['amount']),
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            color: _getAmountColor(type),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
+              ),
+              Text(
+                isWithdrawal
+                    ? widget.controller.getWithdrawalStatusText(withdrawalStatus)
+                    : widget.controller.getTypeText(type),
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w500,
+                  color: isWithdrawal
+                      ? widget.controller.getWithdrawalStatusColor(withdrawalStatus)
+                      : (type == 'earn' ? const Color(0xFF237AFF) : widget.controller.getTypeColor(type)),
                 ),
-
-                // 설명이 있는 경우 표시 (description 표시 안함)
-                /*
-                if (widget.historyItem['description'] != null && widget.historyItem['description'].toString().isNotEmpty) ...[
-                  const SizedBox(height: 4),
-                  Text(
-                    widget.historyItem['description'],
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: Colors.grey[600],
-                    ),
-                  ),
-                ],
-                */
-
-                // 출금인 경우 계좌 정보 표시
-                if (isWithdrawal && widget.historyItem['account_number'] != null) ...[
-                  const SizedBox(height: 4),
-                  Text(
-                    '${widget.historyItem['account_holder'] ?? ''} | ${_maskAccountNumber(widget.historyItem['account_number'] ?? '')}',
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: Colors.grey[600],
-                    ),
-                  ),
-                ],
-
-                // 은행 정보 (출금인 경우)
-                if (isWithdrawal && widget.historyItem['bank_name'] != null && widget.historyItem['bank_name'].toString().isNotEmpty) ...[
-                  const SizedBox(height: 4),
-                  Text(
-                    '${widget.historyItem['bank_name']}',
-                    style: TextStyle(
-                      fontSize: 11,
-                      color: Colors.grey[600],
-                    ),
-                  ),
-                ],
-
-                // SWIFT 코드 (국제 송금인 경우)
-                if (isWithdrawal && widget.historyItem['swift_code'] != null && widget.historyItem['swift_code'].toString().isNotEmpty) ...[
-                  const SizedBox(height: 4),
-                  Text(
-                    'SWIFT: ${widget.historyItem['swift_code']}',
-                    style: TextStyle(
-                      fontSize: 11,
-                      color: Colors.grey[600],
-                    ),
-                  ),
-                ],
-
-                // 수취인 주소 (국제 송금인 경우)
-                if (isWithdrawal && widget.historyItem['receiver_address'] != null && widget.historyItem['receiver_address'].toString().isNotEmpty) ...[
-                  const SizedBox(height: 4),
-                  Text(
-                    '주소: ${_shortenAddress(widget.historyItem['receiver_address'])}',
-                    style: TextStyle(
-                      fontSize: 11,
-                      color: Colors.grey[600],
-                    ),
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ],
-              ],
-            ),
+              ),
+            ],
           ),
-        ],
-      ),
-    );
-  }
+          const SizedBox(height: 6),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                _getTransactionTitle(type),
+                style: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              Row(
+                children: [
+                  Text(
+                    // 적립은 '+', 출금/사용은 '-' 기호 추가
+                    '${_getAmountPrefix(type)}$currencySymbol ',
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                      color: _getAmountColor(type),
+                    ),
+                  ),
+                  Text(
+                    widget.controller.formatAmount(widget.historyItem['amount']),
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: _getAmountColor(type),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
 
-  Widget _buildTypeIndicator(String type) {
-    return Container(
-      width: 4,
-      height: 50,
-      decoration: BoxDecoration(
-        color: widget.controller.getTypeColor(type),
-        borderRadius: BorderRadius.circular(4),
+          // 설명이 있는 경우 표시 (description 표시 안함)
+          /*
+          if (widget.historyItem['description'] != null && widget.historyItem['description'].toString().isNotEmpty) ...[
+            const SizedBox(height: 4),
+            Text(
+              widget.historyItem['description'],
+              style: TextStyle(
+                fontSize: 12,
+                color: Colors.grey[600],
+              ),
+            ),
+          ],
+          */
+
+          // 출금인 경우 계좌 정보 표시
+          if (isWithdrawal && widget.historyItem['account_number'] != null) ...[
+            const SizedBox(height: 4),
+            Text(
+              '${widget.historyItem['account_holder'] ?? ''} | ${_maskAccountNumber(widget.historyItem['account_number'] ?? '')}',
+              style: TextStyle(
+                fontSize: 12,
+                color: Colors.grey[600],
+              ),
+            ),
+          ],
+
+          // 은행 정보 (출금인 경우)
+          if (isWithdrawal && widget.historyItem['bank_name'] != null && widget.historyItem['bank_name'].toString().isNotEmpty) ...[
+            const SizedBox(height: 4),
+            Text(
+              '${widget.historyItem['bank_name']}',
+              style: TextStyle(
+                fontSize: 11,
+                color: Colors.grey[600],
+              ),
+            ),
+          ],
+
+          // SWIFT 코드 (국제 송금인 경우)
+          if (isWithdrawal && widget.historyItem['swift_code'] != null && widget.historyItem['swift_code'].toString().isNotEmpty) ...[
+            const SizedBox(height: 4),
+            Text(
+              'SWIFT: ${widget.historyItem['swift_code']}',
+              style: TextStyle(
+                fontSize: 11,
+                color: Colors.grey[600],
+              ),
+            ),
+          ],
+
+          // 수취인 주소 (국제 송금인 경우)
+          if (isWithdrawal && widget.historyItem['receiver_address'] != null && widget.historyItem['receiver_address'].toString().isNotEmpty) ...[
+            const SizedBox(height: 4),
+            Text(
+              '주소: ${_shortenAddress(widget.historyItem['receiver_address'])}',
+              style: TextStyle(
+                fontSize: 11,
+                color: Colors.grey[600],
+              ),
+              overflow: TextOverflow.ellipsis,
+            ),
+          ],
+        ],
       ),
     );
   }
@@ -217,7 +198,7 @@ class _BalanceHistoryItemWidgetState extends State<BalanceHistoryItemWidget> {
   // 금액 색상
   Color _getAmountColor(String type) {
     if (type == 'earn') {
-      return Colors.green;
+      return const Color(0xFF237AFF);
     } else if (type == 'withdrawal') {
       return Colors.blue;
     } else {

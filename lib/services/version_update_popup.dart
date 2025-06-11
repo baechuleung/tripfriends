@@ -31,7 +31,7 @@ class VersionUpdatePopup extends StatelessWidget {
         elevation: 0,
         backgroundColor: Colors.transparent,
         child: Container(
-          padding: const EdgeInsets.all(20),
+          padding: const EdgeInsets.fromLTRB(30, 20, 30, 5),
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(20),
@@ -47,20 +47,12 @@ class VersionUpdatePopup extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               // 아이콘
-              Container(
+              Image.asset(
+                'assets/main/bell.png',
                 width: 80,
                 height: 80,
-                decoration: BoxDecoration(
-                  color: const Color(0xFF4A90E2).withOpacity(0.1),
-                  shape: BoxShape.circle,
-                ),
-                child: const Icon(
-                  Icons.rocket_launch,
-                  size: 40,
-                  color: Color(0xFF4A90E2),
-                ),
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 15),
 
               // 제목
               Text(
@@ -68,12 +60,13 @@ class VersionUpdatePopup extends StatelessWidget {
                     ? VersionTranslations.getTranslation('force_update_title', language)
                     : VersionTranslations.getTranslation('new_version_available', language),
                 style: const TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
-                  color: Color(0xFF2C3E50),
+                  color: Color(0xFF353535),
+                  fontSize: 20,
+                  fontFamily: 'Spoqa Han Sans Neo',
+                  fontWeight: FontWeight.w700,
                 ),
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 20),
 
               // 버튼들
               if (isForceUpdate) ...[
@@ -108,19 +101,13 @@ class VersionUpdatePopup extends StatelessWidget {
       },
       style: TextButton.styleFrom(
         padding: const EdgeInsets.symmetric(vertical: 14),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-          side: BorderSide(
-            color: Colors.grey[300]!,
-            width: 1,
-          ),
-        ),
       ),
       child: Text(
         VersionTranslations.getTranslation('update_later', language),
-        style: TextStyle(
-          color: Colors.grey[600],
-          fontSize: 16,
+        style: const TextStyle(
+          color: Color(0xFF999999),
+          fontSize: 14,
+          fontFamily: 'Spoqa Han Sans Neo',
           fontWeight: FontWeight.w500,
         ),
       ),
@@ -158,20 +145,21 @@ class VersionUpdatePopup extends StatelessWidget {
         }
       },
       style: ElevatedButton.styleFrom(
-        backgroundColor: const Color(0xFF4A90E2),
+        backgroundColor: const Color(0xFF5B6FED),
         foregroundColor: Colors.white,
-        padding: const EdgeInsets.symmetric(vertical: 14),
+        padding: const EdgeInsets.symmetric(vertical: 16),
         elevation: 0,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(30),
         ),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           const Icon(
             Icons.download,
-            size: 20,
+            size: 22,
           ),
           const SizedBox(width: 8),
           Text(
@@ -179,7 +167,9 @@ class VersionUpdatePopup extends StatelessWidget {
                 ? VersionTranslations.getTranslation('update_now', language)
                 : VersionTranslations.getTranslation('go_to_update', language),
             style: const TextStyle(
+              color: Colors.white,
               fontSize: 16,
+              fontFamily: 'Spoqa Han Sans Neo',
               fontWeight: FontWeight.w600,
             ),
           ),

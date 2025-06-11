@@ -339,25 +339,30 @@ class _ProfileMediaSliderState extends State<ProfileMediaSlider> {
       bottom: 10,
       left: 16,
       child: Container(
-        padding: const EdgeInsets.symmetric(
-          horizontal: 8,
-          vertical: 4,
-        ),
-        decoration: BoxDecoration(
-          color: isApproved
-              ? Colors.green.withOpacity(0.8)
-              : Colors.orange.withOpacity(0.8),
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Text(
-          isApproved
-              ? widget.currentLabels['approval_complete'] ?? '승인 완료'
-              : widget.currentLabels['approval_waiting'] ?? '승인 대기중',
-          style: const TextStyle(
-            fontSize: 12,
-            color: Colors.white,
-            fontWeight: FontWeight.bold,
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+        decoration: ShapeDecoration(
+          color: isApproved ? const Color(0xFFE7F1FF) : const Color(0xFFFFE8E8),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(30),
           ),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Text(
+              isApproved
+                  ? widget.currentLabels['approval_complete'] ?? '승인 완료'
+                  : widget.currentLabels['approval_waiting'] ?? '승인 대기중',
+              style: TextStyle(
+                color: isApproved ? const Color(0xFF3182F6) : const Color(0xFFFF3E6C),
+                fontSize: 12,
+                fontFamily: 'Spoqa Han Sans Neo',
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ],
         ),
       ),
     );

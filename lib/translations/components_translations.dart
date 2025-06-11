@@ -62,6 +62,43 @@ class ComponentsTranslations {
       "JP": "マイ情報",
       "TH": "ข้อมูลของฉัน",
       "PH": "My Info"
+    },
+    // Top Tab Bar
+    "travel": {
+      "KR": "여행",
+      "VN": "Du lịch",
+      "JP": "旅行",
+      "TH": "ท่องเที่ยว",
+      "PH": "Travel"
+    },
+    "job_search": {
+      "KR": "구직",
+      "VN": "Việc làm",
+      "JP": "求職",
+      "TH": "หางาน",
+      "PH": "Jobs"
+    },
+    "talk": {
+      "KR": "현지 톡톡",
+      "VN": "Trò chuyện",
+      "JP": "トーク",
+      "TH": "คุย",
+      "PH": "Talk"
+    },
+    "information": {
+      "KR": "실시간 정보",
+      "VN": "Tin tức",
+      "JP": "情報",
+      "TH": "ข้อมูล",
+      "PH": "Info"
+    },
+    // Service Preparing
+    "service_preparing": {
+      "KR": "서비스 준비중입니다",
+      "VN": "Dịch vụ đang được chuẩn bị",
+      "JP": "サービス準備中です",
+      "TH": "กำลังเตรียมบริการ",
+      "PH": "Service is being prepared"
     }
   };
 }

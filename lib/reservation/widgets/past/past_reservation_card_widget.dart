@@ -124,7 +124,7 @@ class _PastReservationCardWidgetState extends State<PastReservationCardWidget> {
                   ),
                   child: Center(
                     child: Text(
-                      '${reservation.reservationNumber}',
+                      '${ReservationTranslations.getTranslation("reservation_number", _currentLanguage)} ${reservation.reservationNumber}',
                       style: const TextStyle(
                         color: Color(0xFF999999),
                         fontSize: 12,
@@ -174,7 +174,7 @@ class _PastReservationCardWidgetState extends State<PastReservationCardWidget> {
                       Row(
                         children: [
                           Text(
-                            controller.formatPrice(reservation.totalPriceInfo, reservation.currencySymbol),
+                            controller.formatPrice(reservation.finalPrice, reservation.currencySymbol),
                             style: const TextStyle(
                               color: Color(0xFF353535),
                               fontSize: 18,
@@ -190,7 +190,7 @@ class _PastReservationCardWidgetState extends State<PastReservationCardWidget> {
                               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
                             ),
                             child: Text(
-                              reservation.usedTime,
+                              reservation.finalUsedTime,
                               style: const TextStyle(
                                 color: Colors.white,
                                 fontSize: 12,

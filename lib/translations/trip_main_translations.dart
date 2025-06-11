@@ -24,11 +24,11 @@ class MainTranslations {
       "PH": "My Info"
     },
     "chat_list": {
-      "KR": "채팅 리스트",
-      "VN": "Danh sách trò chuyện",
-      "JP": "チャットリスト",
-      "TH": "รายการแชท",
-      "PH": "Chat List"
+      "KR": "채팅",
+      "VN": "Trò chuyện",
+      "JP": "チャット",
+      "TH": "แชท",
+      "PH": "Chat"
     },
     "purchase_ticket": {
       "KR": "이용권 구매",

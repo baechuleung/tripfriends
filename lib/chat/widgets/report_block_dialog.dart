@@ -165,7 +165,14 @@ class _ReportDialogState extends State<ReportDialog> {
                         Expanded(
                           child: Text(
                             _reportTypes[i],
-                            style: const TextStyle(fontSize: 14),
+                            style: _selectedType == _reportTypes[i]
+                                ? const TextStyle(
+                              color: Color(0xFF4E5968),
+                              fontSize: 14,
+                              fontFamily: 'Spoqa Han Sans Neo',
+                              fontWeight: FontWeight.w700,
+                            )
+                                : const TextStyle(fontSize: 14),
                           ),
                         ),
                       ],

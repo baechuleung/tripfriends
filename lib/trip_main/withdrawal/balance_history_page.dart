@@ -145,12 +145,12 @@ class _BalanceHistoryPageState extends State<BalanceHistoryPage> {
   Widget _buildFilterOptions() {
     final language = currentCountryCode.toUpperCase();
 
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+          child: Text(
             MypageTranslations.getTranslation('filter_type', language),
             style: const TextStyle(
               fontSize: 14,
@@ -158,8 +158,12 @@ class _BalanceHistoryPageState extends State<BalanceHistoryPage> {
               color: Colors.black87,
             ),
           ),
-          const SizedBox(height: 8),
-          SingleChildScrollView(
+        ),
+        const SizedBox(height: 8),
+        Align(
+          alignment: Alignment.centerLeft,
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(horizontal: 8),
             scrollDirection: Axis.horizontal,
             child: Row(
               children: [
@@ -171,8 +175,11 @@ class _BalanceHistoryPageState extends State<BalanceHistoryPage> {
               ],
             ),
           ),
-          const SizedBox(height: 16),
-          Text(
+        ),
+        const SizedBox(height: 16),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: Text(
             MypageTranslations.getTranslation('filter_period', language),
             style: const TextStyle(
               fontSize: 14,
@@ -180,8 +187,12 @@ class _BalanceHistoryPageState extends State<BalanceHistoryPage> {
               color: Colors.black87,
             ),
           ),
-          const SizedBox(height: 8),
-          SingleChildScrollView(
+        ),
+        const SizedBox(height: 8),
+        Align(
+          alignment: Alignment.centerLeft,
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(horizontal: 8),
             scrollDirection: Axis.horizontal,
             child: Row(
               children: [
@@ -195,17 +206,16 @@ class _BalanceHistoryPageState extends State<BalanceHistoryPage> {
               ],
             ),
           ),
-          const SizedBox(height: 8),
-          const Divider(),
-        ],
-      ),
+        ),
+        const SizedBox(height: 8),
+      ],
     );
   }
 
   Widget _buildTypeFilterButton(String filter, String label) {
     final isSelected = _currentTypeFilter == filter;
 
-    return InkWell(
+    return GestureDetector(
       onTap: () => _changeTypeFilter(filter),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -227,7 +237,7 @@ class _BalanceHistoryPageState extends State<BalanceHistoryPage> {
   Widget _buildDateFilterButton(String filter, String label) {
     final isSelected = _currentDateFilter == filter;
 
-    return InkWell(
+    return GestureDetector(
       onTap: () => _changeDateFilter(filter),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -332,7 +342,7 @@ class _BalanceHistoryPageState extends State<BalanceHistoryPage> {
     }
 
     return ListView.separated(
-      padding: const EdgeInsets.all(8.0),
+      padding: EdgeInsets.zero,
       itemCount: filteredHistory.length + 1, // +1 for header
       separatorBuilder: (context, index) {
         if (index == 0) return const SizedBox.shrink(); // No separator after header
@@ -372,9 +382,10 @@ class _BalanceHistoryPageState extends State<BalanceHistoryPage> {
               Text(
                 '$itemCount${MypageTranslations.getTranslation('count_unit', language)}',
                 style: const TextStyle(
+                  color: Color(0xFF353535),
                   fontSize: 14,
-                  fontWeight: FontWeight.bold,
-                  color: Color(0xFF4169E1),
+                  fontFamily: 'Spoqa Han Sans Neo',
+                  fontWeight: FontWeight.w500,
                 ),
               ),
             ],

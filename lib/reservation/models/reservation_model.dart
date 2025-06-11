@@ -89,6 +89,11 @@ class Reservation {
   Timestamp? get completedAtTimestamp => data['completedAt'] as Timestamp?;
   Timestamp? get agreementTimestamp => data['agreementTimestamp'] as Timestamp?;
 
+  // 완료 정보
+  Map<String, dynamic> get completionInfo => data['completionInfo'] ?? {};
+  int get finalPrice => data['completionInfo']?['finalPrice'] ?? 0;
+  String get finalUsedTime => data['completionInfo']?['finalUsedTime'] ?? '';
+
   String get createdAtFormatted {
     if (data['createdAt'] is Timestamp) {
       return (data['createdAt'] as Timestamp)
