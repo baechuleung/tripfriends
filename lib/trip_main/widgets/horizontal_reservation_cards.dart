@@ -126,7 +126,7 @@ class _HorizontalReservationCardsState extends State<HorizontalReservationCards>
             iconColor: const Color(0xFF4E5968),
             titleStyle: const TextStyle(
               color: Color(0xFF4E5968),
-              fontSize: 14,
+              fontSize: 13,
               fontFamily: 'Spoqa Han Sans Neo',
               fontWeight: FontWeight.w700,
             ),

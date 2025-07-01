@@ -6,8 +6,11 @@ import 'terms/service_terms_screen.dart';
 import 'terms/privacy_terms_screen.dart';
 import 'terms/location_terms_screen.dart';
 import '../services/translation_service.dart';
+import '../translations/components_translations.dart';
+import '../main.dart' show currentCountryCode, languageChangeController;
 import 'logout/logout_controller.dart';
 import 'logout/logout_popup.dart';
+import 'dart:async';
 
 class SettingsDrawer extends StatefulWidget {
   final TranslationService? translationService;
@@ -22,13 +25,32 @@ class _SettingsDrawerState extends State<SettingsDrawer> {
   late TranslationService _translationService;
   late LogoutController _logoutController;
   String _appVersion = "";
+  String _currentLanguage = 'KR';
+  StreamSubscription<String>? _languageSubscription;
 
   @override
   void initState() {
     super.initState();
     _translationService = widget.translationService ?? TranslationService();
     _logoutController = LogoutController();
+    _currentLanguage = currentCountryCode;
+
+    // 언어 변경 리스너 등록
+    _languageSubscription = languageChangeController.stream.listen((newLanguage) {
+      if (mounted) {
+        setState(() {
+          _currentLanguage = newLanguage;
+        });
+      }
+    });
+
     _getAppVersion();
+  }
+
+  @override
+  void dispose() {
+    _languageSubscription?.cancel();
+    super.dispose();
   }
 
   Future<void> _getAppVersion() async {
@@ -67,7 +89,10 @@ class _SettingsDrawerState extends State<SettingsDrawer> {
       children: [
         ListTile(
           title: Text(
-            _translationService.get(translationKey, title),
+            // logout은 ComponentsTranslations에서 가져오기
+            translationKey == 'logout'
+                ? ComponentsTranslations.getTranslation('logout', _currentLanguage)
+                : _translationService.get(translationKey, title),
             style: const TextStyle(
               fontSize: 13,
               fontWeight: FontWeight.normal,

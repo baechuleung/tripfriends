@@ -24,21 +24,7 @@ class VersionCheckService {
           .get();
 
       if (versionSnapshot.docs.isEmpty) {
-        debugPrint('❌ 버전 정보가 없습니다. 초기 버전 정보를 생성합니다.');
-
-        // 초기 버전 정보 생성
-        await _firestore
-            .collection('tripfriends_version_info')
-            .add({
-          'minimum_version': currentVersion, // 현재 버전을 최소 버전으로 설정
-          'latest_version': currentVersion,  // 현재 버전을 최신 버전으로 설정
-          'update_message': '', // 빈 문자열로 설정
-          'ios_url': 'https://apps.apple.com/app/id123456789', // 실제 앱스토어 URL로 변경 필요
-          'android_url': 'https://play.google.com/store/apps/details?id=com.yourcompany.tripfriends', // 실제 플레이스토어 URL로 변경 필요
-          'updated_at': FieldValue.serverTimestamp(),
-        });
-
-        debugPrint('✅ 초기 버전 정보 생성 완료: $currentVersion');
+        debugPrint('❌ 버전 정보가 없습니다.');
         return;
       }
 
@@ -105,42 +91,6 @@ class VersionCheckService {
     } catch (e) {
       debugPrint('❌ 버전 비교 중 오류: $e');
       return false;
-    }
-  }
-
-  // 버전 정보를 Firestore에 저장 (관리자용)
-  static Future<void> setVersionInfo({
-    required String minimumVersion,
-    required String latestVersion,
-    required String updateMessage,
-    required String iosUrl,
-    required String androidUrl,
-  }) async {
-    try {
-      // 기존 버전 정보 삭제
-      final QuerySnapshot existingDocs = await _firestore
-          .collection('tripfriends_version_info')
-          .get();
-
-      for (var doc in existingDocs.docs) {
-        await doc.reference.delete();
-      }
-
-      // 새 버전 정보 추가
-      await _firestore
-          .collection('tripfriends_version_info')
-          .add({
-        'minimum_version': minimumVersion,
-        'latest_version': latestVersion,
-        'update_message': updateMessage,
-        'ios_url': iosUrl,
-        'android_url': androidUrl,
-        'updated_at': FieldValue.serverTimestamp(),
-      });
-
-      debugPrint('✅ 버전 정보 업데이트 완료');
-    } catch (e) {
-      debugPrint('❌ 버전 정보 업데이트 실패: $e');
     }
   }
 }

@@ -51,12 +51,15 @@ void main() async {
   // .env 파일 로드
   await dotenv.load(fileName: ".env");
 
+  // SharedPreferences 초기화
   await SharedPreferencesService.initialize();
 
   // 기기 로케일 정보 가져오기
   final Locale deviceLocale = WidgetsBinding.instance.platformDispatcher.locale;
-  String deviceCountry = deviceLocale.countryCode ?? 'KR';
-  debugPrint('📱 기기 로케일: $deviceCountry');
+  String deviceLanguage = deviceLocale.languageCode.toUpperCase();
+  String deviceCountry = deviceLocale.countryCode?.toUpperCase() ?? '';
+
+  debugPrint('📱 기기 언어: $deviceLanguage, 국가: $deviceCountry');
 
   // 지원하는 국가 코드 목록
   const List<String> SUPPORTED_COUNTRY_CODES = [
@@ -65,14 +68,32 @@ void main() async {
     'JP',
     'TH',
     'PH',
-    'MY'
+    'MY',
+    'EN'
   ];
 
-  // 지원하는 국가 코드인지 확인
-  if (SUPPORTED_COUNTRY_CODES.contains(deviceCountry)) {
+  // 언어 코드를 국가 코드로 매핑
+  const Map<String, String> LANGUAGE_TO_COUNTRY = {
+    'KO': 'KR', // 한국어 -> 한국
+    'VI': 'VN', // 베트남어 -> 베트남
+    'JA': 'JP', // 일본어 -> 일본
+    'TH': 'TH', // 태국어 -> 태국
+    'TL': 'PH', // 타갈로그어 -> 필리핀
+    'FIL': 'PH', // 필리핀어 -> 필리핀
+    'MS': 'MY', // 말레이어 -> 말레이시아
+    'EN': 'EN', // 영어
+  };
+
+  // 1. 먼저 언어 코드로 국가 확인
+  if (LANGUAGE_TO_COUNTRY.containsKey(deviceLanguage)) {
+    currentCountryCode = LANGUAGE_TO_COUNTRY[deviceLanguage]!;
+  }
+  // 2. 언어 매핑이 없으면 국가 코드 확인
+  else if (SUPPORTED_COUNTRY_CODES.contains(deviceCountry)) {
     currentCountryCode = deviceCountry;
-  } else {
-    // 지원하지 않는 국가 코드면 기본값 'KR' 사용
+  }
+  // 3. 둘 다 없으면 기본값 'KR' 사용
+  else {
     currentCountryCode = 'KR';
   }
 
@@ -80,6 +101,7 @@ void main() async {
   await SharedPreferencesService.setLanguage(currentCountryCode);
   debugPrint('📱 언어 설정 적용: $currentCountryCode');
 
+  // Firebase 초기화 - 반드시 세션 검증 전에 실행
   if (Firebase.apps.isEmpty) {
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
@@ -89,6 +111,9 @@ void main() async {
   // Firebase Realtime Database URL 설정
   FirebaseDatabase.instance.databaseURL =
   'https://tripjoy-d309f-default-rtdb.asia-southeast1.firebasedatabase.app/';
+
+  // Firebase 초기화 후에 세션 유효성 검사 실행
+  await SharedPreferencesService.validateAndCleanSession();
 
   // FCM 서비스 초기화 - 기존 setupNotifications 대신 전체 초기화 사용
   await FCMService.initialize();
@@ -105,9 +130,6 @@ void main() async {
       await SharedPreferencesService.setFCMToken(newToken);
     }
   });
-
-  // 세션 유효성 검사 및 정리
-  await SharedPreferencesService.validateAndCleanSession();
 
   // 로그인 상태 확인
   bool isLoggedIn = SharedPreferencesService.isLoggedIn();

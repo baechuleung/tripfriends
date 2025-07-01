@@ -147,6 +147,10 @@ class EditDefaultController {
 
           profileController.profileMediaNotifier.value = profileMedia;
 
+          // 대표 이미지는 항상 첫 번째 이미지
+          profileController.mainImageIndexNotifier.value = 0;
+
+          // 첫 번째 항목이 이미지인 경우 대표 이미지로 설정
           if (profileMedia.isNotEmpty && profileMedia[0].type == MediaType.image) {
             profileController.profileImageNotifier.value = profileMedia[0].path;
           }
@@ -220,6 +224,7 @@ class EditDefaultController {
         "phoneData": phoneController.getPhoneData(),
         "profileImageUrl": profileImageUrl,
         "profileMediaList": mediaUrls,
+        "mainImageIndex": 0,  // 항상 0번이 대표
         "currencySymbol": currencySymbol,
         "currencyCode": currencyCode,
         "termsAgreed": termsAgreementController.getTermsAgreedMap(),

@@ -132,12 +132,12 @@ class _CustomBottomNavigationState extends State<CustomBottomNavigation> {
     return Scaffold(
       body: pages[widget.selectedIndex],
       bottomNavigationBar: Container(
-        height: 75, // 높이를 80에서 75로 감소
+        height: 95, // 높이를 80에서 75로 감소
         child: BottomNavigationBar(
           items: <BottomNavigationBarItem>[
             BottomNavigationBarItem(
               icon: Padding(
-                padding: const EdgeInsets.only(bottom: 6.0), // 아이콘 아래 패딩 추가
+                padding: const EdgeInsets.only(bottom: 2.0), // 아이콘 아래 패딩 추가
                 child: Image.asset(
                   widget.selectedIndex == 0
                       ? 'assets/bottom/home_on.png'
@@ -150,7 +150,7 @@ class _CustomBottomNavigationState extends State<CustomBottomNavigation> {
             ),
             BottomNavigationBarItem(
               icon: Padding(
-                padding: const EdgeInsets.only(bottom: 6.0), // 아이콘 아래 패딩 추가
+                padding: const EdgeInsets.only(bottom: 2.0), // 아이콘 아래 패딩 추가
                 child: Image.asset(
                   widget.selectedIndex == 1
                       ? 'assets/bottom/event_note_on.png'
@@ -163,7 +163,7 @@ class _CustomBottomNavigationState extends State<CustomBottomNavigation> {
             ),
             BottomNavigationBarItem(
               icon: Padding(
-                padding: const EdgeInsets.only(bottom: 6.0), // 아이콘 아래 패딩 추가
+                padding: const EdgeInsets.only(bottom: 2.0), // 아이콘 아래 패딩 추가
                 child: Image.asset(
                   widget.selectedIndex == 2
                       ? 'assets/bottom/event_upcoming_on.png'
@@ -178,7 +178,7 @@ class _CustomBottomNavigationState extends State<CustomBottomNavigation> {
               icon: Tooltip(
                 message: navLabels['chat_list'] ?? '채팅 리스트',
                 child: Padding(
-                  padding: const EdgeInsets.only(bottom: 6.0), // 아이콘 아래 패딩 추가
+                  padding: const EdgeInsets.only(bottom: 2.0), // 아이콘 아래 패딩 추가
                   child: Image.asset(
                     widget.selectedIndex == 3
                         ? 'assets/bottom/tooltip_on.png'
@@ -192,7 +192,7 @@ class _CustomBottomNavigationState extends State<CustomBottomNavigation> {
             ),
             BottomNavigationBarItem(
               icon: Padding(
-                padding: const EdgeInsets.only(bottom: 6.0), // 아이콘 아래 패딩 추가
+                padding: const EdgeInsets.only(bottom: 2.0), // 아이콘 아래 패딩 추가
                 child: Image.asset(
                   widget.selectedIndex == 4
                       ? 'assets/bottom/account_circle_on.png'
@@ -205,7 +205,7 @@ class _CustomBottomNavigationState extends State<CustomBottomNavigation> {
             ),
           ],
           currentIndex: widget.selectedIndex,
-          selectedItemColor: const Color(0xFF3182F6), // 선택된 아이템 색상 변경
+          selectedItemColor: const Color(0xFF5963D0), // 선택된 아이템 색상 변경
           unselectedItemColor: const Color(0xFF999999), // 선택되지 않은 아이템 색상 변경
           selectedFontSize: 12, // 선택된 글자 크기 고정
           unselectedFontSize: 12, // 선택되지 않은 글자 크기 고정

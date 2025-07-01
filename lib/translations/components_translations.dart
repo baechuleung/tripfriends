@@ -14,6 +14,13 @@ class ComponentsTranslations {
       "TH": "คุณแน่ใจหรือไม่ว่าต้องการออกจากระบบ?",
       "PH": "Are you sure you want to logout?"
     },
+    "logout": {
+      "KR": "로그아웃",
+      "VN": "Đăng xuất",
+      "JP": "ログアウト",
+      "TH": "ออกจากระบบ",
+      "PH": "Logout"
+    },
     "cancel": {
       "KR": "취소",
       "VN": "Hủy",

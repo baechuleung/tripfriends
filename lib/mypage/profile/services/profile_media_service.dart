@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:video_player/video_player.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class ProfileMediaService {
   final Function(bool) onMediaLoadingStateChanged;
@@ -48,7 +49,7 @@ class ProfileMediaService {
     }
   }
 
-  // Firebase Storage에서 사용자 프로필 이미지와 영상 로드 (최적화)
+  // Firestore에서 프로필 미디어 로드 (최적화)
   Future<void> loadProfileMedia(String userId, [BuildContext? context]) async {
     onMediaLoadingStateChanged(true);
 
@@ -56,103 +57,64 @@ class ProfileMediaService {
     dispose();
 
     try {
-      // Storage 경로: tripfriends_profiles/userId/ 아래의 모든 파일
-      final storageRef = FirebaseStorage.instance.ref().child('tripfriends_profiles/$userId');
+      // Firestore에서 사용자 데이터 가져오기
+      final docSnapshot = await FirebaseFirestore.instance
+          .collection('tripfriends_users')
+          .doc(userId)
+          .get();
 
-      try {
-        // 폴더 내의 모든 항목 나열
-        final listResult = await storageRef.listAll();
+      if (docSnapshot.exists) {
+        final data = docSnapshot.data() as Map<String, dynamic>;
 
-        // 미디어 URL 리스트 초기화
-        List<Map<String, dynamic>> mediaItems = [];
-        List<String> imageUrls = []; // 이미지 URL 모음
+        // profileMediaList가 있는 경우
+        if (data['profileMediaList'] != null && data['profileMediaList'] is List) {
+          final mediaList = List<Map<String, dynamic>>.from(data['profileMediaList']);
 
-        // 각 항목에 대한 다운로드 URL 병렬 가져오기
-        final urlFutures = listResult.items.map((item) async {
-          try {
-            String fileName = item.name.toLowerCase();
-            String url = await item.getDownloadURL();
+          List<Map<String, dynamic>> mediaItems = [];
+          List<String> imageUrls = [];
 
-            // 이미지 파일 필터링
-            if (fileName.endsWith('.jpg') ||
-                fileName.endsWith('.jpeg') ||
-                fileName.endsWith('.png') ||
-                fileName.endsWith('.gif') ||
-                fileName.endsWith('.webp')) {
-              imageUrls.add(url); // 이미지 URL 추가
-              return {
-                'url': url,
-                'type': 'image',
-                'fileName': fileName // 정렬용 파일명 추가
-              };
+          // Firestore에 저장된 순서대로 미디어 아이템 처리
+          for (int i = 0; i < mediaList.length; i++) {
+            final item = mediaList[i];
+            final url = item['path'] as String;
+            final type = item['type'] as String;
+
+            if (type == 'image') {
+              imageUrls.add(url);
             }
-            // 비디오 파일 필터링
-            else if (fileName.endsWith('.mp4') ||
-                fileName.endsWith('.mov') ||
-                fileName.endsWith('.avi') ||
-                fileName.endsWith('.webm') ||
-                fileName.endsWith('.mkv')) {
-              return {
-                'url': url,
-                'type': 'video',
-                'fileName': fileName // 정렬용 파일명 추가
-              };
-            }
-          } catch (e) {
-            print('아이템 URL 가져오기 오류: $e');
+
+            // 순서를 유지하면서 mediaItems에 추가
+            mediaItems.add({
+              'url': url,
+              'type': type,
+            });
           }
-          return null;
-        });
 
-        // 모든 URL을 병렬로 가져오기 (타임아웃 설정)
-        List<Map<String, dynamic>?> results = [];
-        try {
-          results = await Future.wait(
-            urlFutures,
-            eagerError: false,
-          ).timeout(
-            const Duration(seconds: 10),
-            onTimeout: () {
-              print('URL 가져오기 타임아웃');
-              return []; // 단순히 빈 리스트 반환
-            },
-          );
-        } catch (e) {
-          print('URL 처리 중 오류: $e');
-        }
+          print('로드된 미디어 순서: ${mediaItems.map((e) => e['type']).toList()}');
 
-        // null이 아닌 결과만 필터링하여 mediaItems에 추가
-        mediaItems = results.where((item) => item != null).cast<Map<String, dynamic>>().toList();
-
-        // 파일명 기준으로 정렬 (선택사항)
-        if (mediaItems.isNotEmpty) {
-          mediaItems.sort((a, b) => a['fileName'].compareTo(b['fileName']));
-
-          // 파일명 필드 제거 (필요 없음)
-          for (var item in mediaItems) {
-            item.remove('fileName');
+          // 이미지 프리캐싱
+          if (context != null && imageUrls.isNotEmpty) {
+            _precacheImages(imageUrls, context);
           }
-        }
 
-        // 내장 Flutter 이미지 캐싱
-        if (context != null) {
-          _precacheImages(imageUrls, context);
-        }
+          // 비디오 컨트롤러 초기화
+          final videoItems = mediaItems.where((item) => item['type'] == 'video').toList();
+          if (videoItems.isNotEmpty) {
+            final videoInitFutures = videoItems.map((item) => _initVideoController(item['url']));
+            await Future.wait(videoInitFutures);
+          }
 
-        // 비디오 컨트롤러 초기화 (병렬로 시작)
-        final videoItems = mediaItems.where((item) => item['type'] == 'video').toList();
-        if (videoItems.isNotEmpty) {
-          final videoInitFutures = videoItems.map((item) => _initVideoController(item['url']));
-          await Future.wait(videoInitFutures);
+          _profileMedia = mediaItems;
+        } else {
+          // profileMediaList가 없으면 기본 이미지 설정
+          setDefaultMedia(data);
         }
-
-        _profileMedia = mediaItems;
-        onMediaLoadingStateChanged(false);
-      } catch (e) {
-        print('Storage 항목 나열 오류: $e');
+      } else {
+        // 문서가 없으면 빈 리스트
         _profileMedia = [];
-        onMediaLoadingStateChanged(false);
       }
+
+      onMediaLoadingStateChanged(false);
     } catch (e) {
       print('미디어 로드 오류: $e');
       _profileMedia = [];

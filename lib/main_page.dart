@@ -42,10 +42,12 @@ class _MainPageState extends State<MainPage> with WidgetsBindingObserver {
   StreamSubscription? _languageChangeSubscription;
   String _currentLanguage = '';
   bool _wasLoggedOut = true;
+  Timer? _initTimeoutTimer;
 
   @override
   void initState() {
     super.initState();
+    debugPrint('🚀 MainPage initState 시작');
     WidgetsBinding.instance.addObserver(this);
     translationService = TranslationService();
 
@@ -71,6 +73,19 @@ class _MainPageState extends State<MainPage> with WidgetsBindingObserver {
         });
 
     loadTranslations();
+
+    // 초기화 타임아웃 설정 - 5초 후에도 완료되지 않으면 강제로 완료 처리
+    _initTimeoutTimer = Timer(const Duration(seconds: 5), () {
+      if (!_isInitialCheckComplete && mounted) {
+        debugPrint('⏰ 초기화 타임아웃 - 강제로 완료 처리');
+        setState(() {
+          _isInitialCheckComplete = true;
+          _isLoggedIn = false;
+          _isProfileComplete = false;
+        });
+      }
+    });
+
     _checkLoginStatus();
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -89,6 +104,7 @@ class _MainPageState extends State<MainPage> with WidgetsBindingObserver {
 
   @override
   void dispose() {
+    _initTimeoutTimer?.cancel();
     WidgetsBinding.instance.removeObserver(this);
     _languageChangeSubscription?.cancel();
     super.dispose();
@@ -123,7 +139,11 @@ class _MainPageState extends State<MainPage> with WidgetsBindingObserver {
   }
 
   Future<void> _checkRealLoginStatus() async {
-    if (_isCheckingSession) return;
+    debugPrint('🔍 _checkRealLoginStatus 시작');
+    if (_isCheckingSession) {
+      debugPrint('⚠️ 이미 세션 체크 중 - 건너뜀');
+      return;
+    }
     _isCheckingSession = true;
 
     try {
@@ -181,9 +201,9 @@ class _MainPageState extends State<MainPage> with WidgetsBindingObserver {
 
         setState(() {
           _isProfileComplete = false;
-          _isInitialCheckComplete = true;
+          _isInitialCheckComplete = true;  // 로그아웃 상태에서도 반드시 설정
         });
-        debugPrint('🔄 로그아웃 상태 - UI 업데이트');
+        debugPrint('🔄 로그아웃 상태 - UI 업데이트, 초기화 완료');
       }
     } catch (e) {
       debugPrint('로그인 상태 확인 중 오류 발생: $e');
@@ -195,18 +215,22 @@ class _MainPageState extends State<MainPage> with WidgetsBindingObserver {
       setState(() {
         _isLoggedIn = false;
         _isProfileComplete = false;
-        _isInitialCheckComplete = true;
+        _isInitialCheckComplete = true;  // 오류 상태에서도 반드시 설정
       });
+      debugPrint('❌ 오류 발생 - 초기화 완료 처리');
     } finally {
       _isCheckingSession = false;
+      debugPrint('🏁 _checkRealLoginStatus 완료');
     }
   }
 
   void _checkLoginStatus() async {
+    debugPrint('🔍 _checkLoginStatus 호출');
     _checkRealLoginStatus();
   }
 
   Future<void> _checkProfileCompletion() async {
+    debugPrint('👤 _checkProfileCompletion 시작');
     if (_isRegisterPageActive) {
       debugPrint('🛑 등록 페이지 활성화 상태 - 프로필 검증 건너뜀');
 
@@ -214,8 +238,9 @@ class _MainPageState extends State<MainPage> with WidgetsBindingObserver {
       _isRegisterPageActive = false;
 
       setState(() {
-        _isInitialCheckComplete = true;
+        _isInitialCheckComplete = true;  // 등록 페이지 활성화 상태에서도 설정
       });
+      return;  // early return 추가
     }
 
     try {
@@ -227,8 +252,9 @@ class _MainPageState extends State<MainPage> with WidgetsBindingObserver {
         setState(() {
           _isProfileComplete = false;
           _isLoggedIn = false;
-          _isInitialCheckComplete = true;
+          _isInitialCheckComplete = true;  // user null 상태에서도 설정
         });
+        debugPrint('⚠️ user null - 초기화 완료 처리');
 
         if (mounted) {
           Navigator.of(context).pushAndRemoveUntil(
@@ -255,8 +281,9 @@ class _MainPageState extends State<MainPage> with WidgetsBindingObserver {
 
       setState(() {
         _isProfileComplete = profileExists;
-        _isInitialCheckComplete = true;
+        _isInitialCheckComplete = true;  // 프로필 체크 완료 후 항상 설정
       });
+      debugPrint('✅ 프로필 체크 완료 - 초기화 완료 처리');
 
       if (!profileExists) {
         debugPrint('⚠️ 사용자 프로필이 완료되지 않음 - RegisterPage로 이동');
@@ -281,8 +308,9 @@ class _MainPageState extends State<MainPage> with WidgetsBindingObserver {
       setState(() {
         _isProfileComplete = false;
         _isLoggedIn = false;
-        _isInitialCheckComplete = true;
+        _isInitialCheckComplete = true;  // 오류 상태에서도 설정
       });
+      debugPrint('❌ 프로필 체크 오류 - 초기화 완료 처리');
 
       if (mounted) {
         Navigator.of(context).pushAndRemoveUntil(
@@ -391,7 +419,10 @@ class _MainPageState extends State<MainPage> with WidgetsBindingObserver {
 
   @override
   Widget build(BuildContext context) {
+    debugPrint('🏗️ MainPage build - 초기화 완료: $_isInitialCheckComplete');
+
     if (!_isInitialCheckComplete) {
+      debugPrint('⏳ 스플래시 화면 표시');
       return Scaffold(
         body: Center(
           child: CircularProgressIndicator(),
@@ -400,6 +431,7 @@ class _MainPageState extends State<MainPage> with WidgetsBindingObserver {
     }
 
     if (!_isLoggedIn || !_isProfileComplete) {
+      debugPrint('🔓 로그인 페이지 표시');
       return Scaffold(
         body: AuthMainPageWidget(key: _authWidgetKey),
       );
