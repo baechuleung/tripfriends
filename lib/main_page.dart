@@ -28,6 +28,7 @@ class MainPage extends StatefulWidget {
 }
 
 class _MainPageState extends State<MainPage> with WidgetsBindingObserver {
+  // 상태 변수들
   Map<String, String> countryNames = {};
   Key _authWidgetKey = UniqueKey();
   Key _bottomNavKey = UniqueKey();
@@ -36,13 +37,18 @@ class _MainPageState extends State<MainPage> with WidgetsBindingObserver {
   bool _isLoggedIn = false;
   bool _isCheckingSession = false;
   bool _isProfileComplete = false;
-  bool _isRegisterPageActive = false;
   bool _isInitialCheckComplete = false;
   late TranslationService translationService;
-  StreamSubscription? _languageChangeSubscription;
   String _currentLanguage = '';
-  bool _wasLoggedOut = true;
+
+  // 스트림 구독 관리
+  StreamSubscription? _languageChangeSubscription;
+  StreamSubscription? _authStateSubscription;
   Timer? _initTimeoutTimer;
+
+  // 캐시된 국가 데이터
+  static Map<String, dynamic>? _cachedCountryData;
+  static String? _cachedDataLanguage;
 
   @override
   void initState() {
@@ -55,27 +61,24 @@ class _MainPageState extends State<MainPage> with WidgetsBindingObserver {
       _selectedIndex = widget.initialIndex!;
     }
 
-    _currentLanguage =
-        SharedPreferencesService.getLanguage() ?? currentCountryCode;
+    _currentLanguage = SharedPreferencesService.getLanguage() ?? currentCountryCode;
 
-    _languageChangeSubscription =
-        languageChangeController.stream.listen((String newLanguage) {
-          if (_currentLanguage != newLanguage) {
-            if (mounted) {
-              setState(() {
-                _currentLanguage = newLanguage;
-                debugPrint('🔤 MainPage: 언어 변경 이벤트 수신: $newLanguage');
-                loadTranslations();
-                _refreshKeys();
-              });
-            }
-          }
+    // 언어 변경 리스너 - 중복 방지
+    _languageChangeSubscription = languageChangeController.stream.listen((String newLanguage) {
+      if (_currentLanguage != newLanguage && mounted) {
+        setState(() {
+          _currentLanguage = newLanguage;
+          debugPrint('🔤 MainPage: 언어 변경 이벤트 수신: $newLanguage');
         });
+        loadTranslations();
+      }
+    });
 
+    // 초기 번역 로드
     loadTranslations();
 
-    // 초기화 타임아웃 설정 - 5초 후에도 완료되지 않으면 강제로 완료 처리
-    _initTimeoutTimer = Timer(const Duration(seconds: 5), () {
+    // 초기화 타임아웃 - 3초로 단축
+    _initTimeoutTimer = Timer(const Duration(seconds: 3), () {
       if (!_isInitialCheckComplete && mounted) {
         debugPrint('⏰ 초기화 타임아웃 - 강제로 완료 처리');
         setState(() {
@@ -86,192 +89,94 @@ class _MainPageState extends State<MainPage> with WidgetsBindingObserver {
       }
     });
 
-    _checkLoginStatus();
+    // 인증 상태 체크 - 한 번만
+    _initializeAuthCheck();
 
+    // 버전 체크
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
         VersionCheckService.checkVersion(context);
       }
     });
+  }
 
-    FirebaseAuth.instance.idTokenChanges().listen((User? user) {
+  // 인증 초기화 - 중복 방지
+  void _initializeAuthCheck() {
+    // 기존 구독 취소
+    _authStateSubscription?.cancel();
+
+    // 즉시 현재 상태 체크
+    _checkCurrentAuthState();
+
+    // 향후 변경사항 리스닝
+    _authStateSubscription = FirebaseAuth.instance.authStateChanges().listen((User? user) {
       if (mounted) {
-        debugPrint('🔑 토큰 상태 변경 감지');
-        _checkRealLoginStatus();
+        debugPrint('🔑 인증 상태 변경 감지');
+        _handleAuthStateChange(user);
       }
     });
   }
 
-  @override
-  void dispose() {
-    _initTimeoutTimer?.cancel();
-    WidgetsBinding.instance.removeObserver(this);
-    _languageChangeSubscription?.cancel();
-    super.dispose();
-  }
-
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.resumed) {
-      _checkRealLoginStatus();
-      _checkLanguageUpdate();
-    }
-  }
-
-  Future<void> _checkLanguageUpdate() async {
-    String? savedLanguage = SharedPreferencesService.getLanguage();
-    if (savedLanguage != null && savedLanguage != _currentLanguage) {
-      if (mounted) {
-        setState(() {
-          _currentLanguage = savedLanguage;
-          debugPrint('🔄 MainPage: 앱 재개 시 언어 변경 감지: $_currentLanguage');
-          loadTranslations();
-          _refreshKeys();
-        });
-      }
-    }
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    _checkLanguageUpdate();
-  }
-
-  Future<void> _checkRealLoginStatus() async {
-    debugPrint('🔍 _checkRealLoginStatus 시작');
-    if (_isCheckingSession) {
-      debugPrint('⚠️ 이미 세션 체크 중 - 건너뜀');
-      return;
-    }
+  // 현재 인증 상태 체크 - 단순화
+  Future<void> _checkCurrentAuthState() async {
+    if (_isCheckingSession) return;
     _isCheckingSession = true;
 
     try {
       final user = FirebaseAuth.instance.currentUser;
-
-      _isRegisterPageActive = SharedPreferencesService.getBool(
-          'is_registering', defaultValue: false);
-      debugPrint('🔍 등록 페이지 활성화 여부: $_isRegisterPageActive');
-
-      bool validAuth = false;
-      if (user != null) {
-        try {
-          await user.getIdToken(false);
-          validAuth = true;
-        } catch (e) {
-          debugPrint('🚫 토큰 확인 실패, 강제 갱신 시도: $e');
-          try {
-            await user.getIdToken(true);
-            validAuth = true;
-          } catch (e2) {
-            debugPrint('🚫 토큰 강제 갱신도 실패: $e2');
-            await FirebaseAuth.instance.signOut();
-            await SharedPreferencesService.clearUserSession();
-            validAuth = false;
-          }
-        }
-      }
-
-      final bool realLoggedIn = user != null && validAuth;
-
-      final bool justLoggedIn = !_isLoggedIn && realLoggedIn && _wasLoggedOut;
-
-      if (!mounted) return;
-
-      setState(() {
-        _isLoggedIn = realLoggedIn;
-        _wasLoggedOut = !realLoggedIn;
-      });
-
-      SharedPreferencesService.setLoggedIn(realLoggedIn);
-
-      debugPrint('🔐 로그인 상태: $_isLoggedIn (Firebase 기준)');
-
-      if (realLoggedIn) {
-        await _checkProfileCompletion();
-
-        if (justLoggedIn && _isProfileComplete && mounted) {
-          setState(() {
-            _selectedIndex = 0;
-          });
-          debugPrint('📍 로그인 성공 - 홈 탭으로 이동');
-        }
-      } else {
-        if (!mounted) return;
-
-        setState(() {
-          _isProfileComplete = false;
-          _isInitialCheckComplete = true;  // 로그아웃 상태에서도 반드시 설정
-        });
-        debugPrint('🔄 로그아웃 상태 - UI 업데이트, 초기화 완료');
-      }
-    } catch (e) {
-      debugPrint('로그인 상태 확인 중 오류 발생: $e');
-      await FirebaseAuth.instance.signOut();
-      await SharedPreferencesService.clearUserSession();
-
-      if (!mounted) return;
-
-      setState(() {
-        _isLoggedIn = false;
-        _isProfileComplete = false;
-        _isInitialCheckComplete = true;  // 오류 상태에서도 반드시 설정
-      });
-      debugPrint('❌ 오류 발생 - 초기화 완료 처리');
+      await _handleAuthStateChange(user);
     } finally {
       _isCheckingSession = false;
-      debugPrint('🏁 _checkRealLoginStatus 완료');
     }
   }
 
-  void _checkLoginStatus() async {
-    debugPrint('🔍 _checkLoginStatus 호출');
-    _checkRealLoginStatus();
-  }
+  // 인증 상태 변경 핸들러 - 통합
+  Future<void> _handleAuthStateChange(User? user) async {
+    if (!mounted) return;
 
-  Future<void> _checkProfileCompletion() async {
-    debugPrint('👤 _checkProfileCompletion 시작');
-    if (_isRegisterPageActive) {
-      debugPrint('🛑 등록 페이지 활성화 상태 - 프로필 검증 건너뜀');
+    final isRegistering = SharedPreferencesService.getBool('is_registering', defaultValue: false);
 
+    if (isRegistering) {
       await SharedPreferencesService.setBool('is_registering', false);
-      _isRegisterPageActive = false;
-
       setState(() {
-        _isInitialCheckComplete = true;  // 등록 페이지 활성화 상태에서도 설정
+        _isInitialCheckComplete = true;
       });
-      return;  // early return 추가
+      return;
     }
 
-    try {
-      final user = FirebaseAuth.instance.currentUser;
-
-      if (user == null) {
-        if (!mounted) return;
-
-        setState(() {
-          _isProfileComplete = false;
-          _isLoggedIn = false;
-          _isInitialCheckComplete = true;  // user null 상태에서도 설정
-        });
-        debugPrint('⚠️ user null - 초기화 완료 처리');
-
-        if (mounted) {
-          Navigator.of(context).pushAndRemoveUntil(
-            MaterialPageRoute(builder: (context) => AuthMainPageWidget()),
-                (route) => false,
-          );
-        }
-        return;
+    bool isValid = false;
+    if (user != null) {
+      try {
+        await user.getIdToken(false);
+        isValid = true;
+      } catch (e) {
+        debugPrint('🚫 토큰 검증 실패: $e');
+        await FirebaseAuth.instance.signOut();
+        await SharedPreferencesService.clearUserSession();
       }
+    }
 
+    setState(() {
+      _isLoggedIn = isValid;
+    });
+
+    if (isValid) {
+      await _checkProfileCompletion(user!);
+    } else {
+      setState(() {
+        _isProfileComplete = false;
+        _isInitialCheckComplete = true;
+      });
+    }
+  }
+
+  // 프로필 완성도 체크 - 최적화
+  Future<void> _checkProfileCompletion(User user) async {
+    try {
       final docSnapshot = await FirebaseFirestore.instance
           .collection('tripfriends_users')
           .doc(user.uid)
           .get();
-
-      debugPrint('👤 Firestore 사용자 정보 조회: 문서 존재 여부: ${docSnapshot
-          .exists}, 데이터: ${docSnapshot.data()}');
 
       final bool profileExists = docSnapshot.exists &&
           docSnapshot.data() != null &&
@@ -281,72 +186,70 @@ class _MainPageState extends State<MainPage> with WidgetsBindingObserver {
 
       setState(() {
         _isProfileComplete = profileExists;
-        _isInitialCheckComplete = true;  // 프로필 체크 완료 후 항상 설정
+        _isInitialCheckComplete = true;
       });
-      debugPrint('✅ 프로필 체크 완료 - 초기화 완료 처리');
 
-      if (!profileExists) {
-        debugPrint('⚠️ 사용자 프로필이 완료되지 않음 - RegisterPage로 이동');
-
-        if (mounted) {
-          Navigator.pushAndRemoveUntil(
-            context,
-            MaterialPageRoute(
-              builder: (context) => RegisterPage(uid: user.uid),
-            ),
-                (route) => false,
-          );
-        }
-      }
-    } catch (e) {
-      debugPrint('프로필 확인 중 오류 발생: $e');
-      await FirebaseAuth.instance.signOut();
-      await SharedPreferencesService.clearUserSession();
-
-      if (!mounted) return;
-
-      setState(() {
-        _isProfileComplete = false;
-        _isLoggedIn = false;
-        _isInitialCheckComplete = true;  // 오류 상태에서도 설정
-      });
-      debugPrint('❌ 프로필 체크 오류 - 초기화 완료 처리');
-
-      if (mounted) {
-        Navigator.of(context).pushAndRemoveUntil(
-          MaterialPageRoute(builder: (context) => AuthMainPageWidget()),
+      if (!profileExists && mounted) {
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(
+            builder: (context) => RegisterPage(uid: user.uid),
+          ),
               (route) => false,
         );
+      }
+    } catch (e) {
+      debugPrint('프로필 확인 중 오류: $e');
+      if (mounted) {
+        setState(() {
+          _isProfileComplete = false;
+          _isLoggedIn = false;
+          _isInitialCheckComplete = true;
+        });
       }
     }
   }
 
+  // 번역 로드 - 캐싱 적용
   Future<void> loadTranslations() async {
     try {
-      String effectiveLanguage = _currentLanguage.isNotEmpty ?
-      _currentLanguage :
-      (SharedPreferencesService.getLanguage() ?? currentCountryCode);
+      String effectiveLanguage = _currentLanguage.isNotEmpty
+          ? _currentLanguage
+          : (SharedPreferencesService.getLanguage() ?? currentCountryCode);
 
-      debugPrint('📚 MainPage: 국가 목록 로드 중, 사용 언어: $effectiveLanguage');
+      // 캐시된 데이터가 있고 언어가 같으면 재사용
+      if (_cachedCountryData != null && _cachedDataLanguage == effectiveLanguage) {
+        if (mounted) {
+          setState(() {
+            countryNames = Map.fromEntries(
+                (_cachedCountryData!['countries'] as List).map((country) {
+                  String countryName = country['names'][effectiveLanguage] ??
+                      country['names']['KR'] as String;
+                  return MapEntry(country['code'] as String, countryName);
+                })
+            );
+          });
+        }
+        return;
+      }
 
-      final String translationsJson = await rootBundle.loadString(
-          'assets/data/country.json');
+      // 캐시에 없으면 로드
+      final String translationsJson = await rootBundle.loadString('assets/data/country.json');
       final data = json.decode(translationsJson);
+
+      // 캐시에 저장
+      _cachedCountryData = data;
+      _cachedDataLanguage = effectiveLanguage;
 
       if (mounted) {
         setState(() {
           countryNames = Map.fromEntries(
               (data['countries'] as List).map((country) {
-                String countryName = effectiveLanguage.isNotEmpty &&
-                    country['names'].containsKey(effectiveLanguage) ?
-                country['names'][effectiveLanguage] as String :
-                country['names']['KR'] as String;
-
+                String countryName = country['names'][effectiveLanguage] ??
+                    country['names']['KR'] as String;
                 return MapEntry(country['code'] as String, countryName);
               })
           );
-
-          debugPrint('✅ MainPage: 국가 목록 로드 완료, 항목 수: ${countryNames.length}');
         });
       }
     } catch (e) {
@@ -354,26 +257,50 @@ class _MainPageState extends State<MainPage> with WidgetsBindingObserver {
     }
   }
 
+  @override
+  void dispose() {
+    _initTimeoutTimer?.cancel();
+    _languageChangeSubscription?.cancel();
+    _authStateSubscription?.cancel();
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed && mounted) {
+      // 앱이 포그라운드로 돌아올 때만 체크
+      _checkLanguageUpdate();
+    }
+  }
+
+  void _checkLanguageUpdate() {
+    String? savedLanguage = SharedPreferencesService.getLanguage();
+    if (savedLanguage != null && savedLanguage != _currentLanguage && mounted) {
+      setState(() {
+        _currentLanguage = savedLanguage;
+      });
+      loadTranslations();
+    }
+  }
+
   void _handleCountryChanged(String newCountryCode) {
-    if (!mounted) return;
+    if (!mounted || _currentLanguage == newCountryCode) return;
 
     setState(() {
       _currentLanguage = newCountryCode;
-      debugPrint('🔄 MainPage: 앱바에서 언어 변경: $newCountryCode');
-
-      if (currentCountryCode != newCountryCode) {
-        currentCountryCode = newCountryCode;
-        languageChangeController.add(newCountryCode);
-      }
-
-      loadTranslations();
-      _refreshKeys();
     });
+
+    if (currentCountryCode != newCountryCode) {
+      currentCountryCode = newCountryCode;
+      languageChangeController.add(newCountryCode);
+    }
+
+    loadTranslations();
   }
 
   void _refreshKeys() {
     if (!mounted) return;
-
     setState(() {
       _authWidgetKey = UniqueKey();
       _bottomNavKey = UniqueKey();
@@ -382,17 +309,13 @@ class _MainPageState extends State<MainPage> with WidgetsBindingObserver {
 
   void refreshUI() {
     if (!mounted) return;
-
-    setState(() {
-      _authWidgetKey = UniqueKey();
-      _bottomNavKey = UniqueKey();
-    });
-    _checkRealLoginStatus();
+    _refreshKeys();
+    _checkCurrentAuthState();
   }
 
   Widget _getTabContent() {
     switch (_selectedTabIndex) {
-      case 0: // travel
+      case 0:
         return MainScreen(
           countryNames: countryNames,
           currentLanguage: _currentLanguage,
@@ -400,17 +323,18 @@ class _MainPageState extends State<MainPage> with WidgetsBindingObserver {
           refreshKeys: _refreshKeys,
           translationService: translationService,
           onNavigateToTab: (index) {
-            if (!mounted) return;
-            setState(() {
-              _selectedIndex = index;
-            });
+            if (mounted) {
+              setState(() {
+                _selectedIndex = index;
+              });
+            }
           },
         );
-      case 1: // job search
+      case 1:
         return const JobMainScreen();
-      case 2: // Talk
+      case 2:
         return const TalkMainScreen();
-      case 3: // information
+      case 3:
         return const InfoMainScreen();
       default:
         return Container();
@@ -419,11 +343,8 @@ class _MainPageState extends State<MainPage> with WidgetsBindingObserver {
 
   @override
   Widget build(BuildContext context) {
-    debugPrint('🏗️ MainPage build - 초기화 완료: $_isInitialCheckComplete');
-
     if (!_isInitialCheckComplete) {
-      debugPrint('⏳ 스플래시 화면 표시');
-      return Scaffold(
+      return const Scaffold(
         body: Center(
           child: CircularProgressIndicator(),
         ),
@@ -431,15 +352,13 @@ class _MainPageState extends State<MainPage> with WidgetsBindingObserver {
     }
 
     if (!_isLoggedIn || !_isProfileComplete) {
-      debugPrint('🔓 로그인 페이지 표시');
       return Scaffold(
         body: AuthMainPageWidget(key: _authWidgetKey),
       );
     }
 
-    // 홈 탭(인덱스 0)이 선택된 경우 기존 로직 유지
+    // 홈 탭이 선택된 경우
     if (_selectedIndex == 0) {
-      // travel 탭이 선택된 경우에만 앱바와 탭바 표시
       if (_selectedTabIndex == 0) {
         return Scaffold(
           appBar: TripFriendsAppBar(
@@ -453,7 +372,7 @@ class _MainPageState extends State<MainPage> with WidgetsBindingObserver {
           endDrawer: const SettingsDrawer(),
           body: Column(
             children: [
-              const SizedBox(height: 10), // 앱바와 탭바 사이 간격
+              const SizedBox(height: 10),
               TopTabBar(
                 selectedIndex: _selectedTabIndex,
                 onTabSelected: (index) {
@@ -471,10 +390,11 @@ class _MainPageState extends State<MainPage> with WidgetsBindingObserver {
                   refreshKeys: _refreshKeys,
                   translationService: translationService,
                   onNavigateToTab: (index) {
-                    if (!mounted) return;
-                    setState(() {
-                      _selectedIndex = index;
-                    });
+                    if (mounted) {
+                      setState(() {
+                        _selectedIndex = index;
+                      });
+                    }
                   },
                 ),
               ),
@@ -482,7 +402,6 @@ class _MainPageState extends State<MainPage> with WidgetsBindingObserver {
           ),
         );
       } else {
-        // 다른 상단 탭들 (job search, Talk, information)
         return Scaffold(
           appBar: TripFriendsAppBar(
             countryNames: countryNames,
@@ -495,7 +414,7 @@ class _MainPageState extends State<MainPage> with WidgetsBindingObserver {
           endDrawer: const SettingsDrawer(),
           body: Column(
             children: [
-              const SizedBox(height: 10), // 앱바와 탭바 사이 간격
+              const SizedBox(height: 10),
               TopTabBar(
                 selectedIndex: _selectedTabIndex,
                 onTabSelected: (index) {
@@ -514,15 +433,15 @@ class _MainPageState extends State<MainPage> with WidgetsBindingObserver {
       }
     }
 
-    // travel 탭의 하위 페이지들은 탭바와 앱바 없이 CustomBottomNavigation만 표시
     return CustomBottomNavigation(
       key: _bottomNavKey,
       selectedIndex: _selectedIndex,
       onItemSelected: (index) {
-        if (!mounted) return;
-        setState(() {
-          _selectedIndex = index;
-        });
+        if (mounted) {
+          setState(() {
+            _selectedIndex = index;
+          });
+        }
       },
       mainContent: Container(),
     );

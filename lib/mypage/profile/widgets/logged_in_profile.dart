@@ -112,6 +112,11 @@ class _LoggedInProfileWidgetState extends State<LoggedInProfileWidget> {
 
   @override
   void dispose() {
+    // 이미지 캐시 정리 추가 - 가장 중요!
+    imageCache.clear();
+    imageCache.clearLiveImages();
+
+    // 기존 dispose 로직
     _mediaService?.dispose();
     super.dispose();
   }

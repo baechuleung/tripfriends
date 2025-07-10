@@ -145,11 +145,11 @@ class ChatService {
     print('프로필 캐시에서 제거됨: $userId');
   }
 
-  // 채팅 ID 생성 (정렬하여 일관된 ID 생성)
-  String getChatId(String userId1, String userId2) {
-    List<String> ids = [userId1, userId2];
-    ids.sort(); // 항상 동일한 채팅 ID를 얻기 위해 정렬
-    return ids.join('_');
+  // 채팅 ID 생성 - 고정된 순서: customerId(고객)_friendsId(프렌즈)
+  String getChatId(String friendsId, String customerId) {
+    // 프렌즈 앱에서는 매개변수 순서가 friendsId, customerId이므로
+    // 올바른 순서로 재배치: customerId_friendsId
+    return '${customerId}_${friendsId}';
   }
 
   // 메시지 보내기

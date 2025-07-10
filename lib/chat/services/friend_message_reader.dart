@@ -1,16 +1,20 @@
 // lib/chat/services/friend_message_reader.dart - 트립프렌즈 앱(프렌즈용)
 import 'package:firebase_database/firebase_database.dart';
-import 'friend_chat_service.dart';
 
 class MessageReaderService {
   final FirebaseDatabase _database;
-  final ChatService _chatService = ChatService();
 
   MessageReaderService() : _database = FirebaseDatabase.instance;
 
+  // 채팅 ID 생성 - 고정된 순서: customerId(고객)_friendsId(프렌즈)
+  String getChatId(String friendsId, String customerId) {
+    // 프렌즈 앱에서는 매개변수 순서가 다르므로 올바른 순서로 재배치
+    return '${customerId}_${friendsId}';
+  }
+
   // 메시지를 읽음 상태로 표시 - 개선된 버전
   Future<void> markMessagesAsRead(String friendsId, String customerId) async {
-    final String chatId = _chatService.getChatId(friendsId, customerId);
+    final String chatId = getChatId(friendsId, customerId);
     print('프렌즈앱 - 메시지 읽음 표시 시작: friendsId=$friendsId, customerId=$customerId');
 
     try {
@@ -71,7 +75,7 @@ class MessageReaderService {
 
   // 빠른 읽음 표시 함수 - 화면 터치 시 호출
   Future<void> quickMarkAsRead(String friendsId, String customerId) async {
-    final String chatId = _chatService.getChatId(friendsId, customerId);
+    final String chatId = getChatId(friendsId, customerId);
 
     try {
       // 고객이 보낸 메시지만 읽음 표시 업데이트
@@ -123,7 +127,7 @@ class MessageReaderService {
 
   // 메시지 읽음 상태 업데이트 확인 메서드
   Future<void> checkForReadStatusUpdates(String senderId, String receiverId) async {
-    final String chatId = _chatService.getChatId(senderId, receiverId);
+    final String chatId = getChatId(senderId, receiverId);
 
     try {
       // 프렌즈가 보낸 메시지만 필터링

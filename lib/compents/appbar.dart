@@ -125,6 +125,7 @@ class _TripFriendsAppBarState extends State<TripFriendsAppBar> {
       // 빈 앱바 반환 (로딩 중 상태)
       debugPrint('⚠️ countryNames가 비어있습니다. 기본 앱바 표시');
       return AppBar(
+        backgroundColor: Colors.white,
         centerTitle: false,
         title: Image.asset('assets/logo.png', height: 17, fit: BoxFit.contain),
       );
@@ -138,6 +139,7 @@ class _TripFriendsAppBarState extends State<TripFriendsAppBar> {
     debugPrint('🏗️ AppBar 빌드 중, 표시 국가: $_displayCountryCode');
 
     return AppBar(
+      backgroundColor: Colors.white,
       centerTitle: false,
       title: Image.asset('assets/logo.png', height: 17, fit: BoxFit.contain),
       actions: [
@@ -168,7 +170,7 @@ class _TripFriendsAppBarState extends State<TripFriendsAppBar> {
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8),
                 ),
-                color: Theme.of(context).appBarTheme.backgroundColor,
+                color: Colors.white,
                 elevation: 4,
                 constraints: const BoxConstraints(minWidth: 160),
                 onSelected: (String newValue) async {

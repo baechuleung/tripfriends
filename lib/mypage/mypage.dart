@@ -18,6 +18,10 @@ class MyPage extends StatefulWidget {
 }
 
 class _MyPageState extends State<MyPage> {
+  // 번역 데이터 정적 캐싱 추가
+  static Map<String, String>? _cachedCountryNames;
+  static String? _lastLoadedLanguage;
+
   Map<String, String> countryNames = {};
   Key _profileKey = UniqueKey();
   String _currentLanguage = 'KR';
@@ -35,21 +39,38 @@ class _MyPageState extends State<MyPage> {
       if (mounted) {
         setState(() {
           _currentLanguage = newLanguage;
+          // 언어가 변경되면 캐시 무효화
+          if (_lastLoadedLanguage != newLanguage) {
+            _cachedCountryNames = null;
+            loadTranslations();
+          }
         });
       }
     });
   }
 
   Future<void> loadTranslations() async {
+    // 캐시된 데이터가 있고 같은 언어면 재사용
+    if (_cachedCountryNames != null && _lastLoadedLanguage == currentCountryCode) {
+      setState(() {
+        countryNames = Map.from(_cachedCountryNames!);
+      });
+      return;
+    }
+
     try {
       final String translationsJson = await rootBundle.loadString('assets/data/country.json');
       final data = json.decode(translationsJson);
+
+      _cachedCountryNames = Map.fromEntries(
+          (data['countries'] as List).map((country) =>
+              MapEntry(country['code'] as String, country['names'][currentCountryCode] as String)
+          )
+      );
+      _lastLoadedLanguage = currentCountryCode;
+
       setState(() {
-        countryNames = Map.fromEntries(
-            (data['countries'] as List).map((country) =>
-                MapEntry(country['code'] as String, country['names'][currentCountryCode] as String)
-            )
-        );
+        countryNames = Map.from(_cachedCountryNames!);
       });
     } catch (e) {
       debugPrint('Error loading translations: $e');
@@ -58,6 +79,10 @@ class _MyPageState extends State<MyPage> {
 
   @override
   void dispose() {
+    // 이미지 캐시 정리 추가
+    imageCache.clear();
+    imageCache.clearLiveImages();
+
     _languageSubscription?.cancel();
     super.dispose();
   }

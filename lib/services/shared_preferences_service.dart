@@ -14,6 +14,8 @@ class SharedPreferencesService {
   static const String _userDocumentKey = 'user_document';
   static const String _authTokenKey = 'auth_token';
   static const String _tokenTimestampKey = 'token_timestamp'; // 토큰 발급 시간 추가
+  static const String _needsReloginKey = 'needs_relogin'; // 재로그인 필요 여부 추가
+  static const String _userTypeKey = 'user_type'; // 사용자 타입 추가
 
   static late SharedPreferences _prefs;
 
@@ -27,6 +29,28 @@ class SharedPreferencesService {
     await attemptAutoLogin();
   }
 
+  // 재로그인 필요 여부 설정
+  static Future<void> setNeedsRelogin(bool needs) async {
+    await _prefs.setBool(_needsReloginKey, needs);
+    debugPrint('🔐 재로그인 필요 설정: $needs');
+  }
+
+  // 재로그인 필요 여부 확인
+  static bool needsRelogin() {
+    return _prefs.getBool(_needsReloginKey) ?? false;
+  }
+
+  // 사용자 타입 저장 (friends/customer)
+  static Future<void> setUserType(String type) async {
+    await _prefs.setString(_userTypeKey, type);
+    debugPrint('👤 사용자 타입 설정: $type');
+  }
+
+  // 사용자 타입 가져오기
+  static String? getUserType() {
+    return _prefs.getString(_userTypeKey);
+  }
+
   // 자동 로그인 시도 - 개선된 버전
   static Future<bool> attemptAutoLogin() async {
     try {
@@ -35,6 +59,15 @@ class SharedPreferencesService {
 
       if (currentUser != null) {
         debugPrint('✅ Firebase Auth에 이미 로그인됨: ${currentUser.uid}');
+
+        // 저장된 UID와 비교
+        String? savedUid = getUserUid();
+        if (savedUid != null && savedUid != currentUser.uid) {
+          debugPrint('⚠️ UID 불일치! 저장된: $savedUid, 현재: ${currentUser.uid}');
+          // UID 불일치 시 현재 Firebase Auth의 UID로 업데이트
+          await saveUserSession(currentUser.uid);
+          debugPrint('✅ UID를 현재 Firebase Auth UID로 업데이트: ${currentUser.uid}');
+        }
 
         // 토큰 갱신이 필요한지 확인
         if (await isTokenRefreshNeeded()) {
@@ -60,6 +93,12 @@ class SharedPreferencesService {
       }
 
       debugPrint('🔄 자동 로그인 시도 - UID: $uid');
+
+      // 재로그인이 필요한 경우
+      if (needsRelogin()) {
+        debugPrint('⚠️ 재로그인 필요 플래그 설정됨');
+        return false;
+      }
 
       // Firestore에서 사용자 정보 확인
       DocumentSnapshot userDoc = await FirebaseFirestore.instance
@@ -115,6 +154,13 @@ class SharedPreferencesService {
         bool isLoggedInLocally = isLoggedIn();
 
         if (isLoggedInLocally) {
+          String? savedUid = getUserUid();
+          if (savedUid != null && savedUid.isNotEmpty) {
+            debugPrint('⚠️ Firebase Auth 없지만 저장된 UID 있음: $savedUid');
+            await setNeedsRelogin(true);
+            return;
+          }
+
           bool loginSuccess = await attemptAutoLogin();
           if (!loginSuccess) {
             await clearUserSession();
@@ -123,6 +169,40 @@ class SharedPreferencesService {
           await clearUserSession();
         }
         return;
+      }
+
+      // 저장된 UID와 현재 UID 비교
+      String? savedUid = getUserUid();
+      if (savedUid != null && savedUid != currentUser.uid) {
+        debugPrint('⚠️ UID 변경 감지! 기존: $savedUid, 신규: ${currentUser.uid}');
+
+        // Firestore에서 두 UID의 사용자 정보 확인
+        final oldUserDoc = await FirebaseFirestore.instance
+            .collection('tripfriends_users')
+            .doc(savedUid)
+            .get();
+
+        final newUserDoc = await FirebaseFirestore.instance
+            .collection('tripfriends_users')
+            .doc(currentUser.uid)
+            .get();
+
+        // 새 UID의 사용자 정보가 있으면 업데이트, 없으면 기존 UID 유지
+        if (newUserDoc.exists) {
+          debugPrint('✅ 새 UID의 사용자 정보 존재, UID 업데이트');
+          await saveUserSession(currentUser.uid, userDoc: newUserDoc.data());
+        } else if (oldUserDoc.exists) {
+          debugPrint('⚠️ 새 UID의 사용자 정보 없음, 기존 UID 유지');
+          // Firebase Auth 재인증 시도
+          await FirebaseAuth.instance.signOut();
+          await setNeedsRelogin(true);
+          return;
+        } else {
+          debugPrint('❌ 두 UID 모두 사용자 정보 없음');
+          await clearUserSession();
+          await FirebaseAuth.instance.signOut();
+          return;
+        }
       }
 
       // 토큰 갱신 체크
@@ -153,6 +233,7 @@ class SharedPreferencesService {
       } else {
         await _prefs.setBool(_isLoggedInKey, true);
         await saveUserDocument(currentUser.uid, userDoc.data());
+        await setNeedsRelogin(false); // 재로그인 플래그 해제
         debugPrint('✅ 로그인 상태 확인됨 - Firebase 및 Firestore 데이터 존재');
       }
     } catch (e) {
@@ -221,6 +302,9 @@ class SharedPreferencesService {
 
   static Future<void> setLoggedIn(bool value) async {
     await _prefs.setBool(_isLoggedInKey, value);
+    if (value) {
+      await setNeedsRelogin(false); // 로그인 성공 시 재로그인 플래그 해제
+    }
     debugPrint('🔐 로그인 상태 설정: $value');
   }
 
@@ -249,6 +333,12 @@ class SharedPreferencesService {
     try {
       debugPrint('💾 세션 저장 시작 - UID: $uid');
 
+      // 기존 UID가 있고 다른 경우 경고
+      String? existingUid = getUserUid();
+      if (existingUid != null && existingUid != uid) {
+        debugPrint('⚠️ UID 변경 감지! 기존: $existingUid, 신규: $uid');
+      }
+
       List<Future<bool>> futures = [
         _prefs.setString(_userIdKey, uid),
         _prefs.setString(_userUidKey, uid),
@@ -257,6 +347,9 @@ class SharedPreferencesService {
 
       // 토큰 타임스탬프 저장
       await updateTokenTimestamp();
+
+      // 재로그인 플래그 해제
+      await setNeedsRelogin(false);
 
       if (userDoc != null) {
         await saveUserDocument(uid, userDoc);
@@ -302,6 +395,8 @@ class SharedPreferencesService {
       _prefs.remove(_tokenTimestampKey), // 토큰 타임스탬프도 삭제
       _prefs.setBool(_isLoggedInKey, false),
       _prefs.remove(_fcmTokenKey),
+      _prefs.remove(_needsReloginKey), // 재로그인 플래그도 삭제
+      _prefs.remove(_userTypeKey), // 사용자 타입도 삭제
     ]);
     debugPrint('✅ 세션 정보 초기화 완료');
   }
@@ -332,6 +427,8 @@ class SharedPreferencesService {
       'userId': uid,
       'uid': uid,
       'isLoggedIn': isLoggedIn(),
+      'needsRelogin': needsRelogin(),
+      'userType': getUserType(),
     };
   }
 }

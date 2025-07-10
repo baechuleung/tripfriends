@@ -38,14 +38,23 @@ class ProfileMediaService {
       controller.dispose();
     }
     _videoControllers.clear();
+    _profileMedia.clear();
   }
 
-  // 이미지 미리 로드 (Flutter 내장 기능 사용)
+  // 이미지 미리 로드 (Flutter 내장 기능 사용) - 크기 제한 추가
   void _precacheImages(List<String> imageUrls, BuildContext? context) {
     if (context == null) return;
 
     for (var url in imageUrls) {
-      precacheImage(NetworkImage(url), context);
+      // 메모리 최적화: 작은 크기로 프리캐싱
+      precacheImage(
+        ResizeImage(
+          NetworkImage(url),
+          width: 800,  // 최대 너비 제한
+          height: 800, // 최대 높이 제한
+        ),
+        context,
+      );
     }
   }
 
@@ -87,78 +96,89 @@ class ProfileMediaService {
             mediaItems.add({
               'url': url,
               'type': type,
+              'order': i,
             });
           }
 
-          print('로드된 미디어 순서: ${mediaItems.map((e) => e['type']).toList()}');
+          _profileMedia = mediaItems;
 
-          // 이미지 프리캐싱
+          // 이미지 프리캐싱 (최적화된 크기로)
           if (context != null && imageUrls.isNotEmpty) {
             _precacheImages(imageUrls, context);
           }
+        } else if (data['profileImageUrl'] != null) {
+          // 구 버전 호환성: profileImageUrl만 있는 경우
+          _profileMedia = [{
+            'url': data['profileImageUrl'],
+            'type': 'image',
+            'order': 0,
+          }];
 
-          // 비디오 컨트롤러 초기화
-          final videoItems = mediaItems.where((item) => item['type'] == 'video').toList();
-          if (videoItems.isNotEmpty) {
-            final videoInitFutures = videoItems.map((item) => _initVideoController(item['url']));
-            await Future.wait(videoInitFutures);
+          // 단일 이미지도 프리캐싱
+          if (context != null) {
+            _precacheImages([data['profileImageUrl']], context);
           }
-
-          _profileMedia = mediaItems;
-        } else {
-          // profileMediaList가 없으면 기본 이미지 설정
-          setDefaultMedia(data);
         }
-      } else {
-        // 문서가 없으면 빈 리스트
-        _profileMedia = [];
       }
-
-      onMediaLoadingStateChanged(false);
     } catch (e) {
-      print('미디어 로드 오류: $e');
-      _profileMedia = [];
+      print('프로필 미디어 로드 오류: $e');
+    } finally {
       onMediaLoadingStateChanged(false);
     }
   }
 
-  // 비디오 컨트롤러 초기화
-  Future<void> _initVideoController(String url) async {
-    try {
-      // 이미 초기화된 컨트롤러가 있는지 확인
-      if (_videoControllers.containsKey(url)) {
-        return;
-      }
+  // 기본 미디어 설정
+  void setDefaultMedia(Map<String, dynamic> userData) {
+    _profileMedia = [];
+    _currentMediaIndex = 0;
 
+    if (userData['profileImageUrl'] != null) {
+      _profileMedia = [{
+        'url': userData['profileImageUrl'],
+        'type': 'image',
+        'order': 0,
+      }];
+    }
+  }
+
+  // 비디오 컨트롤러 생성
+  Future<VideoPlayerController?> createVideoController(String url) async {
+    if (_videoControllers.containsKey(url)) {
+      return _videoControllers[url];
+    }
+
+    try {
       final controller = VideoPlayerController.network(url);
       await controller.initialize();
-      controller.setLooping(true);
       _videoControllers[url] = controller;
+      return controller;
     } catch (e) {
-      print('비디오 컨트롤러 초기화 오류: $e');
+      print('비디오 컨트롤러 생성 오류: $e');
+      return null;
     }
+  }
+
+  // 현재 미디어가 비디오인지 확인
+  bool get isCurrentMediaVideo {
+    if (_currentMediaIndex >= _profileMedia.length) return false;
+    return _profileMedia[_currentMediaIndex]['type'] == 'video';
+  }
+
+  // 현재 미디어 URL 가져오기
+  String? get currentMediaUrl {
+    if (_currentMediaIndex >= _profileMedia.length) return null;
+    return _profileMedia[_currentMediaIndex]['url'];
   }
 
   // 비디오 재생/일시정지 토글
   void toggleVideoPlayback(String url) {
     if (_videoControllers.containsKey(url)) {
-      if (_videoControllers[url]!.value.isPlaying) {
-        _videoControllers[url]!.pause();
+      final controller = _videoControllers[url]!;
+      if (controller.value.isPlaying) {
+        controller.pause();
       } else {
-        _videoControllers[url]!.play();
+        controller.play();
       }
     }
-  }
-
-  // 미디어가 비어있으면, 기본 미디어 설정
-  void setDefaultMedia(Map<String, dynamic> userData) {
-    // 기본 이미지가 있는 경우 사용
-    if (userData['profileImageUrl'] != null && userData['profileImageUrl'].toString().isNotEmpty) {
-      _profileMedia = [{'url': userData['profileImageUrl'], 'type': 'image'}];
-    } else {
-      // 아니면 기본 아바타 이미지 사용
-      _profileMedia = [{'url': 'https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y', 'type': 'image'}];
-    }
-    onMediaLoadingStateChanged(false);
   }
 }

@@ -1,33 +1,61 @@
 // main.dart
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart'; // NoAnimationPageTransitionBuilder 오류 수정을 위해 추가
+import 'package:flutter/services.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'main_page.dart';
 import 'firebase_options.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_database/firebase_database.dart'; // Firebase Realtime Database 추가
+import 'package:firebase_database/firebase_database.dart';
 import 'services/shared_preferences_service.dart';
-import 'services/fcm_service/fcm_service.dart'; // FCM 서비스 임포트
-import 'services/fcm_service/handlers/message_handler.dart'; // navigatorKey 임포트
+import 'services/fcm_service/fcm_service.dart';
+import 'services/fcm_service/handlers/message_handler.dart';
 import 'dart:async';
-import 'routes/app_routes.dart'; // 간단한 라우터 파일 임포트
+import 'routes/app_routes.dart';
+import 'cache_manager.dart';
 
 export 'main.dart' show currentCountryCode, isLanguageChanging;
 
 // 초기 기본값을 'KR'로 설정
 String currentCountryCode = 'KR';
 
-// 언어 변경 중인지 표시하는 전역 변수 (로딩 스피너에 사용)
+// 언어 변경 중인지 표시하는 전역 변수
 bool isLanguageChanging = false;
 
-// 언어 변경 이벤트를 구독할 수 있는 스트림 컨트롤러 추가
-final StreamController<String> languageChangeController =
-StreamController<String>.broadcast();
+// 언어 변경 이벤트를 구독할 수 있는 스트림 컨트롤러 - 싱글톤 패턴 적용
+class LanguageManager {
+  static final LanguageManager _instance = LanguageManager._internal();
+  factory LanguageManager() => _instance;
+  LanguageManager._internal();
 
-// 로딩 상태 변경 이벤트 스트림 컨트롤러 추가
-final StreamController<bool> loadingStateController =
-StreamController<bool>.broadcast();
+  final StreamController<String> _languageChangeController = StreamController<String>.broadcast();
+  final StreamController<bool> _loadingStateController = StreamController<bool>.broadcast();
+
+  Stream<String> get languageChanges => _languageChangeController.stream;
+  Stream<bool> get loadingStates => _loadingStateController.stream;
+
+  void updateLanguage(String language) {
+    if (!_languageChangeController.isClosed) {
+      _languageChangeController.add(language);
+    }
+  }
+
+  void updateLoadingState(bool isLoading) {
+    if (!_loadingStateController.isClosed) {
+      _loadingStateController.add(isLoading);
+    }
+  }
+
+  void dispose() {
+    _languageChangeController.close();
+    _loadingStateController.close();
+  }
+}
+
+final languageManager = LanguageManager();
+// 기존 전역 변수 대체
+final languageChangeController = languageManager._languageChangeController;
+final loadingStateController = languageManager._loadingStateController;
 
 // 애니메이션 없는 페이지 전환을 위한 클래스
 class NoAnimationPageTransitionBuilder extends PageTransitionsBuilder {
@@ -48,6 +76,10 @@ class NoAnimationPageTransitionBuilder extends PageTransitionsBuilder {
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
+  // 캐시 매니저 초기화
+  AggressiveCacheManager.initialize();
+  await AggressiveCacheManager.clearAllCaches();
+
   // .env 파일 로드
   await dotenv.load(fileName: ".env");
 
@@ -63,45 +95,34 @@ void main() async {
 
   // 지원하는 국가 코드 목록
   const List<String> SUPPORTED_COUNTRY_CODES = [
-    'KR',
-    'VN',
-    'JP',
-    'TH',
-    'PH',
-    'MY',
-    'EN'
+    'KR', 'VN', 'JP', 'TH', 'PH', 'MY', 'EN'
   ];
 
   // 언어 코드를 국가 코드로 매핑
   const Map<String, String> LANGUAGE_TO_COUNTRY = {
-    'KO': 'KR', // 한국어 -> 한국
-    'VI': 'VN', // 베트남어 -> 베트남
-    'JA': 'JP', // 일본어 -> 일본
-    'TH': 'TH', // 태국어 -> 태국
-    'TL': 'PH', // 타갈로그어 -> 필리핀
-    'FIL': 'PH', // 필리핀어 -> 필리핀
-    'MS': 'MY', // 말레이어 -> 말레이시아
-    'EN': 'EN', // 영어
+    'KO': 'KR',
+    'VI': 'VN',
+    'JA': 'JP',
+    'TH': 'TH',
+    'TL': 'PH',
+    'FIL': 'PH',
+    'MS': 'MY',
+    'EN': 'EN',
   };
 
-  // 1. 먼저 언어 코드로 국가 확인
+  // 언어 설정 결정
   if (LANGUAGE_TO_COUNTRY.containsKey(deviceLanguage)) {
     currentCountryCode = LANGUAGE_TO_COUNTRY[deviceLanguage]!;
-  }
-  // 2. 언어 매핑이 없으면 국가 코드 확인
-  else if (SUPPORTED_COUNTRY_CODES.contains(deviceCountry)) {
+  } else if (SUPPORTED_COUNTRY_CODES.contains(deviceCountry)) {
     currentCountryCode = deviceCountry;
-  }
-  // 3. 둘 다 없으면 기본값 'KR' 사용
-  else {
+  } else {
     currentCountryCode = 'KR';
   }
 
-  // 언어 설정 저장
   await SharedPreferencesService.setLanguage(currentCountryCode);
   debugPrint('📱 언어 설정 적용: $currentCountryCode');
 
-  // Firebase 초기화 - 반드시 세션 검증 전에 실행
+  // Firebase 초기화
   if (Firebase.apps.isEmpty) {
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
@@ -112,21 +133,17 @@ void main() async {
   FirebaseDatabase.instance.databaseURL =
   'https://tripjoy-d309f-default-rtdb.asia-southeast1.firebasedatabase.app/';
 
-  // Firebase 초기화 후에 세션 유효성 검사 실행
+  // 세션 유효성 검사
   await SharedPreferencesService.validateAndCleanSession();
 
-  // FCM 서비스 초기화 - 기존 setupNotifications 대신 전체 초기화 사용
+  // FCM 서비스 초기화
   await FCMService.initialize();
 
   // FCM 토큰 갱신 리스너 설정
   FCMService.setupTokenRefresh((String newToken) async {
-    // 현재 로그인한 사용자가 있는 경우 Firestore에 토큰 업데이트
     User? currentUser = FirebaseAuth.instance.currentUser;
     if (currentUser != null) {
       await FCMService.updateTokenInDatabase(currentUser.uid, newToken);
-      debugPrint('✅ Firestore의 FCM 토큰 업데이트 완료');
-
-      // 로컬 저장소에도 업데이트
       await SharedPreferencesService.setFCMToken(newToken);
     }
   });
@@ -135,17 +152,9 @@ void main() async {
   bool isLoggedIn = SharedPreferencesService.isLoggedIn();
   debugPrint('👤 로그인 상태 확인: ${isLoggedIn ? '로그인됨' : '로그인되지 않음'}');
 
-  // 로그인 상태이지만 Firebase Auth가 null인 경우, 자동 로그인 시도 (전화번호 관련 코드 제거)
   if (isLoggedIn && FirebaseAuth.instance.currentUser == null) {
-    // 저장된 UID 가져오기
     String? uid = SharedPreferencesService.getUserUid();
-
-    if (uid != null && uid.isNotEmpty) {
-      debugPrint('✅ 세션 정보 있음 - 로그인 상태 유지');
-      // 세션 정보만 확인하고 유지
-      // Firebase Auth는 자체적으로 세션 복구 시도
-    } else {
-      debugPrint('❌ 세션 정보 없음, 로그인 필요');
+    if (uid == null || uid.isEmpty) {
       await SharedPreferencesService.clearUserSession();
     }
   }
@@ -160,18 +169,19 @@ class MyApp extends StatefulWidget {
   State<MyApp> createState() => _MyAppState();
 }
 
-class _MyAppState extends State<MyApp> {
-  // 언어 로딩 상태
+class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   bool _isLoading = false;
+  Timer? _memoryCheckTimer;
+  StreamSubscription? _loadingSubscription;
+  StreamSubscription? _authSubscription;
 
   @override
   void initState() {
     super.initState();
-    _setupAuthListeners();
-    // 버전 체크를 여기서 제거
+    WidgetsBinding.instance.addObserver(this);
 
-    // 로딩 상태 변경 이벤트 구독
-    loadingStateController.stream.listen((bool loading) {
+    // 스트림 구독
+    _loadingSubscription = languageManager.loadingStates.listen((bool loading) {
       if (mounted) {
         setState(() {
           _isLoading = loading;
@@ -179,16 +189,25 @@ class _MyAppState extends State<MyApp> {
         });
       }
     });
+
+    // 인증 리스너 설정 - 한 번만
+    _setupAuthListener();
+
+    // 메모리 체크 타이머 - 3분으로 늘림
+    _memoryCheckTimer = Timer.periodic(const Duration(minutes: 3), (timer) {
+      _checkMemoryPressure();
+    });
   }
 
-  void _setupAuthListeners() {
-    // Firebase 인증 상태 변화 감지
-    FirebaseAuth.instance.authStateChanges().listen((User? user) {
+  void _setupAuthListener() {
+    // 기존 구독 취소
+    _authSubscription?.cancel();
+
+    // 새 구독 생성
+    _authSubscription = FirebaseAuth.instance.authStateChanges().listen((User? user) {
       if (user != null) {
-        // 로그인 시 FCM 토큰 업데이트
         FCMService.onUserLogin(user.uid);
       } else {
-        // 로그아웃 상태일 때 처리
         String? uid = SharedPreferencesService.getUserUid();
         if (uid != null) {
           FCMService.onUserLogout(uid);
@@ -197,41 +216,53 @@ class _MyAppState extends State<MyApp> {
     });
   }
 
-  @override
-  void dispose() {
-    super.dispose();
-  }
+  void _checkMemoryPressure() {
+    final imageCache = PaintingBinding.instance.imageCache;
+    final currentSize = imageCache.currentSizeBytes;
+    final maxSize = imageCache.maximumSizeBytes;
 
-  // 국가 코드 변경 및 알림
-  Future<void> _updateCountryCode(String newCountryCode) async {
-    if (currentCountryCode != newCountryCode) {
-      // 로딩 시작
-      loadingStateController.add(true);
-
-      await SharedPreferencesService.setLanguage(newCountryCode);
-      if (mounted) {
-        setState(() {
-          currentCountryCode = newCountryCode;
-          debugPrint('🔄 언어 설정 업데이트: $currentCountryCode');
-
-          // 언어 변경 이벤트 발생
-          languageChangeController.add(newCountryCode);
-        });
-      }
-
-      // 로딩 완료 (잠시 지연 후 로딩 종료 - UI가 업데이트될 시간 제공)
-      await Future.delayed(const Duration(milliseconds: 500));
-      loadingStateController.add(false);
+    if (currentSize > maxSize * 0.8) {
+      debugPrint('⚠️ 메모리 압박 감지: ${currentSize ~/ 1024 ~/ 1024}MB / ${maxSize ~/ 1024 ~/ 1024}MB');
+      AggressiveCacheManager.emergencyClear();
     }
   }
 
   @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+
+    switch (state) {
+      case AppLifecycleState.paused:
+        debugPrint('📱 앱 백그라운드 전환 - 캐시 정리');
+        AggressiveCacheManager.clearAllCaches();
+        break;
+      case AppLifecycleState.resumed:
+        debugPrint('📱 앱 포그라운드 복귀');
+        break;
+      case AppLifecycleState.inactive:
+        AggressiveCacheManager.emergencyClear();
+        break;
+      default:
+        break;
+    }
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    _memoryCheckTimer?.cancel();
+    _loadingSubscription?.cancel();
+    _authSubscription?.cancel();
+    AggressiveCacheManager.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    // MainPage 인스턴스 생성
     final mainPage = const MainPage();
 
     return MaterialApp(
-      navigatorKey: navigatorKey, // 전역 네비게이터 키 설정
+      navigatorKey: navigatorKey,
       title: 'tripfriends',
       theme: ThemeData(
         fontFamily: 'SpoqaHanSansNeo',
@@ -256,16 +287,14 @@ class _MyAppState extends State<MyApp> {
           brightness: Brightness.light,
         ),
         scaffoldBackgroundColor: const Color(0xFFF9FAFB),
-        // 모든 터치/클릭 효과 완전히 제거
         splashColor: Colors.transparent,
         highlightColor: Colors.transparent,
         hoverColor: Colors.transparent,
         focusColor: Colors.transparent,
         splashFactory: NoSplash.splashFactory,
-        cardTheme: CardThemeData(
-          clipBehavior: Clip.none, // 카드에서 잉크 효과 제거
+        cardTheme: const CardThemeData(
+          clipBehavior: Clip.none,
         ),
-        // 버튼 스타일 기본값 설정
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: ButtonStyle(
             overlayColor: MaterialStateProperty.all(Colors.transparent),
@@ -284,29 +313,21 @@ class _MyAppState extends State<MyApp> {
             splashFactory: NoSplash.splashFactory,
           ),
         ),
-        // 리스트 타일 클릭 색상 변화 제거
-        listTileTheme: ListTileThemeData(
+        listTileTheme: const ListTileThemeData(
           tileColor: Colors.transparent,
           selectedTileColor: Colors.transparent,
         ),
       ),
       debugShowCheckedModeBanner: false,
-
-      // 간단한 라우터 설정 - 메인 페이지 경로만 추가
       routes: AppRoutes.getRoutes(mainPage),
-
-      // 기본 홈 화면 설정
       home: Stack(
-        children: [
-          mainPage, // 기본 메인 페이지
-        ],
+        children: [mainPage],
       ),
     );
   }
 }
 
-// 앱 종료 시 StreamController 정리 함수 추가
+// 앱 종료 시 정리
 void disposeLanguageChangeController() {
-  languageChangeController.close();
-  loadingStateController.close();
+  languageManager.dispose();
 }
