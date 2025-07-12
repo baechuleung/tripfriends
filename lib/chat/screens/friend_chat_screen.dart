@@ -119,17 +119,35 @@ class _ChatScreenState extends State<ChatScreen> with WidgetsBindingObserver {
     }
   }
 
-  // 메시지 목록 로드
+  // 메시지 목록 로드 - 채팅 ID 올바르게 생성됨 확인
   void _loadMessages() {
+    // 채팅 ID 디버깅 로그 추가
+    final chatId = _chatService.getChatId(widget.friendsId, widget.customerId);
+    print('📱 채팅 메시지 로드 시작 - 채팅 ID: $chatId');
+    print('📱 프렌즈 ID: ${widget.friendsId}, 고객 ID: ${widget.customerId}');
+
     _chatService.getMessages(widget.friendsId, widget.customerId)
         .listen((messages) {
       if (mounted) {
         setState(() {
-          _messages = messages;
+          // 스마트한 메시지 목록 업데이트
+          if (messages.isNotEmpty) {
+            // 새로운 메시지 목록이 있는 경우 업데이트
+            _messages = messages;
+            print('📱 메시지 목록 업데이트됨: ${messages.length}개');
+          } else if (!_initialLoadComplete) {
+            // 초기 로딩 시에만 빈 목록 허용
+            _messages = messages;
+            print('📱 초기 로딩 완료 - 빈 메시지 목록');
+          } else {
+            // 이미 메시지가 있는 상태에서 빈 목록이 오면 무시
+            print('📱 빈 메시지 목록 무시 - 기존 메시지 유지: ${_messages.length}개');
+          }
+
           _initialLoadComplete = true;
 
           // 읽지 않은 메시지 자동 읽음 표시
-          final unreadMessages = messages.where((msg) =>
+          final unreadMessages = _messages.where((msg) =>
           msg.senderId == widget.customerId && !msg.isRead).toList();
 
           if (unreadMessages.isNotEmpty) {
@@ -137,6 +155,9 @@ class _ChatScreenState extends State<ChatScreen> with WidgetsBindingObserver {
           }
         });
       }
+    }, onError: (error) {
+      // 스트림 오류 시 기존 메시지 유지
+      print('📱 메시지 스트림 오류 - 기존 메시지 유지: $error');
     });
   }
 
